@@ -1,0 +1,43 @@
+stages:
+  prepare_train_input:
+    desc: "Merge all of all single reports to create a complete vocabulary of all categories in the selected columns."
+    cmd:
+    - python concat_reports.py ../data/feathered/
+    params:
+    - prepare_train_input
+    deps:
+    - ../data/feathered/
+    - concat_reports.py
+    - ../feature_handling/feature_handler.json
+    - ../mldq/feature_handler.py
+    - ../mldq/simple_script.py
+    - ../mldq/params.py
+    outs:
+    - train_input/
+  train:
+    desc: "Train the AutoEmbedding model and save to disk."
+    cmd:
+    - python train_auto_embedder.py ./train_input/
+    params:
+    - train_model
+    deps:
+    - train_auto_embedder.py
+    - ../feature_handling/feature_handler.json
+    - ../mldq/feature_handler.py
+    - ./train_input/
+    - ./embedding/
+    - ../mldq/simple_script.py
+    outs:
+    - model/
+  test:
+    desc: "Test the trained AutoEmbedding model."
+    cmd:
+    - python test_auto_embedder.py ./train_input/ ./model/auto_embedder/
+    params:
+    - train_model
+    deps:
+    - test_auto_embedder.py
+    - ./train_input/
+    - ./model/
+    - ./embedding/
+    - ../mldq/simple_script.py
