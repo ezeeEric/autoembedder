@@ -1,0 +1,9 @@
+prepare_train_input:
+    feature_handler_file: ../feature_handling/feature_handler.json
+train_model:
+    feature_handler_file: ../feature_handling/feature_handler.json
+    optimizer: sgd
+    loss: mse
+    batch_size: 10000
+    epochs: 5
+    learning_rate: 0.1

@@ -1,0 +1,103 @@
+schema: '2.0'
+stages:
+  prepare_train_input:
+    cmd:
+    - python concat_reports.py ../data/feathered/
+    deps:
+    - path: ../data/feathered/
+      md5: 689806ca7931c99d68994d28ba4015e6.dir
+      size: 1740730474
+      nfiles: 13
+    - path: ../feature_handling/feature_handler.json
+      md5: 73f0566e372f9ea1afdf89cbb7ad816e
+      size: 41861
+    - path: ../mldq/feature_handler.py
+      md5: 3ef83d0afb83cce70b1bc2e163848fa0
+      size: 14103
+    - path: ../mldq/params.py
+      md5: edbe52eb8c2150cae39bb569e5a341af
+      size: 1880
+    - path: ../mldq/simple_script.py
+      md5: 7bc61defb132c56824b9257e6d2b7cd3
+      size: 7413
+    - path: concat_reports.py
+      md5: c187d6d17b58e92d40c49b7287f0cdbd
+      size: 2261
+    params:
+      params.yaml:
+        prepare_train_input:
+          feature_handler_file: ../feature_handling/feature_handler.json
+    outs:
+    - path: train_input/
+      md5: a151a3ad75fc98a6c1e61aa8756d5971.dir
+      size: 232061690
+      nfiles: 1
+  train:
+    cmd:
+    - python train_auto_embedder.py ./train_input/
+    deps:
+    - path: ../feature_handling/feature_handler.json
+      md5: 73f0566e372f9ea1afdf89cbb7ad816e
+      size: 41861
+    - path: ../mldq/feature_handler.py
+      md5: 3ef83d0afb83cce70b1bc2e163848fa0
+      size: 14103
+    - path: ../mldq/simple_script.py
+      md5: 7bc61defb132c56824b9257e6d2b7cd3
+      size: 7413
+    - path: ./embedding/
+      md5: 01fd4aeb5ea3347aa76b56509e2a5a3c.dir
+      size: 12039
+      nfiles: 2
+    - path: ./train_input/
+      md5: a151a3ad75fc98a6c1e61aa8756d5971.dir
+      size: 232061690
+      nfiles: 1
+    - path: train_auto_embedder.py
+      md5: 6ef29ac8296b79d1ee0ec1e59c8470b7
+      size: 5263
+    params:
+      params.yaml:
+        train_model:
+          feature_handler_file: ../feature_handling/feature_handler.json
+          optimizer: sgd
+          loss: mse
+          batch_size: 10000
+          epochs: 5
+          learning_rate: 0.1
+    outs:
+    - path: model/
+      md5: 2048ca9914747e4261c279daffdca414.dir
+      size: 229693
+      nfiles: 4
+  test:
+    cmd:
+    - python test_auto_embedder.py ./train_input/ ./model/auto_embedder/
+    deps:
+    - path: ../mldq/simple_script.py
+      md5: 7bc61defb132c56824b9257e6d2b7cd3
+      size: 7413
+    - path: ./embedding/
+      md5: 01fd4aeb5ea3347aa76b56509e2a5a3c.dir
+      size: 12039
+      nfiles: 2
+    - path: ./model/
+      md5: 2048ca9914747e4261c279daffdca414.dir
+      size: 229693
+      nfiles: 4
+    - path: ./train_input/
+      md5: a151a3ad75fc98a6c1e61aa8756d5971.dir
+      size: 232061690
+      nfiles: 1
+    - path: test_auto_embedder.py
+      md5: cbce95b5a2e99cd8ff1c4f4c50fc6247
+      size: 1644
+    params:
+      params.yaml:
+        train_model:
+          feature_handler_file: ../feature_handling/feature_handler.json
+          optimizer: sgd
+          loss: mse
+          batch_size: 10000
+          epochs: 5
+          learning_rate: 0.1
