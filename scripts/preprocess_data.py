@@ -1,10 +1,13 @@
 import sys
 import pandas as pd
 import seaborn as sns
-from palmerpenguins import load_penguins
 
-# from mldq.simple_script import SimpleMultiFilesScript
+sns.set_style("whitegrid")
+from palmerpenguins import load_penguins
 from feature_handling.feature_handler import FeatureHandler
+
+OUTPUT_DIR = "training_input"
+OUTPUT_NAME = "train_data"
 
 
 def select_features(df: pd.DataFrame, feature_handler: FeatureHandler) -> None:
@@ -33,31 +36,19 @@ def remove_duplicates(df: pd.DataFrame) -> pd.DataFrame:
     return df.drop_duplicates(ignore_index=True)
 
 
+def load_data() -> pd.DataFrame:
+    return load_penguins()
+
+
+def create_feature_handler(df: pd.DataFrame) -> None:
+    feature_handler = FeatureHandler.from_df(df)
+    feature_handler.to_json(OUTPUT_DIR)
+
+
 def main():
 
-    sns.set_style("whitegrid")
-    penguins = load_penguins()
-    penguins.head()
-
-    #     print(
-    #     f"Loading feature specifications from {self.params['feature_handler_file']}"
-    # )
-    # self.feature_handler = FeatureHandler.from_json(
-    #     self.params["feature_handler_file"]
-    # )
-
-    #    input_dir=sys.argv[1],
-    #     output_dir="train_input",
-    #     output_name="train_report",
-    #     param_section="prepare_train_input",
-    # file_list = "\n".join(input_files)
-    # print(f"Merging:\n{file_list}")
-
-    # filtered_df_list = [filter_columns(df, self.feature_handler) for df in df_list]
-    # concat_df = pd.concat(filtered_df_list, ignore_index=True, join="inner")
-    # concat_df = remove_duplicates(concat_df)
-
-    # return concat_df
+    df = load_data()
+    create_feature_handler(df)
 
 
 if __name__ == "__main__":

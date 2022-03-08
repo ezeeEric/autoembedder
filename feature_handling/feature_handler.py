@@ -12,6 +12,7 @@ import json
 import glob
 from dataclasses import dataclass, field
 
+from typing import Dict
 import pandas as pd
 
 
