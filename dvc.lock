@@ -105,21 +105,27 @@ stages:
     cmd:
     - python scripts/preprocess_data.py
     deps:
-    - path: feature_handling/feature_handler.json
-      md5: 6d24c1746f2c0a83f8ba0038054189d0
-      size: 41939
-    - path: feature_handling/feature_handler.py
-      md5: 366fb0d5d32ed51785537fac7224f483
-      size: 13515
     - path: scripts/preprocess_data.py
-      md5: edbfd8ee251a0542f7a7dd40485e1b0a
-      size: 1928
+      md5: 2812a0f0c00496ad54abb17e3aef061f
+      size: 2470
+    - path: utils/feature_handler.py
+      md5: 4bd8400f2e2c620f11b68b30d7f1c12f
+      size: 12163
+    - path: utils/params.py
+      md5: edbe52eb8c2150cae39bb569e5a341af
+      size: 1880
     params:
       params.yaml:
         data_preprocessing:
-          feature_handler_file: ./feature_handling/feature_handler.json
+          feature_handler_dir: ./feature_handling/
     outs:
-    - path: training_input/
-      md5: 5fe4a741349830f9d02012dca9325a68.dir
-      size: 16561
-      nfiles: 3
+    - path: data/training_input/
+      md5: 23a90f380d3442596e3e4084cb07e8b2.dir
+      size: 13218
+      nfiles: 1
+    - path: feature_handling/feature_handler.json
+      md5: 9690a932948ec28028812609c0b0ff9b
+      size: 2277
+    - path: feature_handling/feature_handler_pretty_summary.json
+      md5: 85530058600ceb2075fc5fa4246b76da
+      size: 594
