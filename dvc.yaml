@@ -4,13 +4,13 @@ stages:
     cmd:
     - python scripts/preprocess_data.py
     params:
-    - prepare_train_input
+    - data_preprocessing
     deps:
     - scripts/preprocess_data.py
     - feature_handling/feature_handler.json
     - feature_handling/feature_handler.py
     outs:
-    - train_input/
+    - training_input/
   # train:
   #   desc: "Train the AutoEmbedding model and save to disk."
   #   cmd:

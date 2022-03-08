@@ -65,12 +65,8 @@ def get_names_constant_columns(df: pd.DataFrame) -> list[str]:
     return [col for col in df.columns if df[col].nunique() == 1]
 
 
-def get_names_columns_in_reporting_currency(df: pd.DataFrame) -> list[str]:
-    return [col for col in df.columns if "(rep)" in col]
-
-
 def get_names_index_columns(df: pd.DataFrame) -> list[str]:
-    return [col for col in df.columns if ("index" in col or "fpos_opok_id" in col)]
+    return [col for col in df.columns if ("index" in col)]
 
 
 def available_features_in_reference(
@@ -107,7 +103,6 @@ class Feature:
     is_numerical: bool = None
     is_non_numerical: bool = None
     is_constant: bool = None
-    uses_reporting_currency: bool = None
     is_index: bool = None
     actions: list[str] = field(default_factory=lambda: [])
     mapping: list = None
@@ -159,11 +154,6 @@ class FeatureHandler:
                 ],
                 "is_constant features": [
                     feat.name for feat in self._feature_list if feat.is_constant
-                ],
-                "uses_reporting_currency features": [
-                    feat.name
-                    for feat in self._feature_list
-                    if feat.uses_reporting_currency
                 ],
                 "is_index features": [
                     feat.name for feat in self._feature_list if feat.is_index
@@ -257,9 +247,6 @@ class FeatureHandler:
                 df, "categorical"
             )
             feat.is_constant = feat.name in get_names_constant_columns(df)
-            feat.uses_reporting_currency = (
-                feat.name in get_names_columns_in_reporting_currency(df)
-            )
             feat.is_index = feat.name in get_names_index_columns(df)
 
     def add_features_from_df(self, df: pd.DataFrame) -> None:
@@ -276,8 +263,6 @@ class FeatureHandler:
                         in get_column_names_of_type(df, "categorical"),
                         is_constant=feat.name in get_names_constant_columns(df),
                         is_index=feat.name in get_names_index_columns(df),
-                        uses_reporting_currency=feat.name
-                        in get_names_columns_in_reporting_currency(df),
                     )
                 )
 
@@ -357,48 +342,3 @@ class FeatureHandler:
         return available_features_in_reference(
             selected_features_names, available_feature_names
         )
-
-
-def create_features_from_df(df: pd.DataFrame) -> None:
-    """A test function to demonstrate the functionalities of the FeatureHandler."""
-    feature_handler = FeatureHandler.from_df(df)
-    my_list = feature_handler.get_selected_features_names(
-        include_features_with_flags=["is_constant", "is_non_numerical"],
-        include_features_with_actions=["drop"],
-        available_feature_names=df.columns,
-    )
-    print(f"A test list (from df): \n {my_list}")
-    feature_handler.to_json(OUTPUT_DIRECTORY)
-    feature_handler.pretty_print_to_json(OUTPUT_DIRECTORY)
-
-    del feature_handler
-    del my_list
-
-    feature_handler = FeatureHandler.from_json(
-        os.path.join(OUTPUT_DIRECTORY, "feature_handler.json")
-    )
-
-    my_list = feature_handler.get_selected_features(
-        include_features_with_flags=["is_numerical"],
-        exclude_features_with_actions=["drop"],
-    )
-    print(f"A second test list (from yaml): \n {my_list}")
-
-
-def main():
-    input_files = get_sorted_input_files(
-        input_dir=sys.argv[1],
-        input_patterns=sys.argv[2].split(",") if len(sys.argv) > 2 else "",
-        input_extension="feather",
-    )
-    input_file = input_files[0]
-
-    print(f"Processing report: {input_file}.")
-    create_output_dir(OUTPUT_DIRECTORY)
-    input_df = pd.read_feather(input_file)
-    input_df = input_df[:1000]
-    create_features_from_df(input_df)
-
-
-if __name__ == "__main__":
-    main()

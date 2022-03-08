@@ -43,12 +43,17 @@ def load_data() -> pd.DataFrame:
 def create_feature_handler(df: pd.DataFrame) -> None:
     feature_handler = FeatureHandler.from_df(df)
     feature_handler.to_json(OUTPUT_DIR)
+    feature_handler.pretty_print_to_json(OUTPUT_DIR)
+
+
+def save_df(df: pd.DataFrame) -> None:
+    df.to_feather(f"{OUTPUT_DIR}/{OUTPUT_NAME}.feather")
 
 
 def main():
-
     df = load_data()
     create_feature_handler(df)
+    save_df(df)
 
 
 if __name__ == "__main__":
