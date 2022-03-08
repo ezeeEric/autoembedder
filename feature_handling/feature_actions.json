@@ -1,0 +1,37 @@
+{
+    "drop": [
+        "consolidation code",
+        "consunit code",
+        "expected maturity dates",
+        "fs item code",
+        "oe portfolio id",
+        "rai funds",
+        "reporting date",
+        "reporting date id",
+        "saa flag",
+        "esg threshold flag"
+    ],
+    "geo_engineer": [
+        "country of risk"
+    ],
+    "user_selected": [
+        "cart level 4 code_emb_0",
+        "cart level 4 code_emb_1",
+        "book yield",
+        "book value (rep)",
+        "currency_le",
+        "mod duration",
+        "country of risk_le"
+    ],
+    "auto_embedding_categorical": [
+        "cart level 4 code",
+        "aim rating",
+        "attribute type",
+        "coupon"
+    ],
+    "label_encoding": [
+        "country of risk",
+        "currency"
+    ],
+    "onehot_encoding": []
+}

@@ -1,3 +1,18 @@
+Notes:
+```
+dvc init
+dvc remote add -d gs_dvc_autoembedder gs://mldq/dvc_autoembedder
+```
+
+```
+import pandas as pd
+import seaborn as sns 
+from palmerpenguins import load_penguins
+sns.set_style('whitegrid')
+penguins = load_penguins()
+penguins.head()
+```
+
 ## Autoembedding Categorical Data
 
 In the following, the usage of the Autoembedding model to embed categorical data is described.

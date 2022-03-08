@@ -17,4 +17,4 @@ seaborn==0.11.2
 pyarrow==6.0.0
 PyYAML~=6.0
 setuptools~=49.2.1
-pycountry-convert==0.7.2
+palmerpenguins==0.1.4
