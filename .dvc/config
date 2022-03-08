@@ -1,0 +1,4 @@
+[core]
+    remote = gs_dvc_autoembedder
+['remote "gs_dvc_autoembedder"']
+    url = gs://mldq/dvc_autoembedder
