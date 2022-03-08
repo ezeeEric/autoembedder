@@ -101,3 +101,25 @@ stages:
           batch_size: 10000
           epochs: 5
           learning_rate: 0.1
+  data_preprocessing:
+    cmd:
+    - python scripts/preprocess_data.py
+    deps:
+    - path: feature_handling/feature_handler.json
+      md5: 6d24c1746f2c0a83f8ba0038054189d0
+      size: 41939
+    - path: feature_handling/feature_handler.py
+      md5: 366fb0d5d32ed51785537fac7224f483
+      size: 13515
+    - path: scripts/preprocess_data.py
+      md5: edbfd8ee251a0542f7a7dd40485e1b0a
+      size: 1928
+    params:
+      params.yaml:
+        data_preprocessing:
+          feature_handler_file: ./feature_handling/feature_handler.json
+    outs:
+    - path: training_input/
+      md5: 5fe4a741349830f9d02012dca9325a68.dir
+      size: 16561
+      nfiles: 3

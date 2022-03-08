@@ -1,8 +1,13 @@
 import sys
 import pandas as pd
+import seaborn as sns
 
-from mldq.simple_script import SimpleMultiFilesScript
-from mldq.feature_handler import FeatureHandler
+sns.set_style("whitegrid")
+from palmerpenguins import load_penguins
+from feature_handling.feature_handler import FeatureHandler
+
+OUTPUT_DIR = "training_input"
+OUTPUT_NAME = "train_data"
 
 
 def select_features(df: pd.DataFrame, feature_handler: FeatureHandler) -> None:
@@ -31,30 +36,25 @@ def remove_duplicates(df: pd.DataFrame) -> pd.DataFrame:
     return df.drop_duplicates(ignore_index=True)
 
 
-class ConcatScript(SimpleMultiFilesScript):
-    def post_init(self):
-        print(
-            f"Loading feature specifications from {self.params['feature_handler_file']}"
-        )
-        self.feature_handler = FeatureHandler.from_json(
-            self.params["feature_handler_file"]
-        )
+def load_data() -> pd.DataFrame:
+    return load_penguins()
 
-    def process_dataframes(self, df_list: list, input_files: list) -> pd.DataFrame:
-        file_list = "\n".join(input_files)
-        print(f"Merging:\n{file_list}")
 
-        filtered_df_list = [filter_columns(df, self.feature_handler) for df in df_list]
-        concat_df = pd.concat(filtered_df_list, ignore_index=True, join="inner")
-        concat_df = remove_duplicates(concat_df)
+def create_feature_handler(df: pd.DataFrame) -> None:
+    feature_handler = FeatureHandler.from_df(df)
+    feature_handler.to_json(OUTPUT_DIR)
+    feature_handler.pretty_print_to_json(OUTPUT_DIR)
 
-        return concat_df
+
+def save_df(df: pd.DataFrame) -> None:
+    df.to_feather(f"{OUTPUT_DIR}/{OUTPUT_NAME}.feather")
+
+
+def main():
+    df = load_data()
+    create_feature_handler(df)
+    save_df(df)
 
 
 if __name__ == "__main__":
-    ConcatScript(
-        input_dir=sys.argv[1],
-        output_dir="train_input",
-        output_name="train_report",
-        param_section="prepare_train_input",
-    ).run()
+    main()

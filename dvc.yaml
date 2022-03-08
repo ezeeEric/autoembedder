@@ -1,43 +1,40 @@
 stages:
-  prepare_train_input:
-    desc: "Merge all of all single reports to create a complete vocabulary of all categories in the selected columns."
+  data_preprocessing:
+    desc: "Create complete vocabulary for training the Autoembedder"
     cmd:
-    - python concat_reports.py ../data/feathered/
+    - python scripts/preprocess_data.py
     params:
-    - prepare_train_input
+    - data_preprocessing
     deps:
-    - ../data/feathered/
-    - concat_reports.py
-    - ../feature_handling/feature_handler.json
-    - ../mldq/feature_handler.py
-    - ../mldq/simple_script.py
-    - ../mldq/params.py
+    - scripts/preprocess_data.py
+    - feature_handling/feature_handler.json
+    - feature_handling/feature_handler.py
     outs:
-    - train_input/
-  train:
-    desc: "Train the AutoEmbedding model and save to disk."
-    cmd:
-    - python train_auto_embedder.py ./train_input/
-    params:
-    - train_model
-    deps:
-    - train_auto_embedder.py
-    - ../feature_handling/feature_handler.json
-    - ../mldq/feature_handler.py
-    - ./train_input/
-    - ./embedding/
-    - ../mldq/simple_script.py
-    outs:
-    - model/
-  test:
-    desc: "Test the trained AutoEmbedding model."
-    cmd:
-    - python test_auto_embedder.py ./train_input/ ./model/auto_embedder/
-    params:
-    - train_model
-    deps:
-    - test_auto_embedder.py
-    - ./train_input/
-    - ./model/
-    - ./embedding/
-    - ../mldq/simple_script.py
+    - training_input/
+  # train:
+  #   desc: "Train the AutoEmbedding model and save to disk."
+  #   cmd:
+  #   - python scripts/train_auto_embedder.py ./train_input/
+  #   params:
+  #   - train_model
+  #   deps:
+  #   - scripts/train_auto_embedder.py
+  #   - ../feature_handling/feature_handler.json
+  #   - ../mldq/feature_handler.py
+  #   - ./train_input/
+  #   - ./embedding/
+  #   - ../mldq/simple_script.py
+  #   outs:
+  #   - model/
+  # test:
+  #   desc: "Test the trained AutoEmbedding model."
+  #   cmd:
+  #   - python scripts/test_auto_embedder.py ./train_input/ ./model/auto_embedder/
+  #   params:
+  #   - train_model
+  #   deps:
+  #   - scripts/test_auto_embedder.py
+  #   - ./train_input/
+  #   - ./model/
+  #   - ./embedding/
+  #   - ../mldq/simple_script.py
