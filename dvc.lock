@@ -122,6 +122,9 @@ stages:
     - path: feature_handling/feature_handler.json
       md5: 9690a932948ec28028812609c0b0ff9b
       size: 2277
+    - path: feature_handling/feature_handler_pretty_summary.json
+      md5: 85530058600ceb2075fc5fa4246b76da
+      size: 594
     - path: training_input/
       md5: 23a90f380d3442596e3e4084cb07e8b2.dir
       size: 13218

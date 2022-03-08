@@ -12,6 +12,7 @@ stages:
     outs:
     - training_input/
     - feature_handling/feature_handler.json
+    - feature_handling/feature_handler_pretty_summary.json
   # train:
   #   desc: "Train the AutoEmbedding model and save to disk."
   #   cmd:
