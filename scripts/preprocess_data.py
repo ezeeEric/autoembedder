@@ -1,8 +1,10 @@
 import sys
 import pandas as pd
+import seaborn as sns
+from palmerpenguins import load_penguins
 
-from mldq.simple_script import SimpleMultiFilesScript
-from mldq.feature_handler import FeatureHandler
+# from mldq.simple_script import SimpleMultiFilesScript
+from feature_handling.feature_handler import FeatureHandler
 
 
 def select_features(df: pd.DataFrame, feature_handler: FeatureHandler) -> None:
@@ -31,30 +33,32 @@ def remove_duplicates(df: pd.DataFrame) -> pd.DataFrame:
     return df.drop_duplicates(ignore_index=True)
 
 
-class ConcatScript(SimpleMultiFilesScript):
-    def post_init(self):
-        print(
-            f"Loading feature specifications from {self.params['feature_handler_file']}"
-        )
-        self.feature_handler = FeatureHandler.from_json(
-            self.params["feature_handler_file"]
-        )
+def main():
 
-    def process_dataframes(self, df_list: list, input_files: list) -> pd.DataFrame:
-        file_list = "\n".join(input_files)
-        print(f"Merging:\n{file_list}")
+    sns.set_style("whitegrid")
+    penguins = load_penguins()
+    penguins.head()
 
-        filtered_df_list = [filter_columns(df, self.feature_handler) for df in df_list]
-        concat_df = pd.concat(filtered_df_list, ignore_index=True, join="inner")
-        concat_df = remove_duplicates(concat_df)
+    #     print(
+    #     f"Loading feature specifications from {self.params['feature_handler_file']}"
+    # )
+    # self.feature_handler = FeatureHandler.from_json(
+    #     self.params["feature_handler_file"]
+    # )
 
-        return concat_df
+    #    input_dir=sys.argv[1],
+    #     output_dir="train_input",
+    #     output_name="train_report",
+    #     param_section="prepare_train_input",
+    # file_list = "\n".join(input_files)
+    # print(f"Merging:\n{file_list}")
+
+    # filtered_df_list = [filter_columns(df, self.feature_handler) for df in df_list]
+    # concat_df = pd.concat(filtered_df_list, ignore_index=True, join="inner")
+    # concat_df = remove_duplicates(concat_df)
+
+    # return concat_df
 
 
 if __name__ == "__main__":
-    ConcatScript(
-        input_dir=sys.argv[1],
-        output_dir="train_input",
-        output_name="train_report",
-        param_section="prepare_train_input",
-    ).run()
+    main()
