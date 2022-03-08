@@ -9,7 +9,7 @@ from utils.params import with_params
 from utils.utils import create_output_dir
 
 
-OUTPUT_DIR = "training_input"
+OUTPUT_DIR = "data/training_input"
 OUTPUT_NAME = "train_data"
 
 

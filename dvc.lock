@@ -106,8 +106,8 @@ stages:
     - python scripts/preprocess_data.py
     deps:
     - path: scripts/preprocess_data.py
-      md5: ac04fc708366a1f5a7dcdc7e8fa086a9
-      size: 2465
+      md5: 2812a0f0c00496ad54abb17e3aef061f
+      size: 2470
     - path: utils/feature_handler.py
       md5: 4bd8400f2e2c620f11b68b30d7f1c12f
       size: 12163
@@ -119,13 +119,13 @@ stages:
         data_preprocessing:
           feature_handler_dir: ./feature_handling/
     outs:
+    - path: data/training_input/
+      md5: 23a90f380d3442596e3e4084cb07e8b2.dir
+      size: 13218
+      nfiles: 1
     - path: feature_handling/feature_handler.json
       md5: 9690a932948ec28028812609c0b0ff9b
       size: 2277
     - path: feature_handling/feature_handler_pretty_summary.json
       md5: 85530058600ceb2075fc5fa4246b76da
       size: 594
-    - path: training_input/
-      md5: 23a90f380d3442596e3e4084cb07e8b2.dir
-      size: 13218
-      nfiles: 1

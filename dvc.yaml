@@ -10,7 +10,7 @@ stages:
     - utils/feature_handler.py
     - utils/params.py
     outs:
-    - training_input/
+    - data/training_input/
     - feature_handling/feature_handler.json
     - feature_handling/feature_handler_pretty_summary.json
   # train:
