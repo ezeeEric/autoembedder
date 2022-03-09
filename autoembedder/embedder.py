@@ -12,8 +12,10 @@ class Embedder(Model):
     def __init__(
         self,
         encoding_dictionary: dict[str, list],
+        config: dict,
     ):
         super().__init__()
+        self.config = config
         self.encoding_dictionary = encoding_dictionary
 
         self.n_categories_per_feature = [

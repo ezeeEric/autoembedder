@@ -88,19 +88,17 @@ def apply_ordinal_encoding_column(
 class AutoEmbedder(Embedder):
     def __init__(
         self,
-        encoding_dictionary: dict[str, list],
         numerical_features: list[str] = [],
         categorical_features: list[int] = [],
         feature_idx_map: dict[str, list] = {},
         embedding_layer_idx_feature_name_map: dict[str, int] = {},
-        config: dict = {},
+        **kwargs,
     ):
         """Class for unsupervised categorial feature embedding. Consists of an
         embedding layer and a symmetric autoencoder.
         """
-        super().__init__(encoding_dictionary=encoding_dictionary)
+        super().__init__(**kwargs)
 
-        self.config = config
         self.numerical_features = numerical_features
         self.categorical_features = categorical_features
 

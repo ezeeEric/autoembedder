@@ -145,7 +145,7 @@ def train_autoembedder(df: pd.DataFrame, params: dict) -> pd.DataFrame:
         df, params["feature_handler_file"]
     )
     train_df, test_df, encoding_dictionary = prepare_data_for_fit(
-        df, numerical_features, categorical_features
+        df, numerical_features, categorical_features, params
     )
 
     auto_embedder = AutoEmbedder(
