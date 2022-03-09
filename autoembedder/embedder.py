@@ -12,8 +12,10 @@ class Embedder(Model):
     def __init__(
         self,
         encoding_dictionary: dict[str, list],
+        config: dict,
     ):
         super().__init__()
+        self.config = config
         self.encoding_dictionary = encoding_dictionary
 
         self.n_categories_per_feature = [
@@ -55,13 +57,12 @@ class Embedder(Model):
         # would use multiple inputs here; however there's no intrinsic
         # positional relation between our words.
         input_length = 1
-
         embedding_layer = tf.keras.layers.Embedding(
             input_dim=input_dim,
             output_dim=embedding_output_dimension,
             input_length=input_length,
             dtype=np.float64,
-            embeddings_initializer="uniform",
+            embeddings_initializer=self.config["embeddings_initializer"].lower(),
             name=f"embedding_{layer_idx}",
         )
         return embedding_layer, embedding_output_dimension

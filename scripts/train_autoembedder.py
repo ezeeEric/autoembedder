@@ -10,6 +10,7 @@ import pandas as pd
 from typing import Tuple
 import tensorflow as tf
 from sklearn.preprocessing import OrdinalEncoder
+from sklearn.model_selection import train_test_split
 
 print(f"tensorflow {tf.__version__}")
 
@@ -109,10 +110,17 @@ def test_model(df: pd.DataFrame, model: AutoEmbedder, batch_size: int) -> None:
     pass
 
 
+def split_train_test_df(df: pd.DataFrame, training_fraction: float) -> None:
+    return train_test_split(
+        df,
+    )
+
+
 def prepare_data_for_fit(
     df: tf.Tensor,
     numerical_features: list[str],
     categorical_features: list[str],
+    config: dict,
 ) -> tf.Tensor:
     """This function first encodes the categorical input, then normalises the numerical input and finally merges the result."""
     df_encoded, embedding_encoder = encode_categorical_input_ordinal(
@@ -120,17 +128,31 @@ def prepare_data_for_fit(
     )
     df_numericals_normalised = normalise_numerical_input_columns(df[numerical_features])
     df = pd.concat([df_numericals_normalised, df_encoded], axis=1)
-    return df, embedding_encoder
+    train_df, test_df = train_test_split(df, test_size=config["test_data_fraction"])
+    return train_df, test_df, embedding_encoder
+
+
+def load_features(
+    df: pd.DataFrame, feature_handler_file: str
+) -> Tuple[list[str], list[str]]:
+    feature_handler = FeatureHandler.from_json(feature_handler_file)
+    numerical_features, categorical_features = select_features(df, feature_handler)
+    return numerical_features, categorical_features
 
 
 def train_autoembedder(df: pd.DataFrame, params: dict) -> pd.DataFrame:
-    feature_handler = FeatureHandler.from_json(params["feature_handler_file"])
-    numerical_features, categorical_features = select_features(df, feature_handler)
-    df, encoding_dictionary = prepare_data_for_fit(
-        df, numerical_features, categorical_features
+    numerical_features, categorical_features = load_features(
+        df, params["feature_handler_file"]
     )
+    train_df, test_df, encoding_dictionary = prepare_data_for_fit(
+        df, numerical_features, categorical_features, params
+    )
+
     auto_embedder = AutoEmbedder(
-        encoding_dictionary, numerical_features, categorical_features
+        encoding_dictionary=encoding_dictionary,
+        numerical_features=numerical_features,
+        categorical_features=categorical_features,
+        config=params,
     )
     compile_model(
         model=auto_embedder,
@@ -138,15 +160,14 @@ def train_autoembedder(df: pd.DataFrame, params: dict) -> pd.DataFrame:
         optimizer_name=params["optimizer"],
         loss_name=params["loss"],
     )
-
     auto_embedder = train_model(
-        df=df,
+        df=train_df,
         model=auto_embedder,
         batch_size=params["batch_size"],
         epochs=params["epochs"],
     )
     test_model(
-        df,
+        test_df,
         auto_embedder,
         batch_size=params["batch_size"],
     )

@@ -12,25 +12,34 @@ from sklearn.preprocessing import OrdinalEncoder
 
 
 def determine_autoencoder_shape(
-    emb_out_dim: list[int], numerical_features: list[int]
+    embedding_layers_output_dimensions: list[int],
+    n_numerical_features: int,
+    config: dict,
 ) -> list[int]:
-    # TODO this shape is chosen for easy dev purposes, needs to be optimised and
-    # maybe steered via params
-    input_layer_size = sum(emb_out_dim) + len(numerical_features)
+    input_layer_size = sum(embedding_layers_output_dimensions) + n_numerical_features
+
     encoder_shape = [
         input_layer_size,
         input_layer_size // 2,
         input_layer_size // 3,
         input_layer_size // 4,
     ]
-    decoder_shape = [input_layer_size // 3, input_layer_size // 2, input_layer_size]
+    if config["manual_encoder_architecture"]:
+        encoder_shape = [input_layer_size] + list(config["manual_encoder_architecture"])
+
+    decoder_shape = list(reversed(encoder_shape[:-1]))
+    if config["manual_decoder_architecture"]:
+        decoder_shape = list(config["manual_decoder_architecture"]) + [input_layer_size]
     return encoder_shape, decoder_shape
 
 
-def create_dense_layers(shape: list[int], name: str) -> list[layers.Dense]:
-    # TODO activation function as parameter
+def create_dense_layers(
+    shape: list[int], name: str, activation_fct: str
+) -> list[layers.Dense]:
     return [
-        layers.Dense(n_nodes, activation="relu", name=f"{name}_{layer_idx}")
+        layers.Dense(
+            n_nodes, activation=activation_fct.lower(), name=f"{name}_{layer_idx}"
+        )
         for layer_idx, n_nodes in enumerate(shape)
     ]
 
@@ -79,25 +88,27 @@ def apply_ordinal_encoding_column(
 class AutoEmbedder(Embedder):
     def __init__(
         self,
-        encoding_dictionary: dict[str, list],
         numerical_features: list[str] = [],
         categorical_features: list[int] = [],
         feature_idx_map: dict[str, list] = {},
         embedding_layer_idx_feature_name_map: dict[str, int] = {},
+        **kwargs,
     ):
         """Class for unsupervised categorial feature embedding. Consists of an
         embedding layer and a symmetric autoencoder.
         """
-        super().__init__(encoding_dictionary=encoding_dictionary)
+        super().__init__(**kwargs)
 
         self.numerical_features = numerical_features
         self.categorical_features = categorical_features
 
         self.feature_idx_map = feature_idx_map
         self.embedding_layer_idx_feature_name_map = embedding_layer_idx_feature_name_map
+
         self.encoder_shape, self.decoder_shape = determine_autoencoder_shape(
             self.embedding_layers_output_dimensions,
-            self.numerical_features,
+            len(self.numerical_features),
+            self.config,
         )
 
         self.encoder = self.setup_encoder(self.encoder_shape)
@@ -110,6 +121,7 @@ class AutoEmbedder(Embedder):
             "encoding_dictionary": self.encoding_dictionary,
             "feature_idx_map": self.feature_idx_map,
             "embedding_layer_idx_feature_name_map": self.embedding_layer_idx_feature_name_map,
+            "config": self.config,
         }
         return config_dict
 
@@ -118,11 +130,19 @@ class AutoEmbedder(Embedder):
         return cls(**config)
 
     def setup_encoder(self, encoder_shape: list[int]) -> tf.keras.Sequential:
-        encoder_layers = create_dense_layers(shape=encoder_shape, name="encoder")
+        encoder_layers = create_dense_layers(
+            shape=encoder_shape,
+            name="encoder",
+            activation_fct=self.config["activation_function"],
+        )
         return tf.keras.Sequential(encoder_layers, name="encoder")
 
     def setup_decoder(self, decoder_shape: list[int]) -> tf.keras.Sequential:
-        dec_layers = create_dense_layers(shape=decoder_shape[:-1], name="decoder")
+        dec_layers = create_dense_layers(
+            shape=decoder_shape[:-1],
+            name="decoder",
+            activation_fct=self.config["activation_function"],
+        )
 
         # the last layer is a sigmoid activation
         dec_layers.append(
