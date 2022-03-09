@@ -51,8 +51,8 @@ stages:
       md5: 4bd8400f2e2c620f11b68b30d7f1c12f
       size: 12163
     - path: scripts/train_autoembedder.py
-      md5: 73f78756c173cb343f7e96548d7203a0
-      size: 5103
+      md5: 1789451f1185e45350fb9c097bf3f0b0
+      size: 5102
     params:
       params.yaml:
         train_model:
@@ -64,40 +64,32 @@ stages:
           learning_rate: 0.01
     outs:
     - path: ./data/model/
-      md5: 0217f48a4c7f1842917597e38c494138.dir
+      md5: 17500f827a1ea18e74453fd1a6ead274.dir
       size: 215674
       nfiles: 4
   test:
     cmd:
-    - python test_auto_embedder.py ./train_input/ ./model/auto_embedder/
+    - python scripts/test_autoembedder.py ./data/training_input/ ./data/model/autoembedder
     deps:
-    - path: ../mldq/simple_script.py
-      md5: 7bc61defb132c56824b9257e6d2b7cd3
-      size: 7413
-    - path: ./embedding/
-      md5: 01fd4aeb5ea3347aa76b56509e2a5a3c.dir
-      size: 12039
-      nfiles: 2
-    - path: ./model/
-      md5: 2048ca9914747e4261c279daffdca414.dir
-      size: 229693
+    - path: ./autoembedder/
+      md5: 649c93fcd1419548b43dca6466069c16.dir
+      size: 31142
+      nfiles: 5
+    - path: ./data/model/
+      md5: 17500f827a1ea18e74453fd1a6ead274.dir
+      size: 215674
       nfiles: 4
-    - path: ./train_input/
-      md5: a151a3ad75fc98a6c1e61aa8756d5971.dir
-      size: 232061690
+    - path: ./data/training_input/
+      md5: 5d1c30045f28b9ee73b4e34ed5328b1c.dir
+      size: 13218
       nfiles: 1
-    - path: test_auto_embedder.py
-      md5: cbce95b5a2e99cd8ff1c4f4c50fc6247
-      size: 1644
+    - path: scripts/test_autoembedder.py
+      md5: ab59867a6f7cc46a84c99447d23adb5f
+      size: 1474
     params:
       params.yaml:
-        train_model:
-          feature_handler_file: ../feature_handling/feature_handler.json
-          optimizer: sgd
-          loss: mse
-          batch_size: 10000
-          epochs: 5
-          learning_rate: 0.1
+        test_model:
+          feature_handler_file: ./feature_handling/feature_handler.json
   data_preprocessing:
     cmd:
     - python scripts/preprocess_data.py

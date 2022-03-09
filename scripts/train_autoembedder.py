@@ -56,7 +56,7 @@ def save_autoembedder_model(
     auto_embedder: AutoEmbedder,
     out_path: str,
 ) -> None:
-    out_file = os.path.join(out_path, "auto_embedder")
+    out_file = os.path.join(out_path, "autoembedder")
     auto_embedder.save(out_file)
 
 
