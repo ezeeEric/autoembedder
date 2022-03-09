@@ -5,10 +5,11 @@ train_model:
     manual_encoder_architecture: [6,4,4,2] #empty list [] for automatic autencoder shape
     manual_decoder_architecture: [] #empty list [] for default symmetric autoencoder shape
     activation_function: ReLU
+    test_data_fraction: 0.2
     optimizer: sgd
     loss: mse
-    batch_size: 32
-    epochs: 20
+    batch_size: 9
+    epochs: 50
     learning_rate: 0.01
 test_model:
     feature_handler_file: ./feature_handling/feature_handler.json

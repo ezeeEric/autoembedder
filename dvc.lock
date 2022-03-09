@@ -51,8 +51,8 @@ stages:
       md5: 4bd8400f2e2c620f11b68b30d7f1c12f
       size: 12163
     - path: scripts/train_autoembedder.py
-      md5: 7f9d5d0753b8d492bd845c2e15e4c722
-      size: 5459
+      md5: 5ec2fabcbb955a39d483d12b77613a2f
+      size: 5458
     params:
       params.yaml:
         train_model:
@@ -66,13 +66,13 @@ stages:
           activation_function: ReLU
           optimizer: sgd
           loss: mse
-          batch_size: 32
-          epochs: 20
+          batch_size: 9
+          epochs: 50
           learning_rate: 0.01
     outs:
     - path: ./data/model/
-      md5: 7799663ec50990311c79be54786b0413.dir
-      size: 258063
+      md5: 2aa4e7214ab6a6a890d15580d8e2e993.dir
+      size: 258551
       nfiles: 4
   test:
     cmd:
