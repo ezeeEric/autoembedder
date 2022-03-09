@@ -7,7 +7,7 @@ import tensorflow as tf
 from tensorflow.keras import layers
 import pandas as pd
 
-from auto_embedding.embedding.embedder import Embedder
+from autoembedder.embedder import Embedder
 from sklearn.preprocessing import OrdinalEncoder
 
 

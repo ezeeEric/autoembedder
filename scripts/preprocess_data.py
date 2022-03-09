@@ -14,13 +14,13 @@ OUTPUT_NAME = "train_data"
 
 
 def select_features(df: pd.DataFrame, feature_handler: FeatureHandler) -> None:
-    features_autoembedding_categorical = feature_handler.get_selected_features_names(
+    features_autoembedding_numerical = feature_handler.get_selected_features_names(
         include_features_with_flags=["is_numerical"],
         exclude_features_with_flags=["is_constant", "is_index"],
         exclude_features_with_actions=["drop"],
         available_feature_names=df.columns,
     )
-    features_autoembedding_numerical = feature_handler.get_selected_features_names(
+    features_autoembedding_categorical = feature_handler.get_selected_features_names(
         include_features_with_flags=["is_non_numerical"],
         exclude_features_with_flags=["is_constant", "is_index"],
         exclude_features_with_actions=["drop"],

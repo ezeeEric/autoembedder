@@ -16,7 +16,9 @@ print(f"tensorflow {tf.__version__}")
 from autoembedder.autoembedder import AutoEmbedder
 from utils.feature_handler import FeatureHandler
 from utils.params import with_params
-from scripts.preprocess_data import select_features, create_output_dir
+from utils.utils import create_output_dir, get_sorted_input_files
+from scripts.preprocess_data import select_features
+
 
 OUTPUT_DIRECTORY = "./data/model"
 
@@ -50,7 +52,7 @@ def encode_categorical_input_ordinal(
     return df_enc, encoding_dictionary
 
 
-def save_auto_embedding_model(
+def save_autoembedder_model(
     auto_embedder: AutoEmbedder,
     out_path: str,
 ) -> None:
@@ -116,10 +118,7 @@ def prepare_data_for_fit(
     df_encoded, embedding_encoder = encode_categorical_input_ordinal(
         df[categorical_features]
     )
-    df_numericals_no_nan = report_preprocessing.fill_na_with_median(
-        df[numerical_features]
-    )
-    df_numericals_normalised = normalise_numerical_input_columns(df_numericals_no_nan)
+    df_numericals_normalised = normalise_numerical_input_columns(df[numerical_features])
     df = pd.concat([df_numericals_normalised, df_encoded], axis=1)
     return df, embedding_encoder
 
@@ -165,9 +164,8 @@ def main(params):
     create_output_dir(OUTPUT_DIRECTORY)
 
     df = pd.read_feather(input_files[0])
-
-    auto_embedding_model = train_autoembedder(df, params)
-    save_auto_embedding_model(auto_embedding_model, OUTPUT_DIRECTORY)
+    autoembedder_model = train_autoembedder(df, params)
+    save_autoembedder_model(autoembedder_model, OUTPUT_DIRECTORY)
 
 
 if __name__ == "__main__":

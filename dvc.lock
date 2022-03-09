@@ -34,41 +34,38 @@ stages:
       nfiles: 1
   train:
     cmd:
-    - python train_autoembedder.py ./train_input/
+    - python scripts/train_autoembedder.py ./data/training_input/
     deps:
-    - path: ../feature_handling/feature_handler.json
-      md5: 73f0566e372f9ea1afdf89cbb7ad816e
-      size: 41861
-    - path: ../mldq/feature_handler.py
-      md5: 3ef83d0afb83cce70b1bc2e163848fa0
-      size: 14103
-    - path: ../mldq/simple_script.py
-      md5: 7bc61defb132c56824b9257e6d2b7cd3
-      size: 7413
-    - path: ./embedding/
-      md5: 01fd4aeb5ea3347aa76b56509e2a5a3c.dir
-      size: 12039
-      nfiles: 2
-    - path: ./train_input/
-      md5: a151a3ad75fc98a6c1e61aa8756d5971.dir
-      size: 232061690
+    - path: ./autoembedder/
+      md5: 649c93fcd1419548b43dca6466069c16.dir
+      size: 31142
+      nfiles: 5
+    - path: ./data/training_input/
+      md5: 5d1c30045f28b9ee73b4e34ed5328b1c.dir
+      size: 13218
       nfiles: 1
-    - path: train_autoembedder.py
-      md5: 6ef29ac8296b79d1ee0ec1e59c8470b7
-      size: 5263
+    - path: ./feature_handling/feature_handler.json
+      md5: 9690a932948ec28028812609c0b0ff9b
+      size: 2277
+    - path: ./utils/feature_handler.py
+      md5: 4bd8400f2e2c620f11b68b30d7f1c12f
+      size: 12163
+    - path: scripts/train_autoembedder.py
+      md5: 73f78756c173cb343f7e96548d7203a0
+      size: 5103
     params:
       params.yaml:
         train_model:
-          feature_handler_file: ../feature_handling/feature_handler.json
+          feature_handler_file: ./feature_handling/feature_handler.json
           optimizer: sgd
           loss: mse
-          batch_size: 10000
-          epochs: 5
-          learning_rate: 0.1
+          batch_size: 32
+          epochs: 20
+          learning_rate: 0.01
     outs:
-    - path: model/
-      md5: 2048ca9914747e4261c279daffdca414.dir
-      size: 229693
+    - path: ./data/model/
+      md5: 0217f48a4c7f1842917597e38c494138.dir
+      size: 215674
       nfiles: 4
   test:
     cmd:
@@ -106,7 +103,7 @@ stages:
     - python scripts/preprocess_data.py
     deps:
     - path: scripts/preprocess_data.py
-      md5: 2812a0f0c00496ad54abb17e3aef061f
+      md5: e321eedc1d8f99f4926a4540638c56b4
       size: 2470
     - path: utils/feature_handler.py
       md5: 4bd8400f2e2c620f11b68b30d7f1c12f
@@ -120,7 +117,7 @@ stages:
           feature_handler_dir: ./feature_handling/
     outs:
     - path: data/training_input/
-      md5: 23a90f380d3442596e3e4084cb07e8b2.dir
+      md5: 5d1c30045f28b9ee73b4e34ed5328b1c.dir
       size: 13218
       nfiles: 1
     - path: feature_handling/feature_handler.json

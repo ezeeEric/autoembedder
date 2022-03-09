@@ -16,7 +16,7 @@ stages:
   train:
     desc: "Train the AutoEmbedding model and save to disk."
     cmd:
-    - python scripts/train_autoembedder.py ./data/train_input/
+    - python scripts/train_autoembedder.py ./data/training_input/
     params:
     - train_model
     deps:
