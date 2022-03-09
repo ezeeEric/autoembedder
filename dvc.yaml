@@ -27,15 +27,14 @@ stages:
     - ./autoembedder/
     outs:
     - ./data/model/
-  # test:
-  #   desc: "Test the trained AutoEmbedding model."
-  #   cmd:
-  #   - python scripts/test_auto_embedder.py ./train_input/ ./model/auto_embedder/
-  #   params:
-  #   - train_model
-  #   deps:
-  #   - scripts/test_auto_embedder.py
-  #   - ./train_input/
-  #   - ./model/
-  #   - ./embedding/
-  #   - ../mldq/simple_script.py
+  test:
+    desc: "Test the trained AutoEmbedding model."
+    cmd:
+    - python scripts/test_autoembedder.py ./data/training_input/ ./data/model/autoembedder
+    params:
+    - test_model
+    deps:
+    - scripts/test_autoembedder.py
+    - ./data/training_input/
+    - ./data/model/
+    - ./autoembedder/

@@ -7,3 +7,5 @@ train_model:
     batch_size: 32
     epochs: 20
     learning_rate: 0.01
+test_model:
+    feature_handler_file: ./feature_handling/feature_handler.json

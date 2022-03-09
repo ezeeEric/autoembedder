@@ -6,13 +6,13 @@ import pandas as pd
 import tensorflow as tf
 
 print(f"tensorflow {tf.__version__}")
-from mldq import with_params
-from mldq.report_reading import create_output_dir, get_sorted_input_files
 
+from utils.params import with_params
+from utils.utils import create_output_dir, get_sorted_input_files
 
-from auto_embedding.embedding.auto_embedder import AutoEmbedder
+from autoembedder.autoembedder import AutoEmbedder
 
-OUTPUT_DIRECTORY = "model_tests"
+OUTPUT_DIRECTORY = "data/tests"
 
 
 def get_model(model_dir: str) -> AutoEmbedder:
@@ -39,7 +39,7 @@ def check_loaded_model(df: pd.DataFrame, model: AutoEmbedder) -> None:
 
 @with_params("params.yaml", "train_model")
 def main(params: dict):
-    
+
     input_files = get_sorted_input_files(
         input_dir=sys.argv[1],
         input_patterns=sys.argv[3].split(",") if len(sys.argv) > 3 else "",
@@ -47,10 +47,6 @@ def main(params: dict):
     )
     target_dir = create_output_dir(OUTPUT_DIRECTORY)
 
-    if len(input_files) > 1:
-        print(
-            "Warning: Multiple test input files not supported. Only first one will be processed."
-        )
     df = pd.read_feather(input_files[0])
 
     model = get_model(model_dir=sys.argv[2])
