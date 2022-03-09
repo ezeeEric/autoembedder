@@ -6,6 +6,7 @@ train_model:
     manual_decoder_architecture: [] #empty list [] for default symmetric autoencoder shape
     activation_function: ReLU
     test_data_fraction: 0.2
+    embeddings_initializer: uniform
     optimizer: sgd
     loss: mse
     batch_size: 9

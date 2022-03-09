@@ -121,6 +121,7 @@ class AutoEmbedder(Embedder):
             "encoding_dictionary": self.encoding_dictionary,
             "feature_idx_map": self.feature_idx_map,
             "embedding_layer_idx_feature_name_map": self.embedding_layer_idx_feature_name_map,
+            "config": self.config,
         }
         return config_dict
 
