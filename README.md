@@ -67,7 +67,7 @@ The model is implemented using `tensorflow 2.8.0` and `sklearn 1.0`. The files c
 | `embedding/embedder.py`  | Class defining and wrapping all Embedding layers  |
 | `embedding/auto_embedder.py`  | The AutoEmbedding model; defines Autoencoder architecture and methods used in training and testing |
 | `concat_reports.py`  | Script for training input preparation  |
-| `train_auto_embedder.py`  | Script to steer building, training and saving the model  |
+| `train_autoembedder.py`  | Script to steer building, training and saving the model  |
 | `test_auto_embedder.py`  | Testing the trained model, loading it from disk |
 | `dvc.yaml`  | Definition of pipeline stages  |
 | `params.yaml`  | Parameters used in scripts  |
@@ -192,7 +192,7 @@ dvc repro multi_report
 
 ### Caveats
 - indirect testing the autoembedding model by running the outlier detections; a dedicated model evaluation not implemented yet
-- normalization of continuous columns based on manual min-max scaling (`train_auto_embedder.normalise_numerical_input_columns`)
+- normalization of continuous columns based on manual min-max scaling (`train_autoembedder.normalise_numerical_input_columns`)
 - various parameters hardcoded as described above
 - hyperparameters must be tuned
 

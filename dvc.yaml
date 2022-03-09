@@ -13,21 +13,20 @@ stages:
     - data/training_input/
     - feature_handling/feature_handler.json
     - feature_handling/feature_handler_pretty_summary.json
-  # train:
-  #   desc: "Train the AutoEmbedding model and save to disk."
-  #   cmd:
-  #   - python scripts/train_auto_embedder.py ./train_input/
-  #   params:
-  #   - train_model
-  #   deps:
-  #   - scripts/train_auto_embedder.py
-  #   - ../feature_handling/feature_handler.json
-  #   - ../mldq/feature_handler.py
-  #   - ./train_input/
-  #   - ./embedding/
-  #   - ../mldq/simple_script.py
-  #   outs:
-  #   - model/
+  train:
+    desc: "Train the AutoEmbedding model and save to disk."
+    cmd:
+    - python scripts/train_autoembedder.py ./data/train_input/
+    params:
+    - train_model
+    deps:
+    - scripts/train_autoembedder.py
+    - ./feature_handling/feature_handler.json
+    - ./utils/feature_handler.py
+    - ./data/training_input/
+    - ./autoembedder/
+    outs:
+    - ./data/model/
   # test:
   #   desc: "Test the trained AutoEmbedding model."
   #   cmd:

@@ -34,7 +34,7 @@ stages:
       nfiles: 1
   train:
     cmd:
-    - python train_auto_embedder.py ./train_input/
+    - python train_autoembedder.py ./train_input/
     deps:
     - path: ../feature_handling/feature_handler.json
       md5: 73f0566e372f9ea1afdf89cbb7ad816e
@@ -53,7 +53,7 @@ stages:
       md5: a151a3ad75fc98a6c1e61aa8756d5971.dir
       size: 232061690
       nfiles: 1
-    - path: train_auto_embedder.py
+    - path: train_autoembedder.py
       md5: 6ef29ac8296b79d1ee0ec1e59c8470b7
       size: 5263
     params:

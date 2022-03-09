@@ -1,32 +1,24 @@
 """Train the AutoEmbedder Model.
 
-python train_auto_embedder.py ./train_input/
+python train_autoembedder.py ./train_input/
 """
 
 import sys
 import os
 import numpy as np
 import pandas as pd
+from typing import Tuple
 import tensorflow as tf
-
-from mldq.feature_handler import FeatureHandler
+from sklearn.preprocessing import OrdinalEncoder
 
 print(f"tensorflow {tf.__version__}")
 
-from mldq import with_params
-from auto_embedding.embedding.auto_embedder import AutoEmbedder
-from mldq.report_reading import create_output_dir, get_sorted_input_files
-from mldq import report_preprocessing
+from autoembedder.autoembedder import AutoEmbedder
+from utils.feature_handler import FeatureHandler
+from utils.params import with_params
+from scripts.preprocess_data import select_features, create_output_dir
 
-from auto_embedding.concat_reports import select_features
-
-
-from typing import Tuple
-
-
-from sklearn.preprocessing import OrdinalEncoder
-
-OUTPUT_DIRECTORY = "model"
+OUTPUT_DIRECTORY = "./data/model"
 
 
 def create_encoding_dictionary(
@@ -124,13 +116,15 @@ def prepare_data_for_fit(
     df_encoded, embedding_encoder = encode_categorical_input_ordinal(
         df[categorical_features]
     )
-    df_numericals_no_nan = report_preprocessing.fill_na_with_median(df[numerical_features])
+    df_numericals_no_nan = report_preprocessing.fill_na_with_median(
+        df[numerical_features]
+    )
     df_numericals_normalised = normalise_numerical_input_columns(df_numericals_no_nan)
     df = pd.concat([df_numericals_normalised, df_encoded], axis=1)
     return df, embedding_encoder
 
 
-def train_auto_embedder(df: pd.DataFrame, params: dict) -> pd.DataFrame:
+def train_autoembedder(df: pd.DataFrame, params: dict) -> pd.DataFrame:
     feature_handler = FeatureHandler.from_json(params["feature_handler_file"])
     numerical_features, categorical_features = select_features(df, feature_handler)
     df, encoding_dictionary = prepare_data_for_fit(
@@ -171,8 +165,8 @@ def main(params):
     create_output_dir(OUTPUT_DIRECTORY)
 
     df = pd.read_feather(input_files[0])
-    
-    auto_embedding_model = train_auto_embedder(df, params)
+
+    auto_embedding_model = train_autoembedder(df, params)
     save_auto_embedding_model(auto_embedding_model, OUTPUT_DIRECTORY)
 
 
