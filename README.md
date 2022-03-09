@@ -60,7 +60,7 @@ Once the training is completed, the Autoencoder is discarded an
 the embedding layers can be used for the Anomaly detection tasks.
 
 ### Implementation
-The model is implemented using `tensorflow 2.8.0` and `sklearn 1.0`. The files can be found in the directory `./auto_embedding/`:
+The model is implemented using `tensorflow 2.8.0` and `sklearn 1.0`. The files can be found in the directory `./autoembedder/`:
 
 | File  | Description |
 | ------------- | ------------- |
@@ -87,7 +87,7 @@ Thereafter, the model is fitted. Since we are converting the dataframe to a `tf.
 
 #### Model Parameters
 
-Some model and training configurations are parameters in `auto_embedding/params.yaml` and can be steered without changing the codebase. Other parameters are currently hardcoded.
+Some model and training configurations are parameters in `autoembedder/params.yaml` and can be steered without changing the codebase. Other parameters are currently hardcoded.
 
 - in `params.yaml`:
 
@@ -116,9 +116,9 @@ Here follows a simple example on how to use the `Autoembedder` model to embed se
 
 #### 1. Register Features to use for AutoEmbedding
 
-The categorical features to embed are selected in  `feature_handling/feature_actions.json` in the `auto_embedding_categorical` field:
+The categorical features to embed are selected in  `feature_handling/feature_actions.json` in the `autoembedder_categorical` field:
 ```
-"auto_embedding_categorical": [
+"autoembedder_categorical": [
    "cart level 4 code",
    "aim rating",
    "attribute type",
@@ -126,7 +126,7 @@ The categorical features to embed are selected in  `feature_handling/feature_act
 ],
 ```
 The selection of features to use for the categorical and continuous input is then performed in `concat_reports.select_features()`.   
-By default, the categorical features registered in `auto_embedding_categorical` as described above are chosen, whereas all numerical features with the flag `uses_reporting_currency` are used as continuous features. It is possible to modify this behaviour by manually editing the definitions of `features_autoembedding_categorical` or `features_autoembedding_numerical` in `concat_reports.select_features()`.
+By default, the categorical features registered in `autoembedder_categorical` as described above are chosen, whereas all numerical features with the flag `uses_reporting_currency` are used as continuous features. It is possible to modify this behaviour by manually editing the definitions of `features_autoembedding_categorical` or `features_autoembedding_numerical` in `concat_reports.select_features()`.
 
 The feature actions need to be registered with the `FeatureHandler`, which requires running `dvc repro process_features` in the main directory.
 
@@ -135,10 +135,10 @@ The feature actions need to be registered with the `FeatureHandler`, which requi
 
 Having defined the selected features, simply navigate to the subdirectory and run the pipeline
 ```
-cd auto_embedding/
+cd autoembedder/
 dvc repro
 ```
-Adjust the training and model parameters to your liking in `auto_embedding/params.yaml`. 
+Adjust the training and model parameters to your liking in `autoembedder/params.yaml`. 
 
 #### 3. Autoembed selected columns
 
