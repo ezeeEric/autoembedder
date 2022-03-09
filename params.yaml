@@ -1,5 +1,5 @@
-prepare_train_input:
-    feature_handler_file: ../feature_handling/feature_handler.json
+data_preprocessing:
+    feature_handler_dir: ./feature_handling/
 train_model:
     feature_handler_file: ../feature_handling/feature_handler.json
     optimizer: sgd
