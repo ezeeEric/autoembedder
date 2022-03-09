@@ -37,8 +37,8 @@ stages:
     - python scripts/train_autoembedder.py ./data/training_input/
     deps:
     - path: ./autoembedder/
-      md5: a357f4b011d8ee2d3c601b305926603d.dir
-      size: 31971
+      md5: b82fd895563a1a5a840c3ffe222d1ce9.dir
+      size: 32917
       nfiles: 5
     - path: ./data/training_input/
       md5: 5d1c30045f28b9ee73b4e34ed5328b1c.dir
@@ -51,8 +51,8 @@ stages:
       md5: 4bd8400f2e2c620f11b68b30d7f1c12f
       size: 12163
     - path: scripts/train_autoembedder.py
-      md5: 795e9142ab9f748a58c5d67e35442807
-      size: 5789
+      md5: 2dc91488457c65cd9ea36372becbfb82
+      size: 5707
     params:
       params.yaml:
         train_model:
@@ -69,13 +69,13 @@ stages:
           optimizer: sgd
           loss: mse
           batch_size: 9
-          epochs: 5
+          epochs: 1
           learning_rate: 0.01
     outs:
     - path: ./data/model/
-      md5: a5b01daee06eeec961d139259d9c3fc6.dir
-      size: 258729
-      nfiles: 4
+      md5: d751713988987e9331980363e24189ce.dir
+      size: 0
+      nfiles: 0
   test:
     cmd:
     - python scripts/test_autoembedder.py ./data/training_input/ ./data/model/autoembedder

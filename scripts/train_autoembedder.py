@@ -105,9 +105,7 @@ def train_model(
 
 
 def test_model(df: pd.DataFrame, model: AutoEmbedder, batch_size: int) -> None:
-    # TODO a proper evaluation procedure still needs to be implemented
-    # model.evaluate(tf.convert_to_tensor(df), batch_size=batch_size)
-    pass
+    model.evaluate(tf.convert_to_tensor(df), batch_size=batch_size)
 
 
 def split_train_test_df(df: pd.DataFrame, training_fraction: float) -> None:

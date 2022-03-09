@@ -203,10 +203,27 @@ class AutoEmbedder(Embedder):
         self.optimizer.apply_gradients(zip(gradients, trainable_vars))
         return {"loss": loss}
 
-    def test_step(self, input_data: tf.Tensor) -> dict:
-        # TODO this gets called with model.evaluate(). Can we devise a method to
-        # judge the quality of our embedding?
-        pass
+    def test_step(self, input_batch: tf.Tensor) -> dict:
+        numerical_input, embedding_layer_input = prepare_data_for_embedder(
+            input_batch,
+            numerical_columns_idx=self.feature_idx_map["numerical"],
+            encoded_columns_idx=self.feature_idx_map["categorical"],
+        )
+        embedding_layer_output = self._forward_call_embedder(embedding_layer_input)
+        auto_encoder_input = prepare_data_for_encoder(
+            numerical_input, embedding_layer_output
+        )
+        auto_encoder_output = self(auto_encoder_input, training=True)
+        # TODO continue here
+        print(numerical_input.shape)
+        print(embedding_layer_output)
+        print(auto_encoder_input.shape)
+        print(auto_encoder_output)
+        exit()
+        test_loss = self.compiled_loss(
+            y_true=auto_encoder_input, y_pred=auto_encoder_output
+        )
+        return {"test_loss": test_loss}
 
     def predict(self, input_column: pd.Series) -> pd.DataFrame:
         """Takes a categorical column of an input dataframe and returns a
