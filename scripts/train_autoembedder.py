@@ -123,14 +123,27 @@ def prepare_data_for_fit(
     return df, embedding_encoder
 
 
-def train_autoembedder(df: pd.DataFrame, params: dict) -> pd.DataFrame:
-    feature_handler = FeatureHandler.from_json(params["feature_handler_file"])
+def load_features(
+    df: pd.DataFrame, feature_handler_file: str
+) -> Tuple[list[str], list[str]]:
+    feature_handler = FeatureHandler.from_json(feature_handler_file)
     numerical_features, categorical_features = select_features(df, feature_handler)
+    return numerical_features, categorical_features
+
+
+def train_autoembedder(df: pd.DataFrame, params: dict) -> pd.DataFrame:
+    numerical_features, categorical_features = load_features(
+        df, params["feature_handler_file"]
+    )
     df, encoding_dictionary = prepare_data_for_fit(
         df, numerical_features, categorical_features
     )
+
     auto_embedder = AutoEmbedder(
-        encoding_dictionary, numerical_features, categorical_features
+        encoding_dictionary=encoding_dictionary,
+        numerical_features=numerical_features,
+        categorical_features=categorical_features,
+        config=params,
     )
     compile_model(
         model=auto_embedder,
