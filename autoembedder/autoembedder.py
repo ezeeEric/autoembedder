@@ -207,6 +207,12 @@ class AutoEmbedder(Embedder):
         self.optimizer.apply_gradients(zip(gradients, trainable_vars))
         return {"loss": loss}
 
+    def create_embedding_reference(self) -> None:
+        print(self.encoding_dictionary)
+        print(self.embedding_layer_idx_feature_name_map)
+        exit()
+        return
+
     def test_step(self, input_batch: tf.Tensor) -> dict:
         numerical_input, embedding_layer_input = prepare_data_for_embedder(
             input_batch,
