@@ -37,8 +37,8 @@ stages:
     - python scripts/train_autoembedder.py ./data/training_input/
     deps:
     - path: ./autoembedder/
-      md5: db87b1bb078018613cf7af66eeaec77c.dir
-      size: 35360
+      md5: ac11ee433e0974ac12cec6d79d1d2980.dir
+      size: 37212
       nfiles: 5
     - path: ./data/training_input/
       md5: 5d1c30045f28b9ee73b4e34ed5328b1c.dir
@@ -57,11 +57,7 @@ stages:
       params.yaml:
         train_model:
           feature_handler_file: ./feature_handling/feature_handler.json
-          manual_encoder_architecture:
-          - 6
-          - 4
-          - 4
-          - 2
+          manual_encoder_architecture: []
           manual_decoder_architecture: []
           activation_function: ReLU
           test_data_fraction: 0.2
@@ -69,13 +65,13 @@ stages:
           optimizer: sgd
           loss: mse
           batch_size: 9
-          epochs: 1
-          learning_rate: 0.01
+          epochs: 20
+          learning_rate: 0.05
     outs:
     - path: ./data/model/
-      md5: d751713988987e9331980363e24189ce.dir
-      size: 0
-      nfiles: 0
+      md5: f8c560dc9c245d5613614ab60da02dd5.dir
+      size: 218672
+      nfiles: 4
   test:
     cmd:
     - python scripts/test_autoembedder.py ./data/training_input/ ./data/model/autoembedder
