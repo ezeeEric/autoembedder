@@ -105,6 +105,7 @@ def train_model(
 
 
 def test_model(df: pd.DataFrame, model: AutoEmbedder, batch_size: int) -> None:
+    print(model.feature_idx_map)
     model.evaluate(tf.convert_to_tensor(df), batch_size=batch_size)
 
 
