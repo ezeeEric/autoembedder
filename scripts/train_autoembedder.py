@@ -105,15 +105,8 @@ def train_model(
 
 
 def test_model(df: pd.DataFrame, model: AutoEmbedder, batch_size: int) -> None:
-    # TODO a proper evaluation procedure still needs to be implemented
-    # model.evaluate(tf.convert_to_tensor(df), batch_size=batch_size)
-    pass
-
-
-def split_train_test_df(df: pd.DataFrame, training_fraction: float) -> None:
-    return train_test_split(
-        df,
-    )
+    model.create_embedding_reference()
+    model.evaluate(tf.convert_to_tensor(df), batch_size=batch_size)
 
 
 def prepare_data_for_fit(
@@ -123,6 +116,7 @@ def prepare_data_for_fit(
     config: dict,
 ) -> tf.Tensor:
     """This function first encodes the categorical input, then normalises the numerical input and finally merges the result."""
+    # TODO this is somewhat duplicated with apply_ordinal_encoding_column()
     df_encoded, embedding_encoder = encode_categorical_input_ordinal(
         df[categorical_features]
     )

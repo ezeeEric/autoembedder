@@ -22,10 +22,13 @@ class Embedder(Model):
             len(encoded_cats) for encoded_cats in encoding_dictionary.values()
         ]
 
+        self.embeddings_reference_values = {}
+
         self.embedding_layers = []
         self.embedding_layers_output_dimensions = []
         for idx, in_dim in enumerate(self.n_categories_per_feature):
-            layer, out_dim = self.create_layer(in_dim, idx)
+            feature_name = list(self.encoding_dictionary)[idx]
+            layer, out_dim = self.create_layer(in_dim, feature_name)
             self.embedding_layers.append(layer)
             self.embedding_layers_output_dimensions.append(out_dim)
 
@@ -40,7 +43,7 @@ class Embedder(Model):
         return "\n".join(output)
 
     def create_layer(
-        self, n_categories: int, layer_idx: int
+        self, n_categories: int, feature_name: str
     ) -> tf.keras.layers.Embedding:
 
         # input_size - each embedding layer should have vocabulary size + 1
@@ -49,7 +52,9 @@ class Embedder(Model):
 
         # output_dim=int(input_size ** 0.25)
         # https://developers.googleblog.com/2017/11/introducing-tensorflow-feature-columns.html
-        embedding_output_dimension = int(input_dim ** 0.25)
+        # embedding_output_dimension = int(input_dim ** 0.25)
+        # TODO
+        embedding_output_dimension = n_categories
 
         # this assumes we use one layer per input feature. Sentence embeddings
         # would use multiple inputs here; however there's no intrinsic
@@ -61,7 +66,7 @@ class Embedder(Model):
             input_length=input_length,
             dtype=np.float64,
             embeddings_initializer=self.config["embeddings_initializer"].lower(),
-            name=f"embedding_{layer_idx}",
+            name=f"embedding_{feature_name}",
         )
         return embedding_layer, embedding_output_dimension
 

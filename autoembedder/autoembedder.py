@@ -47,8 +47,8 @@ def create_dense_layers(
 def prepare_data_for_embedder(
     input: tf.Tensor, numerical_columns_idx: list[int], encoded_columns_idx: list[int]
 ) -> list[tf.Tensor]:
-    embedding_layer_input = tf.gather(input, indices=encoded_columns_idx, axis=1)
     numerical_input = tf.gather(input, indices=numerical_columns_idx, axis=1)
+    embedding_layer_input = tf.gather(input, indices=encoded_columns_idx, axis=1)
     return numerical_input, embedding_layer_input
 
 
@@ -56,6 +56,16 @@ def prepare_data_for_encoder(
     numerical_input: tf.Tensor, embedding_layer_output: tf.Tensor
 ) -> tf.Tensor:
     return tf.concat([numerical_input, embedding_layer_output], axis=1)
+
+
+def split_autoencoder_output(
+    input_data: tf.Tensor, n_numerical_nodes: int, embedding_output_split: list[int]
+) -> tf.Tensor:
+    # this is the reverse operation of prepare_data_for_encoder()
+    split_tensors = tf.split(
+        input_data, [n_numerical_nodes] + embedding_output_split, axis=1
+    )
+    return split_tensors[0], split_tensors[1:]
 
 
 def load_ordinal_encoder_for_feature(
@@ -165,6 +175,27 @@ class AutoEmbedder(Embedder):
             for feature_name in self.categorical_features
         ]
 
+    def create_embedding_reference(
+        self,
+    ) -> None:
+        self.embeddings_reference_values = {}
+        for idx, (feature_name, feature_vocabulary) in enumerate(
+            self.encoding_dictionary.items()
+        ):
+            # here we take advantage that entries in the encoding dictionary are lists with persistent order;
+            # the positions (idx) of their entries corresponds to the entry's ordinal encoding
+            feat_voc_idx = range(len(feature_vocabulary))
+            feat_voc_idx_tensor = tf.convert_to_tensor(feat_voc_idx, name=feature_name)
+            # feed through embedding layer
+            assert (
+                feature_name in self.embedding_layers[idx].name
+            ), f"Embedding layer name {self.embedding_layers[idx].name} does not match feature name {feature_name}"
+            embedded_vocabulary = self.embedding_layers[idx](feat_voc_idx_tensor)
+            # store reference
+            self.embeddings_reference_values[feature_name] = list(
+                map(tuple, embedded_vocabulary.numpy())
+            )
+
     def train_step(self, input_batch: tf.Tensor) -> dict:
         """A single training step on a batch of the data. This gets called within model.fit() and is repeated for every batch in every epoch.
 
@@ -200,10 +231,54 @@ class AutoEmbedder(Embedder):
         self.optimizer.apply_gradients(zip(gradients, trainable_vars))
         return {"loss": loss}
 
-    def test_step(self, input_data: tf.Tensor) -> dict:
-        # TODO this gets called with model.evaluate(). Can we devise a method to
-        # judge the quality of our embedding?
-        pass
+    def test_step(self, input_batch: tf.Tensor) -> dict:
+        numerical_input, embedding_layer_input = prepare_data_for_embedder(
+            input_batch,
+            numerical_columns_idx=self.feature_idx_map["numerical"],
+            encoded_columns_idx=self.feature_idx_map["categorical"],
+        )
+        embedding_layer_output = self._forward_call_embedder(embedding_layer_input)
+        assert (
+            sum(self.embedding_layers_output_dimensions)
+            == embedding_layer_output.shape[1]
+        ), "Embedding output layer dimensionality does not match reference"
+        auto_encoder_input = prepare_data_for_encoder(
+            numerical_input, embedding_layer_output
+        )
+        auto_encoder_output = self(auto_encoder_input, training=True)
+
+        # split autoencoder output to get reconstructed embedding values
+        numerical_input_reco, embedding_layer_outputs_reco = split_autoencoder_output(
+            auto_encoder_output,
+            numerical_input.shape[1],
+            self.embedding_layers_output_dimensions,
+        )
+        cosine_loss = tf.keras.losses.CosineSimilarity(
+            axis=-1, reduction=tf.keras.losses.Reduction.NONE
+        )
+        # TODO can these loops be replace with tensor operations?
+        # matched_category_idx = []
+        accuracy = tf.keras.metrics.Accuracy()
+        metric_dict = {}
+        for idx, embedded_feature_batch in enumerate(embedding_layer_outputs_reco):
+            this_feature_name = list(self.embeddings_reference_values.keys())[idx]
+            reference_embeddings = tf.convert_to_tensor(
+                list(self.embeddings_reference_values.values())[idx], dtype=tf.float64
+            )
+            cos_sims = []
+            for ref_emb in reference_embeddings:
+                cos_dist = cosine_loss(
+                    ref_emb, tf.cast(embedded_feature_batch, tf.float64)
+                )
+                cos_sims.append(1 - cos_dist)
+            cosine_similarities = tf.transpose(tf.convert_to_tensor(cos_sims))
+            matched_category_idx = tf.math.argmax(cosine_similarities, axis=1)
+            metric_dict[f"{this_feature_name}_accuracy"] = accuracy(
+                embedding_layer_input[:, idx],
+                tf.convert_to_tensor(matched_category_idx),
+            )
+
+        return metric_dict
 
     def predict(self, input_column: pd.Series) -> pd.DataFrame:
         """Takes a categorical column of an input dataframe and returns a
