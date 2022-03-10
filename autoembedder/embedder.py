@@ -22,8 +22,6 @@ class Embedder(Model):
             len(encoded_cats) for encoded_cats in encoding_dictionary.values()
         ]
 
-        self.embedding_layer_idx_feature_name_map = {}
-
         self.embedding_layers = []
         self.embedding_layers_output_dimensions = []
         for idx, in_dim in enumerate(self.n_categories_per_feature):
