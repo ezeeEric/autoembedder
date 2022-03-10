@@ -37,8 +37,8 @@ stages:
     - python scripts/train_autoembedder.py ./data/training_input/
     deps:
     - path: ./autoembedder/
-      md5: b82fd895563a1a5a840c3ffe222d1ce9.dir
-      size: 32917
+      md5: 3fe41211c4705d8a43b1907960ae03cb.dir
+      size: 34090
       nfiles: 5
     - path: ./data/training_input/
       md5: 5d1c30045f28b9ee73b4e34ed5328b1c.dir

@@ -47,8 +47,8 @@ def create_dense_layers(
 def prepare_data_for_embedder(
     input: tf.Tensor, numerical_columns_idx: list[int], encoded_columns_idx: list[int]
 ) -> list[tf.Tensor]:
-    embedding_layer_input = tf.gather(input, indices=encoded_columns_idx, axis=1)
     numerical_input = tf.gather(input, indices=numerical_columns_idx, axis=1)
+    embedding_layer_input = tf.gather(input, indices=encoded_columns_idx, axis=1)
     return numerical_input, embedding_layer_input
 
 
@@ -56,6 +56,13 @@ def prepare_data_for_encoder(
     numerical_input: tf.Tensor, embedding_layer_output: tf.Tensor
 ) -> tf.Tensor:
     return tf.concat([numerical_input, embedding_layer_output], axis=1)
+
+
+def split_autoencoder_output(
+    input_data: tf.Tensor, n_numerical_nodes: int, n_embedding_output_nodes: int
+) -> tf.Tensor:
+    # this is the reverse operation of prepare_data_for_encoder()
+    return tf.split(input_data, [n_numerical_nodes, n_embedding_output_nodes], axis=1)
 
 
 def load_ordinal_encoder_for_feature(
@@ -214,11 +221,14 @@ class AutoEmbedder(Embedder):
             numerical_input, embedding_layer_output
         )
         auto_encoder_output = self(auto_encoder_input, training=True)
-        # TODO continue here
-        print(numerical_input.shape)
-        print(embedding_layer_output)
-        print(auto_encoder_input.shape)
-        print(auto_encoder_output)
+        # split autoencoder output to get reconstructed embedding values
+        numerical_input_reco, embedding_layer_output_reco = split_autoencoder_output(
+            auto_encoder_output,
+            numerical_input.shape[1],
+            embedding_layer_input.shape[1],
+        )
+        # measure cosine similarity to reference embeddings
+
         exit()
         test_loss = self.compiled_loss(
             y_true=auto_encoder_input, y_pred=auto_encoder_output
