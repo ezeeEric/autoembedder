@@ -98,7 +98,6 @@ class AutoEmbedder(Embedder):
         numerical_features: list[str] = [],
         categorical_features: list[int] = [],
         feature_idx_map: dict[str, list] = {},
-        embedding_layer_idx_feature_name_map: dict[str, int] = {},
         **kwargs,
     ):
         """Class for unsupervised categorial feature embedding. Consists of an
@@ -110,7 +109,6 @@ class AutoEmbedder(Embedder):
         self.categorical_features = categorical_features
 
         self.feature_idx_map = feature_idx_map
-        self.embedding_layer_idx_feature_name_map = embedding_layer_idx_feature_name_map
 
         self.encoder_shape, self.decoder_shape = determine_autoencoder_shape(
             self.embedding_layers_output_dimensions,
@@ -127,7 +125,6 @@ class AutoEmbedder(Embedder):
             "categorical_features": self.categorical_features,
             "encoding_dictionary": self.encoding_dictionary,
             "feature_idx_map": self.feature_idx_map,
-            "embedding_layer_idx_feature_name_map": self.embedding_layer_idx_feature_name_map,
             "config": self.config,
         }
         return config_dict
