@@ -12,8 +12,8 @@ class Embedder(Model):
     def __init__(
         self,
         encoding_reference_values: dict[str, list],
-        embeddings_reference_values: dict[str, list],
         config: dict,
+        embeddings_reference_values: dict[str, list] = {},
     ):
         super().__init__()
         self.config = config

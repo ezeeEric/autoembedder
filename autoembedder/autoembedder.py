@@ -127,6 +127,7 @@ class AutoEmbedder(Embedder):
             "numerical_features": self.numerical_features,
             "categorical_features": self.categorical_features,
             "encoding_reference_values": self.encoding_reference_values,
+            "embeddings_reference_values": self.embeddings_reference_values,
             "feature_idx_map": self.feature_idx_map,
             "config": self.config,
         }

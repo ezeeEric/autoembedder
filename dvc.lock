@@ -37,8 +37,8 @@ stages:
     - python scripts/train_autoembedder.py ./data/training_input/
     deps:
     - path: ./autoembedder/
-      md5: ac11ee433e0974ac12cec6d79d1d2980.dir
-      size: 37212
+      md5: 6d55044707cc4eef4fa11baa90f1e87d.dir
+      size: 37492
       nfiles: 5
     - path: ./data/training_input/
       md5: 5d1c30045f28b9ee73b4e34ed5328b1c.dir
@@ -51,8 +51,8 @@ stages:
       md5: 4bd8400f2e2c620f11b68b30d7f1c12f
       size: 12163
     - path: scripts/train_autoembedder.py
-      md5: dfc25fcebc24f85543f347512b952b4e
-      size: 5696
+      md5: 637ab570d90a0dfc069f6f610f823f1f
+      size: 5738
     params:
       params.yaml:
         train_model:
@@ -69,20 +69,20 @@ stages:
           learning_rate: 0.05
     outs:
     - path: ./data/model/
-      md5: f8c560dc9c245d5613614ab60da02dd5.dir
-      size: 218672
+      md5: 286aacb7477e4cc34b992db28e6f2cd9.dir
+      size: 220374
       nfiles: 4
   test:
     cmd:
     - python scripts/test_autoembedder.py ./data/training_input/ ./data/model/autoembedder
     deps:
     - path: ./autoembedder/
-      md5: a357f4b011d8ee2d3c601b305926603d.dir
-      size: 31971
+      md5: 6d55044707cc4eef4fa11baa90f1e87d.dir
+      size: 37492
       nfiles: 5
     - path: ./data/model/
-      md5: a5b01daee06eeec961d139259d9c3fc6.dir
-      size: 258729
+      md5: 286aacb7477e4cc34b992db28e6f2cd9.dir
+      size: 220374
       nfiles: 4
     - path: ./data/training_input/
       md5: 5d1c30045f28b9ee73b4e34ed5328b1c.dir
