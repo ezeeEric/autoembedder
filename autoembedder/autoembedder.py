@@ -219,7 +219,8 @@ class AutoEmbedder(Embedder):
             )
 
             auto_encoder_output = self(auto_encoder_input, training=True)
-
+            print("Input \n", auto_encoder_input)
+            print("Output \n", auto_encoder_output)
             loss = self.compiled_loss(
                 y_true=auto_encoder_input, y_pred=auto_encoder_output
             )

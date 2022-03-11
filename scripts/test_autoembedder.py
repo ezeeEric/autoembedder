@@ -34,6 +34,8 @@ def check_loaded_model(df: pd.DataFrame, model: AutoEmbedder) -> None:
     print(model.n_categories_per_feature)
     print(model.embedding_layers)
     print(model.embedding_layers_output_dimensions)
+    print(model.encoding_reference_values)
+    print(model.embeddings_reference_values)
     return model
 
 
