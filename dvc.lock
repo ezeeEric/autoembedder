@@ -37,8 +37,8 @@ stages:
     - python scripts/train_autoembedder.py ./data/training_input/
     deps:
     - path: ./autoembedder/
-      md5: 6d55044707cc4eef4fa11baa90f1e87d.dir
-      size: 37492
+      md5: fa597f08dd22a1b2bf1f933129c09a84.dir
+      size: 37643
       nfiles: 5
     - path: ./data/training_input/
       md5: 5d1c30045f28b9ee73b4e34ed5328b1c.dir
@@ -51,8 +51,8 @@ stages:
       md5: 4bd8400f2e2c620f11b68b30d7f1c12f
       size: 12163
     - path: scripts/train_autoembedder.py
-      md5: 637ab570d90a0dfc069f6f610f823f1f
-      size: 5738
+      md5: 788e75ab1aaeaf21700da8e211133f44
+      size: 5928
     params:
       params.yaml:
         train_model:
@@ -62,39 +62,40 @@ stages:
           activation_function: ReLU
           test_data_fraction: 0.2
           embeddings_initializer: uniform
-          optimizer: sgd
+          optimizer: adam
           loss: mse
-          batch_size: 9
-          epochs: 20
+          batch_size: 32
+          epochs: 10
           learning_rate: 0.05
     outs:
     - path: ./data/model/
-      md5: 286aacb7477e4cc34b992db28e6f2cd9.dir
-      size: 220374
+      md5: cd1354f705220ccdca1357aaaa39cbd5.dir
+      size: 274720
       nfiles: 4
   test:
     cmd:
     - python scripts/test_autoembedder.py ./data/training_input/ ./data/model/autoembedder
     deps:
     - path: ./autoembedder/
-      md5: 6d55044707cc4eef4fa11baa90f1e87d.dir
-      size: 37492
+      md5: fa597f08dd22a1b2bf1f933129c09a84.dir
+      size: 37643
       nfiles: 5
     - path: ./data/model/
-      md5: 286aacb7477e4cc34b992db28e6f2cd9.dir
-      size: 220374
+      md5: cd1354f705220ccdca1357aaaa39cbd5.dir
+      size: 274720
       nfiles: 4
     - path: ./data/training_input/
       md5: 5d1c30045f28b9ee73b4e34ed5328b1c.dir
       size: 13218
       nfiles: 1
     - path: scripts/test_autoembedder.py
-      md5: ab59867a6f7cc46a84c99447d23adb5f
-      size: 1474
+      md5: 83dd0e25eb86ab19fe680cebba96e953
+      size: 1562
     params:
       params.yaml:
         test_model:
           feature_handler_file: ./feature_handling/feature_handler.json
+          batch_size: 9
   data_preprocessing:
     cmd:
     - python scripts/preprocess_data.py

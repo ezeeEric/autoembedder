@@ -83,11 +83,15 @@ def compile_model(
 
     if optimizer_name == "sgd":
         optimizer = tf.keras.optimizers.SGD(learning_rate=learning_rate)
+    elif optimizer_name == "adam":
+        optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
     else:
         raise NotImplementedError()
 
     if loss_name == "mse":
         loss = tf.keras.losses.MeanSquaredError()
+    elif loss_name == "bce":
+        loss = tf.keras.losses.BinaryCrossentropy()
     else:
         raise NotImplementedError()
 

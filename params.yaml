@@ -7,10 +7,11 @@ train_model:
     activation_function: ReLU
     test_data_fraction: 0.2
     embeddings_initializer: uniform
-    optimizer: sgd
+    optimizer: adam
     loss: mse
-    batch_size: 9
-    epochs: 20
+    batch_size: 32
+    epochs: 10
     learning_rate: 0.05
 test_model:
     feature_handler_file: ./feature_handling/feature_handler.json
+    batch_size: 9
