@@ -86,10 +86,10 @@ def find_embedding_layer_idx_for_feature(
 
 
 def apply_ordinal_encoding_column(
-    df: pd.Series, encoding_dictionary: dict
+    df: pd.Series, encoding_reference_values: dict
 ) -> pd.DataFrame:
     embedding_input_encoder = load_ordinal_encoder_for_feature(
-        encoding_dictionary, df.name
+        encoding_reference_values, df.name
     )
     data_enc = embedding_input_encoder.transform(df.values.reshape(-1, 1))
     return pd.Series(data_enc.flatten(), name=df.name)
@@ -126,7 +126,7 @@ class AutoEmbedder(Embedder):
         config_dict = {
             "numerical_features": self.numerical_features,
             "categorical_features": self.categorical_features,
-            "encoding_dictionary": self.encoding_dictionary,
+            "encoding_reference_values": self.encoding_reference_values,
             "feature_idx_map": self.feature_idx_map,
             "config": self.config,
         }
@@ -180,7 +180,7 @@ class AutoEmbedder(Embedder):
     ) -> None:
         self.embeddings_reference_values = {}
         for idx, (feature_name, feature_vocabulary) in enumerate(
-            self.encoding_dictionary.items()
+            self.encoding_reference_values.items()
         ):
             # here we take advantage that entries in the encoding dictionary are lists with persistent order;
             # the positions (idx) of their entries corresponds to the entry's ordinal encoding
@@ -295,7 +295,7 @@ class AutoEmbedder(Embedder):
             self.categorical_features, input_column.name
         )
         embedding_layer_input = apply_ordinal_encoding_column(
-            input_column, self.encoding_dictionary
+            input_column, self.encoding_reference_values
         )
         embedding_layer_output = self._embed_encoded_column(
             tf.convert_to_tensor(embedding_layer_input), embedding_layer_idx

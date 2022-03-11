@@ -24,7 +24,7 @@ from scripts.preprocess_data import select_features
 OUTPUT_DIRECTORY = "./data/model"
 
 
-def create_encoding_dictionary(
+def create_encoding_reference_values(
     feature_names: list,
     encoder: OrdinalEncoder,
 ) -> dict[str, list]:
@@ -46,11 +46,11 @@ def encode_categorical_input_ordinal(
 
     df_enc = pd.DataFrame(data_enc, columns=df.columns)
 
-    encoding_dictionary = create_encoding_dictionary(
+    encoding_reference_values = create_encoding_reference_values(
         df.columns, embedding_input_encoder
     )
 
-    return df_enc, encoding_dictionary
+    return df_enc, encoding_reference_values
 
 
 def save_autoembedder_model(
@@ -138,12 +138,12 @@ def train_autoembedder(df: pd.DataFrame, params: dict) -> pd.DataFrame:
     numerical_features, categorical_features = load_features(
         df, params["feature_handler_file"]
     )
-    train_df, test_df, encoding_dictionary = prepare_data_for_fit(
+    train_df, test_df, encoding_reference_values = prepare_data_for_fit(
         df, numerical_features, categorical_features, params
     )
 
     auto_embedder = AutoEmbedder(
-        encoding_dictionary=encoding_dictionary,
+        encoding_reference_values=encoding_reference_values,
         numerical_features=numerical_features,
         categorical_features=categorical_features,
         config=params,
