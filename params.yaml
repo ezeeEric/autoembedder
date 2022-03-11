@@ -5,11 +5,11 @@ train_model:
     manual_encoder_architecture: [] #empty list [] for automatic autencoder shape
     manual_decoder_architecture: [] #empty list [] for default symmetric autoencoder shape
     activation_function: ReLU
-    test_data_fraction: 0.2
+    test_data_fraction: 0.1
     embeddings_initializer: uniform
     optimizer: adam
     loss: mse
-    batch_size: 32
+    batch_size: 9
     epochs: 10
     learning_rate: 0.05
 test_model:

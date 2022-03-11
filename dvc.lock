@@ -37,8 +37,8 @@ stages:
     - python scripts/train_autoembedder.py ./data/training_input/
     deps:
     - path: ./autoembedder/
-      md5: fa597f08dd22a1b2bf1f933129c09a84.dir
-      size: 37643
+      md5: 018d78e19a0059bbe0f6bd667c222755.dir
+      size: 37491
       nfiles: 5
     - path: ./data/training_input/
       md5: 5d1c30045f28b9ee73b4e34ed5328b1c.dir
@@ -61,7 +61,7 @@ stages:
           manual_decoder_architecture: []
           activation_function: ReLU
           test_data_fraction: 0.2
-          embeddings_initializer: uniform
+          embeddings_initializer: zeros
           optimizer: adam
           loss: mse
           batch_size: 32
@@ -69,20 +69,20 @@ stages:
           learning_rate: 0.05
     outs:
     - path: ./data/model/
-      md5: cd1354f705220ccdca1357aaaa39cbd5.dir
-      size: 274720
+      md5: f34b6af910fe0fc6ec60fe0cbdd68e5c.dir
+      size: 274555
       nfiles: 4
   test:
     cmd:
     - python scripts/test_autoembedder.py ./data/training_input/ ./data/model/autoembedder
     deps:
     - path: ./autoembedder/
-      md5: fa597f08dd22a1b2bf1f933129c09a84.dir
-      size: 37643
+      md5: 018d78e19a0059bbe0f6bd667c222755.dir
+      size: 37491
       nfiles: 5
     - path: ./data/model/
-      md5: cd1354f705220ccdca1357aaaa39cbd5.dir
-      size: 274720
+      md5: f34b6af910fe0fc6ec60fe0cbdd68e5c.dir
+      size: 274555
       nfiles: 4
     - path: ./data/training_input/
       md5: 5d1c30045f28b9ee73b4e34ed5328b1c.dir
