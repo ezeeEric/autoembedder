@@ -142,6 +142,9 @@ def train_autoembedder(df: pd.DataFrame, params: dict) -> pd.DataFrame:
     numerical_features, categorical_features = load_features(
         df, params["feature_handler_file"]
     )
+    # TODO does this make a difference?
+    print(numerical_features)
+    exit()
     train_df, test_df, encoding_reference_values = prepare_data_for_fit(
         df, numerical_features, categorical_features, params
     )

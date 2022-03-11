@@ -51,8 +51,8 @@ stages:
       md5: 4bd8400f2e2c620f11b68b30d7f1c12f
       size: 12163
     - path: scripts/train_autoembedder.py
-      md5: 788e75ab1aaeaf21700da8e211133f44
-      size: 5928
+      md5: 06c1275b2d93d8e12d692f522e8d06b9
+      size: 6009
     params:
       params.yaml:
         train_model:
@@ -60,18 +60,18 @@ stages:
           manual_encoder_architecture: []
           manual_decoder_architecture: []
           activation_function: ReLU
-          test_data_fraction: 0.2
-          embeddings_initializer: zeros
+          test_data_fraction: 0.1
+          embeddings_initializer: uniform
           optimizer: adam
           loss: mse
-          batch_size: 32
+          batch_size: 9
           epochs: 10
           learning_rate: 0.05
     outs:
     - path: ./data/model/
-      md5: f34b6af910fe0fc6ec60fe0cbdd68e5c.dir
-      size: 274555
-      nfiles: 4
+      md5: d751713988987e9331980363e24189ce.dir
+      size: 0
+      nfiles: 0
   test:
     cmd:
     - python scripts/test_autoembedder.py ./data/training_input/ ./data/model/autoembedder
@@ -81,8 +81,8 @@ stages:
       size: 37491
       nfiles: 5
     - path: ./data/model/
-      md5: f34b6af910fe0fc6ec60fe0cbdd68e5c.dir
-      size: 274555
+      md5: 7384445fa29b921049a2bf85490e5146.dir
+      size: 275132
       nfiles: 4
     - path: ./data/training_input/
       md5: 5d1c30045f28b9ee73b4e34ed5328b1c.dir
@@ -100,9 +100,12 @@ stages:
     cmd:
     - python scripts/preprocess_data.py
     deps:
+    - path: ./feature_handling/feature_actions.json
+      md5: e8e3e9914c06f1bf8886c8259f317275
+      size: 38
     - path: scripts/preprocess_data.py
-      md5: e321eedc1d8f99f4926a4540638c56b4
-      size: 2470
+      md5: 97ac2b82ba83262cdcbee3e7453a0c10
+      size: 2894
     - path: utils/feature_handler.py
       md5: 4bd8400f2e2c620f11b68b30d7f1c12f
       size: 12163
@@ -113,14 +116,15 @@ stages:
       params.yaml:
         data_preprocessing:
           feature_handler_dir: ./feature_handling/
+          feature_action_file: ./feature_handling/feature_actions.json
     outs:
     - path: data/training_input/
-      md5: 5d1c30045f28b9ee73b4e34ed5328b1c.dir
-      size: 13218
+      md5: 76518463305c60240aba1a1514d686a0.dir
+      size: 12754
       nfiles: 1
     - path: feature_handling/feature_handler.json
-      md5: 9690a932948ec28028812609c0b0ff9b
-      size: 2277
+      md5: 070f9288be784dc10bfabf9626d828fd
+      size: 2365
     - path: feature_handling/feature_handler_pretty_summary.json
       md5: 85530058600ceb2075fc5fa4246b76da
       size: 594

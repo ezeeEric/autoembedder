@@ -14,12 +14,12 @@ from sklearn.model_selection import train_test_split
 
 print(f"tensorflow {tf.__version__}")
 
-# from autoembedder.autoembedder import load_features,
 from utils.feature_handler import FeatureHandler
 from utils.params import with_params
 from utils.utils import create_output_dir, get_sorted_input_files
 from scripts.preprocess_data import select_features
 from scripts.train_autoembedder import load_features, prepare_data_for_fit
+from scripts.test_autoembedder import get_model
 
 OUTPUT_DIRECTORY = ""
 
