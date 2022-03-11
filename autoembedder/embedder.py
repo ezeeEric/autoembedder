@@ -11,23 +11,24 @@ def get_encoded_column(input: np.ndarray, slice_idx: int) -> list[np.ndarray]:
 class Embedder(Model):
     def __init__(
         self,
-        encoding_dictionary: dict[str, list],
+        encoding_reference_values: dict[str, list],
+        embeddings_reference_values: dict[str, list],
         config: dict,
     ):
         super().__init__()
         self.config = config
-        self.encoding_dictionary = encoding_dictionary
+
+        self.encoding_reference_values = encoding_reference_values
+        self.embeddings_reference_values = embeddings_reference_values
 
         self.n_categories_per_feature = [
-            len(encoded_cats) for encoded_cats in encoding_dictionary.values()
+            len(encoded_cats) for encoded_cats in encoding_reference_values.values()
         ]
-
-        self.embeddings_reference_values = {}
 
         self.embedding_layers = []
         self.embedding_layers_output_dimensions = []
         for idx, in_dim in enumerate(self.n_categories_per_feature):
-            feature_name = list(self.encoding_dictionary)[idx]
+            feature_name = list(self.encoding_reference_values)[idx]
             layer, out_dim = self.create_layer(in_dim, feature_name)
             self.embedding_layers.append(layer)
             self.embedding_layers_output_dimensions.append(out_dim)
