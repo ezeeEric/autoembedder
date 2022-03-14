@@ -70,15 +70,21 @@ def normalise_numerical_input_columns(df: pd.DataFrame) -> pd.DataFrame:
     # df_mean_normed = (df - df.mean()) / (df.std())
     # minmax scale
     epsilon = 1e-12
-    df_normed = (df - df.min()) / (df.max() - df.min() + epsilon)
+    df_min, df_max = df.min(), df.max()
+    if abs(df_min - df_max) > epsilon:
+        df_normed = (df - df_min) / (df_max - df_min)
+    else:
+        df_normed = 0
     return df_normed
 
 
+# TODO generalise
 def compile_model(
-    model: AutoEmbedder,
+    model: tf.keras.Model,
     learning_rate: float,
     optimizer_name: str = "sgd",
     loss_name: str = "mse",
+    metrics: list[str] = [],
 ) -> None:
 
     if optimizer_name == "sgd":
@@ -92,12 +98,14 @@ def compile_model(
         loss = tf.keras.losses.MeanSquaredError()
     elif loss_name == "bce":
         loss = tf.keras.losses.BinaryCrossentropy()
+    elif loss_name == "cce":
+        loss = tf.keras.losses.CategoricalCrossentropy()
     else:
         raise NotImplementedError()
 
     # explicitely setting run_eagerly=True is necessary in tf 2.0 when dealing
     # with custom layers and losses
-    model.compile(optimizer=optimizer, loss=loss, run_eagerly=True)
+    model.compile(optimizer=optimizer, loss=loss, metrics=metrics, run_eagerly=True)
 
 
 def train_model(

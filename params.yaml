@@ -3,17 +3,34 @@ data_preprocessing:
     feature_action_file: ./feature_handling/feature_actions.json
 train_model:
     feature_handler_file: ./feature_handling/feature_handler.json
-
-    manual_encoder_architecture: [4,4,2] #empty list [] for automatic autencoder shape
+    # manual_encoder_architecture: [4,4,2] #empty list [] for automatic autencoder shape
+    manual_encoder_architecture: [] #empty list [] for automatic autencoder shape
     manual_decoder_architecture: [] #empty list [] for default symmetric autoencoder shape
     activation_function: ReLU
     test_data_fraction: 0.2
     embeddings_initializer: uniform
     optimizer: adam
     loss: mse
+    learning_rate: 0.05
+    metric:
+    - accuracy
+    - precision
     batch_size: 32
     epochs: 100
-    learning_rate: 0.05
 test_model:
     feature_handler_file: ./feature_handling/feature_handler.json
-    batch_size: 9
+    batch_size: 1000
+train_simple_classification_model:
+    feature_handler_file: ./feature_handling/feature_handler.json
+    activation_function: ReLU
+    test_data_fraction: 0.2
+    embeddings_initializer: uniform
+    optimizer: adam
+    loss: cce
+    learning_rate: 0.05
+    metric:
+    - accuracy
+    - precision
+    batch_size: 32
+    epochs: 1000
+test_model:
