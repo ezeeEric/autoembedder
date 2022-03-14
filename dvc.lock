@@ -37,41 +37,44 @@ stages:
     - python scripts/train_autoembedder.py ./data/training_input/
     deps:
     - path: ./autoembedder/
-      md5: 018d78e19a0059bbe0f6bd667c222755.dir
+      md5: f99fcc2c03cafef24be7946c51733747.dir
       size: 37491
       nfiles: 5
     - path: ./data/training_input/
-      md5: 5d1c30045f28b9ee73b4e34ed5328b1c.dir
-      size: 13218
+      md5: 76518463305c60240aba1a1514d686a0.dir
+      size: 12754
       nfiles: 1
     - path: ./feature_handling/feature_handler.json
-      md5: 9690a932948ec28028812609c0b0ff9b
-      size: 2277
+      md5: 070f9288be784dc10bfabf9626d828fd
+      size: 2365
     - path: ./utils/feature_handler.py
       md5: 4bd8400f2e2c620f11b68b30d7f1c12f
       size: 12163
     - path: scripts/train_autoembedder.py
-      md5: 06c1275b2d93d8e12d692f522e8d06b9
-      size: 6009
+      md5: 7e14a071591310234d69f70ef6bfa34b
+      size: 5979
     params:
       params.yaml:
         train_model:
           feature_handler_file: ./feature_handling/feature_handler.json
-          manual_encoder_architecture: []
+          manual_encoder_architecture:
+          - 4
+          - 4
+          - 2
           manual_decoder_architecture: []
           activation_function: ReLU
-          test_data_fraction: 0.1
+          test_data_fraction: 0.2
           embeddings_initializer: uniform
           optimizer: adam
           loss: mse
-          batch_size: 9
-          epochs: 10
+          batch_size: 32
+          epochs: 100
           learning_rate: 0.05
     outs:
     - path: ./data/model/
-      md5: d751713988987e9331980363e24189ce.dir
-      size: 0
-      nfiles: 0
+      md5: 8831c650462ef96892acf36b9730ff8b.dir
+      size: 273748
+      nfiles: 4
   test:
     cmd:
     - python scripts/test_autoembedder.py ./data/training_input/ ./data/model/autoembedder
@@ -81,12 +84,12 @@ stages:
       size: 37491
       nfiles: 5
     - path: ./data/model/
-      md5: 7384445fa29b921049a2bf85490e5146.dir
-      size: 275132
+      md5: b70764264840a5169de6041c54391ff8.dir
+      size: 274238
       nfiles: 4
     - path: ./data/training_input/
-      md5: 5d1c30045f28b9ee73b4e34ed5328b1c.dir
-      size: 13218
+      md5: 76518463305c60240aba1a1514d686a0.dir
+      size: 12754
       nfiles: 1
     - path: scripts/test_autoembedder.py
       md5: 83dd0e25eb86ab19fe680cebba96e953

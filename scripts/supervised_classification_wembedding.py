@@ -21,6 +21,8 @@ from scripts.preprocess_data import select_features
 from scripts.train_autoembedder import load_features, prepare_data_for_fit
 from scripts.test_autoembedder import get_model
 
+from autoembedder.embedder import Embedder
+
 OUTPUT_DIRECTORY = ""
 
 
