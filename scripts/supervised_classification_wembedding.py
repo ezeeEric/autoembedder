@@ -65,8 +65,10 @@ def run_simple_classification(
     pass
 
 
-def evaluate_simple_classification(model, X_test, y_test) -> None:
-    loss, accuracy = model.evaluate(X_test, y_test, verbose=0)
+def evaluate_simple_classification(
+    model, test_df_num, test_df_cat, test_target
+) -> None:
+    loss, accuracy = model.evaluate([test_df_cat, test_df_num], test_target, verbose=0)
     print(f" Model loss on the test set: {loss}")
     print(f" Model accuracy on the test set: {100*accuracy}")
 
@@ -101,9 +103,9 @@ def main(params: dict):
         config=params,
     )
     train_df_num, train_df_cat = train_df[num_feat], train_df[categorical_features]
-    # test_df = test_df[num_feat + categorical_features]
+    test_df_num, test_df_cat = test_df[num_feat], test_df[categorical_features]
     run_simple_classification(train_df_num, train_df_cat, train_df_target, model)
-    # evaluate_simple_classification(model, test_df, test_df_target)
+    evaluate_simple_classification(model, test_df_num, test_df_cat, test_df_target)
 
 
 if __name__ == "__main__":
