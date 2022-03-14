@@ -9,6 +9,7 @@ stages:
     - scripts/preprocess_data.py
     - utils/feature_handler.py
     - utils/params.py
+    - ./feature_handling/feature_actions.json
     outs:
     - data/training_input/
     - feature_handling/feature_handler.json
