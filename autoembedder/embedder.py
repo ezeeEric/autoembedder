@@ -38,6 +38,7 @@ class Embedder(Model):
             f"Embedding layer {layer_idx}: Shape "
             + f"({self.n_categories_per_feature[layer_idx]},"
             + f"{self.embedding_layers_output_dimensions[layer_idx]}) (In,Out)"
+            + f"{self.embedding_layers[layer_idx].weights}) (weights)"
             for layer_idx in range(len(self.embedding_layers))
         ]
         output.append(super(Embedder, self).__str__())
