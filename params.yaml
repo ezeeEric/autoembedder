@@ -23,7 +23,7 @@ test_model:
 train_simple_classification_model:
     feature_handler_file: ./feature_handling/feature_handler.json
     activation_function: ReLU
-    normalisation_method: minmax
+    normalisation_method: manual
     test_data_fraction: 0.2
     embeddings_initializer: uniform
     optimizer: adam

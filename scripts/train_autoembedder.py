@@ -72,6 +72,9 @@ def normalise_numerical_input_columns(
         df_transformed = pd.DataFrame(
             StandardScaler().fit_transform(df), columns=df.columns
         )
+    elif method == "manual":
+        epsilon = 1e-12
+        df_transformed = (df - df.min()) / (df.max() - df.min() + epsilon)
     else:
         raise NotImplementedError(f"{method} not a valid transformation method.")
     return df_transformed
