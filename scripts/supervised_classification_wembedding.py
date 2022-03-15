@@ -90,16 +90,15 @@ def fit_simple_classification_model(
     train_data_cat,
     y,
 ) -> tf.keras.Model:
-    model.fit([train_data_cat, train_data_num], y, epochs=100, verbose=0)
+    model.fit([train_data_cat, train_data_num], y, epochs=200, verbose=1)
 
 
 def evaluate_simple_classification(
     model, test_df_num, test_df_cat, test_target
 ) -> None:
-    print(model.metrics_names)
-    loss, accuracy = model.evaluate([test_df_cat, test_df_num], test_target, verbose=0)
-    print(f" Model loss on the test set: {loss}")
-    print(f" Model accuracy on the test set: {100*accuracy}")
+    eval_metrics = model.evaluate([test_df_cat, test_df_num], test_target, verbose=0)
+    for idx, metric in enumerate(eval_metrics):
+        print(f"Test set {model.metrics_names[idx]}: {metric}")
 
 
 @with_params("params.yaml", "train_simple_classification_model")
@@ -134,7 +133,6 @@ def main(params: dict):
         encoding_reference_values=encoding_reference_values,
         config=params,
     )
-    print(params["metrics"])
     compile_model(
         model=model,
         learning_rate=params["learning_rate"],

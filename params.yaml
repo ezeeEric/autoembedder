@@ -28,7 +28,7 @@ train_simple_classification_model:
     embeddings_initializer: uniform
     optimizer: adam
     loss: cce
-    learning_rate: 0.05
+    learning_rate: 0.1
     metrics:
     - accuracy
     # - precision

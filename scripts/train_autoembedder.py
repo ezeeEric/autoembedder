@@ -103,11 +103,12 @@ def compile_model(
         raise NotImplementedError()
 
     selected_metrics = []
-    for metric_name in metrics:
+
+    for metric_name in list(metrics):
         if metric_name == "accuracy":
-            metrics.append(tf.keras.metrics.Accuracy())
+            selected_metrics.append(tf.keras.metrics.Accuracy())
         elif metric_name == "precision":
-            metrics.append(tf.keras.metrics.Precision())
+            selected_metrics.append(tf.keras.metrics.Precision())
         else:
             raise NotImplementedError()
     # explicitely setting run_eagerly=True is necessary in tf 2.0 when dealing
