@@ -1,8 +1,10 @@
 import sys
+import json
 import pandas as pd
 import seaborn as sns
 
 sns.set_style("whitegrid")
+
 from palmerpenguins import load_penguins
 from utils.feature_handler import FeatureHandler
 from utils.params import with_params
@@ -44,9 +46,13 @@ def load_data() -> pd.DataFrame:
     return load_penguins()
 
 
-def create_feature_handler(df: pd.DataFrame, outdir: str) -> FeatureHandler:
-    feature_handler = FeatureHandler.from_df(df)
+def create_feature_handler(
+    df: pd.DataFrame, outdir: str, feature_actions_file: str
+) -> FeatureHandler:
+    feature_actions = load_feature_actions(feature_actions_file)
+    feature_handler = FeatureHandler.from_df(df, feature_actions)
     create_output_dir(outdir)
+    feature_handler.set_user_actions()
     feature_handler.to_json(outdir)
     feature_handler.pretty_print_to_json(outdir)
     return feature_handler
@@ -61,10 +67,20 @@ def drop_entries_with_nan(df: pd.DataFrame) -> pd.DataFrame:
     return df.dropna(axis=0).reset_index(drop=True)
 
 
+def load_feature_actions(feature_action_file: str) -> dict:
+    print("Loading feature action file.")
+    with open(feature_action_file) as f:
+        feature_actions = json.load(f)
+    return feature_actions
+
+
 @with_params("params.yaml", "data_preprocessing")
 def main(params: dict):
     df = load_data()
-    feature_handler = create_feature_handler(df, params["feature_handler_dir"])
+
+    feature_handler = create_feature_handler(
+        df, params["feature_handler_dir"], params["feature_action_file"]
+    )
     df = remove_duplicates(df)
     df = filter_columns(df, feature_handler)
     df = drop_entries_with_nan(df)

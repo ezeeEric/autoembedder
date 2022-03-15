@@ -104,7 +104,7 @@ def train_model(
     df: pd.DataFrame, model: AutoEmbedder, batch_size: int, epochs: int
 ) -> None:
     model.match_feature_to_input_column_idx(columns=df.columns)
-    model.fit(tf.convert_to_tensor(df), batch_size=batch_size, epochs=epochs)
+    model.fit(tf.convert_to_tensor(df), batch_size=batch_size, epochs=epochs, verbose=1)
     return model
 
 
@@ -142,6 +142,7 @@ def train_autoembedder(df: pd.DataFrame, params: dict) -> pd.DataFrame:
     numerical_features, categorical_features = load_features(
         df, params["feature_handler_file"]
     )
+    # TODO does this make a difference?
     train_df, test_df, encoding_reference_values = prepare_data_for_fit(
         df, numerical_features, categorical_features, params
     )
