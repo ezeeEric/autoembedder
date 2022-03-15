@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from typing import Tuple
 import tensorflow as tf
-from sklearn.preprocessing import OrdinalEncoder
+from sklearn.preprocessing import OrdinalEncoder, MinMaxScaler, StandardScaler
 from sklearn.model_selection import train_test_split
 
 print(f"tensorflow {tf.__version__}")
@@ -61,21 +61,20 @@ def save_autoembedder_model(
     auto_embedder.save(out_file)
 
 
-def normalise_numerical_input_columns(df: pd.DataFrame) -> pd.DataFrame:
-    # TODO
-    # - the epsilon here is required to avoid dividing by 0 TODO the
-    # - normalisation on columns with large range yields many values close to 0.5.
-    # Should this be scaled differently?
-    # mean scale
-    # df_mean_normed = (df - df.mean()) / (df.std())
-    # minmax scale
-    epsilon = 1e-12
-    df_min, df_max = df.min(), df.max()
-    if abs(df_min - df_max) > epsilon:
-        df_normed = (df - df_min) / (df_max - df_min)
+def normalise_numerical_input_columns(
+    df: pd.DataFrame, method: str = "minmax"
+) -> pd.DataFrame:
+    if method == "minmax":
+        df_transformed = pd.DataFrame(
+            MinMaxScaler().fit_transform(df), columns=df.columns
+        )
+    elif method == "standard":
+        df_transformed = pd.DataFrame(
+            StandardScaler().fit_transform(df), columns=df.columns
+        )
     else:
-        df_normed = 0
-    return df_normed
+        raise NotImplementedError(f"{method} not a valid transformation method.")
+    return df_transformed
 
 
 # TODO generalise
@@ -103,16 +102,26 @@ def compile_model(
     else:
         raise NotImplementedError()
 
+    selected_metrics = []
+    for metric_name in metrics:
+        if metric_name == "accuracy":
+            metrics.append(tf.keras.metrics.Accuracy())
+        elif metric_name == "precision":
+            metrics.append(tf.keras.metrics.Precision())
+        else:
+            raise NotImplementedError()
     # explicitely setting run_eagerly=True is necessary in tf 2.0 when dealing
     # with custom layers and losses
-    model.compile(optimizer=optimizer, loss=loss, metrics=metrics, run_eagerly=True)
+    model.compile(
+        optimizer=optimizer, loss=loss, metrics=selected_metrics, run_eagerly=True
+    )
 
 
 def train_model(
     df: pd.DataFrame, model: AutoEmbedder, batch_size: int, epochs: int
 ) -> None:
     model.match_feature_to_input_column_idx(columns=df.columns)
-    model.fit(tf.convert_to_tensor(df), batch_size=batch_size, epochs=epochs, verbose=1)
+    model.fit(tf.convert_to_tensor(df), batch_size=batch_size, epochs=epochs, verbose=0)
     return model
 
 

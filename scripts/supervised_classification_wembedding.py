@@ -16,7 +16,7 @@ from scripts.train_autoembedder import (
     normalise_numerical_input_columns,
 )
 from autoembedder.embedder import Embedder
-from sklearn.model_selection import KFold
+from sklearn.model_selection import KFold, train_test_split
 
 
 class SimpleClassificationNetwork(Embedder):
@@ -50,32 +50,38 @@ def prepare_penguins_for_fit(
     df: tf.Tensor,
     numerical_features: list[str],
     categorical_features: list[str],
+    config: dict,
 ) -> tf.Tensor:
     """This function first encodes the categorical input, then normalises the numerical input and finally merges the result."""
     # TODO this is somewhat duplicated with apply_ordinal_encoding_column()
     df_encoded, embedding_encoder = encode_categorical_input_ordinal(
         df[categorical_features]
     )
-    df_numericals_normalised = normalise_numerical_input_columns(df[numerical_features])
-    return pd.concat([df_numericals_normalised, df_encoded], axis=1), embedding_encoder
-
-    # train_df, test_df = train_test_split(df, test_size=config["test_data_fraction"])
-    # return train_df, test_df, embedding_encoder
-
-
-def create_k_fold_split(X_data, y_data, n_splits):
-    def gen():
-        for train_index, test_index in KFold(n_splits).split(X_data):
-            X_train, X_test = X_data[train_index], X_data[test_index]
-            y_train, y_test = y_data[train_index], y_data[test_index]
-            yield X_train, y_train, X_test, y_test
-
-    return tf.data.Dataset.from_generator(
-        gen, (tf.float64, tf.float64, tf.float64, tf.float64)
+    df_numericals_normalised = normalise_numerical_input_columns(
+        df[numerical_features], method=config["normalisation_method"]
     )
 
+    return pd.concat([df_encoded, df_numericals_normalised], axis=1), embedding_encoder
 
-# dataset=make_dataset(X,y,10)
+
+# TODO this could be implemented
+# def create_k_fold_split(X_data, y_data, n_splits):
+#     def gen():
+#         for train_index, test_index in KFold(n_splits).split(X_data):
+#             X_train, X_test = X_data[train_index], X_data[test_index]
+#             y_train, y_test = y_data[train_index], y_data[test_index]
+#             yield X_train, y_train, X_test, y_test
+
+#     return tf.data.Dataset.from_generator(
+#         gen, (tf.float64, tf.float64, tf.float64, tf.float64)
+#     )
+
+
+def split_datasets(
+    df: pd.DataFrame, config: dict
+) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
+    train_df, test_df = train_test_split(df, test_size=config["test_data_fraction"])
+    return train_df, test_df
 
 
 def fit_simple_classification_model(
@@ -84,12 +90,13 @@ def fit_simple_classification_model(
     train_data_cat,
     y,
 ) -> tf.keras.Model:
-    model.fit([train_data_cat, train_data_num], y, epochs=1000, verbose=0)
+    model.fit([train_data_cat, train_data_num], y, epochs=100, verbose=0)
 
 
 def evaluate_simple_classification(
     model, test_df_num, test_df_cat, test_target
 ) -> None:
+    print(model.metrics_names)
     loss, accuracy = model.evaluate([test_df_cat, test_df_num], test_target, verbose=0)
     print(f" Model loss on the test set: {loss}")
     print(f" Model accuracy on the test set: {100*accuracy}")
@@ -113,6 +120,8 @@ def main(params: dict):
         df, numerical_features, categorical_features, params
     )
 
+    train_df, test_df = split_datasets(df, params)
+
     train_df_target = tf.keras.utils.to_categorical(train_df.pop("species"))
     test_df_target = tf.keras.utils.to_categorical(test_df.pop("species"))
 
@@ -125,6 +134,7 @@ def main(params: dict):
         encoding_reference_values=encoding_reference_values,
         config=params,
     )
+    print(params["metrics"])
     compile_model(
         model=model,
         learning_rate=params["learning_rate"],

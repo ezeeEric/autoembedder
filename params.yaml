@@ -23,14 +23,16 @@ test_model:
 train_simple_classification_model:
     feature_handler_file: ./feature_handling/feature_handler.json
     activation_function: ReLU
+    normalisation_method: minmax
     test_data_fraction: 0.2
     embeddings_initializer: uniform
     optimizer: adam
     loss: cce
     learning_rate: 0.05
-    metric:
+    metrics:
     - accuracy
-    - precision
+    # - precision
     batch_size: 32
-    epochs: 1000
+    epochs: 100
 test_model:
+    test: 0
