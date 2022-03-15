@@ -38,6 +38,7 @@ class Embedder(Model):
             f"Embedding layer {layer_idx}: Shape "
             + f"({self.n_categories_per_feature[layer_idx]},"
             + f"{self.embedding_layers_output_dimensions[layer_idx]}) (In,Out)"
+            + f"{self.embedding_layers[layer_idx].weights}) (weights)"
             for layer_idx in range(len(self.embedding_layers))
         ]
         output.append(super(Embedder, self).__str__())
@@ -76,7 +77,7 @@ class Embedder(Model):
     ) -> pd.DataFrame:
         return self.embedding_layers[layer_idx](input_data)
 
-    def _forward_call_embedder(self, inputs: list[pd.DataFrame]) -> tf.Tensor:
+    def _forward_call_embedder(self, inputs: list[tf.Tensor]) -> tf.Tensor:
         """Forward call of this model. Data is passed through the following
         sequence in training and evaluation"""
         embedded_inputs = []
