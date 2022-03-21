@@ -4,22 +4,15 @@ python train_autoembedder.py ./train_input/
 """
 
 import sys
-import os
-import numpy as np
 import pandas as pd
-from typing import Tuple
 import tensorflow as tf
-from sklearn.preprocessing import OrdinalEncoder
-from sklearn.model_selection import train_test_split
 
 print(f"tensorflow {tf.__version__}")
 
 from utils.feature_handler import FeatureHandler
 from utils.params import with_params
-from utils.utils import create_output_dir, get_sorted_input_files
-from scripts.preprocess_data import select_features
+from utils.utils import get_sorted_input_files
 from scripts.train_autoembedder import load_features, prepare_data_for_fit
-from scripts.test_autoembedder import get_model
 
 from autoembedder.embedder import Embedder
 
