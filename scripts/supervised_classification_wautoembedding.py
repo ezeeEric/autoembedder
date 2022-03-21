@@ -12,13 +12,14 @@ print(f"tensorflow {tf.__version__}")
 from utils.feature_handler import FeatureHandler
 from utils.params import with_params
 from utils.utils import get_sorted_input_files
-from scripts.train_autoembedder import load_features, prepare_data_for_fit
 from scripts.supervised_classification_wembedding import (
     SimpleClassificationNetwork,
     run_simple_classification,
     evaluate_simple_classification,
+    prepare_penguin_data,
 )
 from autoembedder.embedder import Embedder
+from scripts.test_autoembedder import get_model
 
 OUTPUT_DIRECTORY = ""
 
@@ -55,35 +56,31 @@ def main(params: dict):
 
     input_files = get_sorted_input_files(
         input_dir=sys.argv[1],
-        input_patterns=sys.argv[2].split(",") if len(sys.argv) > 2 else None,
+        input_patterns="",
         input_extension="feather",
     )
 
     df = pd.read_feather(input_files[0])
 
-    numerical_features, categorical_features = load_features(
-        df, params["feature_handler_file"]
-    )
-    train_df, test_df, encoding_reference_values = prepare_data_for_fit(
-        df,
-        numerical_features,
-        categorical_features,
-        normalisation_method=params["normalisation_method"],
-        test_data_fraction=params["test_data_fraction"],
-    )
+    autoembedder = get_model(sys.argv[2])
 
-    train_df_target = tf.keras.utils.to_categorical(train_df.pop("species"))
-    test_df_target = tf.keras.utils.to_categorical(test_df.pop("species"))
-    num_feat = ["bill_depth_mm", "bill_length_mm", "body_mass_g", "flipper_length_mm"]
-    categorical_features.remove("species")
-    encoding_reference_values.pop("species")
+    (
+        train_df_num,
+        train_df_cat,
+        test_df_num,
+        test_df_cat,
+        train_df_target,
+        test_df_target,
+        num_feat,
+        encoding_reference_values,
+    ) = prepare_penguin_data(df, params)
+
     model = SimpleClassificationNetwork(
         n_numerical_inputs=len(num_feat),
         encoding_reference_values=encoding_reference_values,
         config=params,
     )
-    train_df_num, train_df_cat = train_df[num_feat], train_df[categorical_features]
-    test_df_num, test_df_cat = test_df[num_feat], test_df[categorical_features]
+
     run_simple_classification(train_df_num, train_df_cat, train_df_target, model)
     evaluate_simple_classification(model, test_df_num, test_df_cat, test_df_target)
 

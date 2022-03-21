@@ -14,6 +14,7 @@ from utils.params import with_params
 from utils.utils import get_sorted_input_files
 from scripts.train_autoembedder import load_features, prepare_data_for_fit
 
+
 from autoembedder.embedder import Embedder
 
 OUTPUT_DIRECTORY = ""
@@ -44,6 +45,44 @@ class SimpleClassificationNetwork(Embedder):
         embedded_input = self._forward_call_embedder(input_cat_enc)
         full_input = tf.concat([embedded_input, input_num], axis=1)
         return self.classification_model(full_input)
+
+
+# TODO this function should rather be part of main
+def prepare_penguin_data(
+    df: pd.DataFrame,
+    params: dict[str],
+) -> list:
+
+    numerical_features, categorical_features = load_features(
+        df, params["feature_handler_file"]
+    )
+    train_df, test_df, encoding_reference_values = prepare_data_for_fit(
+        df,
+        numerical_features,
+        categorical_features,
+        normalisation_method=params["normalisation_method"],
+        test_data_fraction=params["test_data_fraction"],
+    )
+
+    train_df_target = tf.keras.utils.to_categorical(train_df.pop("species"))
+    test_df_target = tf.keras.utils.to_categorical(test_df.pop("species"))
+    num_feat = ["bill_depth_mm", "bill_length_mm", "body_mass_g", "flipper_length_mm"]
+    categorical_features.remove("species")
+    encoding_reference_values.pop("species")
+
+    train_df_num, train_df_cat = train_df[num_feat], train_df[categorical_features]
+    test_df_num, test_df_cat = test_df[num_feat], test_df[categorical_features]
+
+    return (
+        train_df_num,
+        train_df_cat,
+        test_df_num,
+        test_df_cat,
+        train_df_target,
+        test_df_target,
+        num_feat,
+        encoding_reference_values,
+    )
 
 
 def run_simple_classification(
@@ -77,29 +116,22 @@ def main(params: dict):
 
     df = pd.read_feather(input_files[0])
 
-    numerical_features, categorical_features = load_features(
-        df, params["feature_handler_file"]
-    )
-    train_df, test_df, encoding_reference_values = prepare_data_for_fit(
-        df,
-        numerical_features,
-        categorical_features,
-        normalisation_method=params["normalisation_method"],
-        test_data_fraction=params["test_data_fraction"],
-    )
+    (
+        train_df_num,
+        train_df_cat,
+        test_df_num,
+        test_df_cat,
+        train_df_target,
+        test_df_target,
+        num_feat,
+        encoding_reference_values,
+    ) = prepare_penguin_data(df, params)
 
-    train_df_target = tf.keras.utils.to_categorical(train_df.pop("species"))
-    test_df_target = tf.keras.utils.to_categorical(test_df.pop("species"))
-    num_feat = ["bill_depth_mm", "bill_length_mm", "body_mass_g", "flipper_length_mm"]
-    categorical_features.remove("species")
-    encoding_reference_values.pop("species")
     model = SimpleClassificationNetwork(
         n_numerical_inputs=len(num_feat),
         encoding_reference_values=encoding_reference_values,
         config=params,
     )
-    train_df_num, train_df_cat = train_df[num_feat], train_df[categorical_features]
-    test_df_num, test_df_cat = test_df[num_feat], test_df[categorical_features]
     run_simple_classification(train_df_num, train_df_cat, train_df_target, model)
     evaluate_simple_classification(model, test_df_num, test_df_cat, test_df_target)
 
