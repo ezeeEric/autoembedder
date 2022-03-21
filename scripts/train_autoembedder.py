@@ -1,6 +1,5 @@
-"""Train the AutoEmbedder Model.
-
-python train_autoembedder.py ./train_input/
+"""
+python scripts/supervised_classification_wembedding.py ./data/training_input
 """
 
 import sys
@@ -103,7 +102,17 @@ def compile_model(
     elif loss_name == "cce":
         loss = tf.keras.losses.CategoricalCrossentropy()
     else:
-        raise NotImplementedError()
+        raise NotImplementedError(f"Metric {loss_name} not implemented.")
+
+    selected_metrics = []
+
+    for metric_name in list(metrics):
+        if metric_name == "accuracy":
+            selected_metrics.append(tf.keras.metrics.Accuracy())
+        elif metric_name == "precision":
+            selected_metrics.append(tf.keras.metrics.Precision())
+        else:
+            raise NotImplementedError(f"Metric {metric_name} not implemented.")
 
     selected_metrics = []
 
@@ -138,16 +147,19 @@ def prepare_data_for_fit(
     df: tf.Tensor,
     numerical_features: list[str],
     categorical_features: list[str],
-    config: dict,
+    normalisation_method: str,
+    test_data_fraction: float,
 ) -> tf.Tensor:
     """This function first encodes the categorical input, then normalises the numerical input and finally merges the result."""
     # TODO this is somewhat duplicated with apply_ordinal_encoding_column()
     df_encoded, embedding_encoder = encode_categorical_input_ordinal(
         df[categorical_features]
     )
-    df_numericals_normalised = normalise_numerical_input_columns(df[numerical_features])
+    df_numericals_normalised = normalise_numerical_input_columns(
+        df[numerical_features], method=normalisation_method
+    )
     df = pd.concat([df_numericals_normalised, df_encoded], axis=1)
-    train_df, test_df = train_test_split(df, test_size=config["test_data_fraction"])
+    train_df, test_df = train_test_split(df, test_size=test_data_fraction)
     return train_df, test_df, embedding_encoder
 
 
@@ -163,11 +175,13 @@ def train_autoembedder(df: pd.DataFrame, params: dict) -> pd.DataFrame:
     numerical_features, categorical_features = load_features(
         df, params["feature_handler_file"]
     )
-    # TODO does this make a difference?
     train_df, test_df, encoding_reference_values = prepare_data_for_fit(
-        df, numerical_features, categorical_features, params
+        df,
+        numerical_features,
+        categorical_features,
+        normalisation_method=params["normalisation_method"],
+        test_data_fraction=params["test_data_fraction"],
     )
-
     auto_embedder = AutoEmbedder(
         encoding_reference_values=encoding_reference_values,
         numerical_features=numerical_features,
