@@ -1,6 +1,5 @@
-"""Train the AutoEmbedder Model.
-
-python train_autoembedder.py ./train_input/
+"""
+python scripts/supervised_classification_wembedding.py ./data/training_input
 """
 
 import sys
@@ -9,7 +8,7 @@ import numpy as np
 import pandas as pd
 from typing import Tuple
 import tensorflow as tf
-from sklearn.preprocessing import OrdinalEncoder
+from sklearn.preprocessing import OrdinalEncoder, MinMaxScaler, StandardScaler
 from sklearn.model_selection import train_test_split
 
 print(f"tensorflow {tf.__version__}")
@@ -61,24 +60,31 @@ def save_autoembedder_model(
     auto_embedder.save(out_file)
 
 
-def normalise_numerical_input_columns(df: pd.DataFrame) -> pd.DataFrame:
-    # TODO
-    # - the epsilon here is required to avoid dividing by 0 TODO the
-    # - normalisation on columns with large range yields many values close to 0.5.
-    # Should this be scaled differently?
-    # mean scale
-    # df_mean_normed = (df - df.mean()) / (df.std())
-    # minmax scale
-    epsilon = 1e-12
-    df_normed = (df - df.min()) / (df.max() - df.min() + epsilon)
-    return df_normed
+def normalise_numerical_input_columns(
+    df: pd.DataFrame, method: str = "minmax"
+) -> pd.DataFrame:
+    if method == "minmax":
+        df_transformed = pd.DataFrame(
+            MinMaxScaler().fit_transform(df), columns=df.columns
+        )
+    elif method == "standard":
+        df_transformed = pd.DataFrame(
+            StandardScaler().fit_transform(df), columns=df.columns
+        )
+    elif method == "manual":
+        epsilon = 1e-12
+        df_transformed = (df - df.min()) / (df.max() - df.min() + epsilon)
+    else:
+        raise NotImplementedError(f"{method} not a valid transformation method.")
+    return df_transformed
 
 
 def compile_model(
-    model: AutoEmbedder,
+    model: tf.keras.Model,
     learning_rate: float,
     optimizer_name: str = "sgd",
     loss_name: str = "mse",
+    metrics: list[str] = [],
 ) -> None:
 
     if optimizer_name == "sgd":
@@ -92,19 +98,33 @@ def compile_model(
         loss = tf.keras.losses.MeanSquaredError()
     elif loss_name == "bce":
         loss = tf.keras.losses.BinaryCrossentropy()
+    elif loss_name == "cce":
+        loss = tf.keras.losses.CategoricalCrossentropy()
     else:
-        raise NotImplementedError()
+        raise NotImplementedError(f"Metric {loss_name} not implemented.")
+
+    selected_metrics = []
+
+    for metric_name in list(metrics):
+        if metric_name == "accuracy":
+            selected_metrics.append(tf.keras.metrics.Accuracy())
+        elif metric_name == "precision":
+            selected_metrics.append(tf.keras.metrics.Precision())
+        else:
+            raise NotImplementedError(f"Metric {metric_name} not implemented.")
 
     # explicitely setting run_eagerly=True is necessary in tf 2.0 when dealing
     # with custom layers and losses
-    model.compile(optimizer=optimizer, loss=loss, run_eagerly=True)
+    model.compile(
+        optimizer=optimizer, loss=loss, metrics=selected_metrics, run_eagerly=True
+    )
 
 
 def train_model(
     df: pd.DataFrame, model: AutoEmbedder, batch_size: int, epochs: int
 ) -> None:
     model.match_feature_to_input_column_idx(columns=df.columns)
-    model.fit(tf.convert_to_tensor(df), batch_size=batch_size, epochs=epochs, verbose=1)
+    model.fit(tf.convert_to_tensor(df), batch_size=batch_size, epochs=epochs, verbose=0)
     return model
 
 
@@ -117,16 +137,19 @@ def prepare_data_for_fit(
     df: tf.Tensor,
     numerical_features: list[str],
     categorical_features: list[str],
-    config: dict,
+    normalisation_method: str,
+    test_data_fraction: float,
 ) -> tf.Tensor:
     """This function first encodes the categorical input, then normalises the numerical input and finally merges the result."""
     # TODO this is somewhat duplicated with apply_ordinal_encoding_column()
     df_encoded, embedding_encoder = encode_categorical_input_ordinal(
         df[categorical_features]
     )
-    df_numericals_normalised = normalise_numerical_input_columns(df[numerical_features])
+    df_numericals_normalised = normalise_numerical_input_columns(
+        df[numerical_features], method=normalisation_method
+    )
     df = pd.concat([df_numericals_normalised, df_encoded], axis=1)
-    train_df, test_df = train_test_split(df, test_size=config["test_data_fraction"])
+    train_df, test_df = train_test_split(df, test_size=test_data_fraction)
     return train_df, test_df, embedding_encoder
 
 
@@ -142,11 +165,13 @@ def train_autoembedder(df: pd.DataFrame, params: dict) -> pd.DataFrame:
     numerical_features, categorical_features = load_features(
         df, params["feature_handler_file"]
     )
-    # TODO does this make a difference?
     train_df, test_df, encoding_reference_values = prepare_data_for_fit(
-        df, numerical_features, categorical_features, params
+        df,
+        numerical_features,
+        categorical_features,
+        normalisation_method=params["normalisation_method"],
+        test_data_fraction=params["test_data_fraction"],
     )
-
     auto_embedder = AutoEmbedder(
         encoding_reference_values=encoding_reference_values,
         numerical_features=numerical_features,

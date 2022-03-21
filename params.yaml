@@ -9,6 +9,7 @@ train_model:
     activation_function: ReLU
     test_data_fraction: 0.2
     embeddings_initializer: uniform
+    normalisation_method: manual
     optimizer: adam
     loss: mse
     learning_rate: 0.05

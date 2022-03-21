@@ -4,22 +4,15 @@ python train_autoembedder.py ./train_input/
 """
 
 import sys
-import os
-import numpy as np
 import pandas as pd
-from typing import Tuple
 import tensorflow as tf
-from sklearn.preprocessing import OrdinalEncoder
-from sklearn.model_selection import train_test_split
 
 print(f"tensorflow {tf.__version__}")
 
 from utils.feature_handler import FeatureHandler
 from utils.params import with_params
-from utils.utils import create_output_dir, get_sorted_input_files
-from scripts.preprocess_data import select_features
+from utils.utils import get_sorted_input_files
 from scripts.train_autoembedder import load_features, prepare_data_for_fit
-from scripts.test_autoembedder import get_model
 
 from autoembedder.embedder import Embedder
 
@@ -81,7 +74,6 @@ def main(params: dict):
         input_patterns=sys.argv[2].split(",") if len(sys.argv) > 2 else None,
         input_extension="feather",
     )
-    # create_output_dir(OUTPUT_DIRECTORY)
 
     df = pd.read_feather(input_files[0])
 
@@ -89,7 +81,11 @@ def main(params: dict):
         df, params["feature_handler_file"]
     )
     train_df, test_df, encoding_reference_values = prepare_data_for_fit(
-        df, numerical_features, categorical_features, params
+        df,
+        numerical_features,
+        categorical_features,
+        normalisation_method=params["normalisation_method"],
+        test_data_fraction=params["test_data_fraction"],
     )
 
     train_df_target = tf.keras.utils.to_categorical(train_df.pop("species"))
