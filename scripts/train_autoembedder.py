@@ -1,6 +1,5 @@
-"""Train the AutoEmbedder Model.
-
-python train_autoembedder.py ./train_input/
+"""
+python scripts/supervised_classification_wembedding.py ./data/training_input
 """
 
 import sys
@@ -150,7 +149,7 @@ def prepare_data_for_fit(
         df[numerical_features], method=normalisation_method
     )
     df = pd.concat([df_numericals_normalised, df_encoded], axis=1)
-    train_df, test_df = train_test_split(df, test_data_fraction=test_data_fraction)
+    train_df, test_df = train_test_split(df, test_size=test_data_fraction)
     return train_df, test_df, embedding_encoder
 
 
@@ -166,7 +165,6 @@ def train_autoembedder(df: pd.DataFrame, params: dict) -> pd.DataFrame:
     numerical_features, categorical_features = load_features(
         df, params["feature_handler_file"]
     )
-    # TODO does this make a difference?
     train_df, test_df, encoding_reference_values = prepare_data_for_fit(
         df,
         numerical_features,
@@ -174,7 +172,6 @@ def train_autoembedder(df: pd.DataFrame, params: dict) -> pd.DataFrame:
         normalisation_method=params["normalisation_method"],
         test_data_fraction=params["test_data_fraction"],
     )
-
     auto_embedder = AutoEmbedder(
         encoding_reference_values=encoding_reference_values,
         numerical_features=numerical_features,

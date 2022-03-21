@@ -74,7 +74,6 @@ def main(params: dict):
         input_patterns=sys.argv[2].split(",") if len(sys.argv) > 2 else None,
         input_extension="feather",
     )
-    # create_output_dir(OUTPUT_DIRECTORY)
 
     df = pd.read_feather(input_files[0])
 
@@ -82,7 +81,11 @@ def main(params: dict):
         df, params["feature_handler_file"]
     )
     train_df, test_df, encoding_reference_values = prepare_data_for_fit(
-        df, numerical_features, categorical_features, params
+        df,
+        numerical_features,
+        categorical_features,
+        normalisation_method=params["normalisation_method"],
+        test_data_fraction=params["test_data_fraction"],
     )
 
     train_df_target = tf.keras.utils.to_categorical(train_df.pop("species"))
