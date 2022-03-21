@@ -50,4 +50,3 @@ stages:
     - ./data/training_input/
     - ./data/model/
     - ./autoembedder/
-  python scripts/supervised_classification_wembedding.py ./data/training_input
