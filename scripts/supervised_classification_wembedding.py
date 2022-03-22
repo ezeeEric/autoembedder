@@ -1,4 +1,6 @@
-"""Supervised training of a simple classification model using embedding layers.
+"""Train the AutoEmbedder Model.
+
+python train_autoembedder.py ./train_input/
 """
 
 import sys
@@ -7,16 +9,15 @@ import tensorflow as tf
 
 print(f"tensorflow {tf.__version__}")
 
+from utils.feature_handler import FeatureHandler
 from utils.params import with_params
 from utils.utils import get_sorted_input_files
-from scripts.train_autoembedder import (
-    load_features,
-    compile_model,
-    encode_categorical_input_ordinal,
-    normalise_numerical_input_columns,
-)
+from scripts.train_autoembedder import load_features, prepare_data_for_fit
+
+
 from autoembedder.embedder import Embedder
-from sklearn.model_selection import KFold, train_test_split
+
+OUTPUT_DIRECTORY = ""
 
 
 class SimpleClassificationNetwork(Embedder):
@@ -46,62 +47,65 @@ class SimpleClassificationNetwork(Embedder):
         return self.classification_model(full_input)
 
 
-def prepare_penguins_for_fit(
-    df: tf.Tensor,
-    numerical_features: list[str],
-    categorical_features: list[str],
-    config: dict,
-) -> tf.Tensor:
-    """This function first encodes the categorical input, then normalises the numerical input and finally merges the result."""
-    # TODO this is somewhat duplicated with apply_ordinal_encoding_column()
-    df_encoded, embedding_encoder = encode_categorical_input_ordinal(
-        df[categorical_features]
+# TODO this function should rather be part of main
+def prepare_penguin_data(
+    df: pd.DataFrame,
+    params: dict[str],
+) -> list:
+
+    numerical_features, categorical_features = load_features(
+        df, params["feature_handler_file"]
     )
-    df_numericals_normalised = normalise_numerical_input_columns(
-        df[numerical_features], method=config["normalisation_method"]
+    train_df, test_df, encoding_reference_values = prepare_data_for_fit(
+        df,
+        numerical_features,
+        categorical_features,
+        normalisation_method=params["normalisation_method"],
+        test_data_fraction=params["test_data_fraction"],
     )
 
-    return pd.concat([df_encoded, df_numericals_normalised], axis=1), embedding_encoder
+    train_df_target = tf.keras.utils.to_categorical(train_df.pop("species"))
+    test_df_target = tf.keras.utils.to_categorical(test_df.pop("species"))
+    num_feat = ["bill_depth_mm", "bill_length_mm", "body_mass_g", "flipper_length_mm"]
+    categorical_features.remove("species")
+    encoding_reference_values.pop("species")
+
+    train_df_num, train_df_cat = train_df[num_feat], train_df[categorical_features]
+    test_df_num, test_df_cat = test_df[num_feat], test_df[categorical_features]
+
+    return (
+        train_df_num,
+        train_df_cat,
+        test_df_num,
+        test_df_cat,
+        train_df_target,
+        test_df_target,
+        num_feat,
+        encoding_reference_values,
+    )
 
 
-# TODO this could be implemented
-# def create_k_fold_split(X_data, y_data, n_splits):
-#     def gen():
-#         for train_index, test_index in KFold(n_splits).split(X_data):
-#             X_train, X_test = X_data[train_index], X_data[test_index]
-#             y_train, y_test = y_data[train_index], y_data[test_index]
-#             yield X_train, y_train, X_test, y_test
-
-#     return tf.data.Dataset.from_generator(
-#         gen, (tf.float64, tf.float64, tf.float64, tf.float64)
-#     )
-
-
-def split_datasets(
-    df: pd.DataFrame, config: dict
-) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
-    train_df, test_df = train_test_split(df, test_size=config["test_data_fraction"])
-    return train_df, test_df
-
-
-def fit_simple_classification_model(
-    model,
-    train_data_num,
-    train_data_cat,
-    y,
+def run_simple_classification(
+    train_data_num, train_data_cat, y, model
 ) -> tf.keras.Model:
-    model.fit([train_data_cat, train_data_num], y, epochs=200, verbose=1)
+    model.compile(
+        loss=tf.keras.losses.categorical_crossentropy,
+        optimizer=tf.keras.optimizers.SGD(learning_rate=0.05),
+        metrics=["accuracy"],
+    )
+    model.fit([train_data_cat, train_data_num], y, epochs=100, verbose=1)
+    pass
 
 
 def evaluate_simple_classification(
     model, test_df_num, test_df_cat, test_target
 ) -> None:
-    eval_metrics = model.evaluate([test_df_cat, test_df_num], test_target, verbose=0)
-    for idx, metric in enumerate(eval_metrics):
-        print(f"Test set {model.metrics_names[idx]}: {metric}")
+    loss, accuracy = model.evaluate([test_df_cat, test_df_num], test_target, verbose=0)
+    print(f" Model loss on the test set: {loss}")
+    print(f" Model accuracy on the test set: {100*accuracy}")
 
 
-@with_params("params.yaml", "train_simple_classification_model")
+@with_params("params.yaml", "train_model")
 def main(params: dict):
 
     input_files = get_sorted_input_files(
@@ -112,37 +116,23 @@ def main(params: dict):
 
     df = pd.read_feather(input_files[0])
 
-    numerical_features, categorical_features = load_features(
-        df, params["feature_handler_file"]
-    )
-    df, encoding_reference_values = prepare_penguins_for_fit(
-        df, numerical_features, categorical_features, params
-    )
-
-    train_df, test_df = split_datasets(df, params)
-
-    train_df_target = tf.keras.utils.to_categorical(train_df.pop("species"))
-    test_df_target = tf.keras.utils.to_categorical(test_df.pop("species"))
-
-    num_feat = ["bill_depth_mm", "bill_length_mm", "body_mass_g", "flipper_length_mm"]
-    categorical_features.remove("species")
-    encoding_reference_values.pop("species")
+    (
+        train_df_num,
+        train_df_cat,
+        test_df_num,
+        test_df_cat,
+        train_df_target,
+        test_df_target,
+        num_feat,
+        encoding_reference_values,
+    ) = prepare_penguin_data(df, params)
 
     model = SimpleClassificationNetwork(
         n_numerical_inputs=len(num_feat),
         encoding_reference_values=encoding_reference_values,
         config=params,
     )
-    compile_model(
-        model=model,
-        learning_rate=params["learning_rate"],
-        optimizer_name=params["optimizer"],
-        loss_name=params["loss"],
-        metrics=params["metrics"],
-    )
-    train_df_num, train_df_cat = train_df[num_feat], train_df[categorical_features]
-    test_df_num, test_df_cat = test_df[num_feat], test_df[categorical_features]
-    fit_simple_classification_model(model, train_df_num, train_df_cat, train_df_target)
+    run_simple_classification(train_df_num, train_df_cat, train_df_target, model)
     evaluate_simple_classification(model, test_df_num, test_df_cat, test_df_target)
 
 
