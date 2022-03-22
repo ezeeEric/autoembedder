@@ -136,7 +136,7 @@ stages:
     - python scripts/train_autoembedder.py ./data/training_input/
     deps:
     - path: ./autoembedder/
-      md5: 2c28fa5e18fce19a137852d5c30a3671.dir
+      md5: 749fcaef01c80767764dcfdc1278692b.dir
       size: 37608
       nfiles: 5
     - path: ./data/training_input/
@@ -172,6 +172,32 @@ stages:
           epochs: 100
     outs:
     - path: ./data/model/
-      md5: 404266dfc1085c8cd0cb8e1e101351b1.dir
-      size: 263809
+      md5: 1d2c06d788f19705fca5f1667b913333.dir
+      size: 263811
       nfiles: 4
+  train_supervised_classification_embedding:
+    cmd:
+    - python scripts/supervised_classification_wembedding.py ./data/training_input/
+    deps:
+    - path: ./data/training_input/
+      md5: 76518463305c60240aba1a1514d686a0.dir
+      size: 12754
+      nfiles: 1
+    - path: ./scripts/supervised_classification_wembedding.py
+      md5: 439c1951d58dffd34f653f0ec0ea5d64
+      size: 4644
+    params:
+      params.yaml:
+        train_simple_classification_model:
+          feature_handler_file: ./feature_handling/feature_handler.json
+          activation_function: ReLU
+          normalisation_method: manual
+          test_data_fraction: 0.2
+          embeddings_initializer: uniform
+          optimizer: adam
+          loss: cce
+          learning_rate: 0.1
+          metrics:
+          - accuracy
+          batch_size: 32
+          epochs: 100

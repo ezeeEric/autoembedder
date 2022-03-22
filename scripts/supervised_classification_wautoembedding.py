@@ -100,7 +100,9 @@ def main(params: dict):
         test_df_target,
         num_feat,
         encoding_reference_values,
+        encoding_reference_values_target,
     ) = prepare_penguin_data(df, params)
+
     autoembedder = get_model(sys.argv[2])
     model = SimpleClassificationNetworkWithEmbedder(
         n_numerical_inputs=len(num_feat),
