@@ -53,7 +53,5 @@ stages:
     params:
     - train_simple_classification_model
     deps:
-    - scripts/test_autoembedder.py
     - ./data/training_input/
-    - ./data/model/
-    - ./autoembedder/
+    - ./scripts/supervised_classification_wautoembedding.py

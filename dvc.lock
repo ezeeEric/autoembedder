@@ -201,3 +201,30 @@ stages:
           - accuracy
           batch_size: 32
           epochs: 100
+  train_supervised_classification_autoembedding:
+    cmd:
+    - python scripts/supervised_classification_wautoembedding.py ./data/training_input/
+      ./data/model/autoembedder
+    deps:
+    - path: ./data/training_input/
+      md5: 76518463305c60240aba1a1514d686a0.dir
+      size: 12754
+      nfiles: 1
+    - path: ./scripts/supervised_classification_wautoembedding.py
+      md5: eabf5cbf3663d467f9d24801c5a640f3
+      size: 4115
+    params:
+      params.yaml:
+        train_simple_classification_model:
+          feature_handler_file: ./feature_handling/feature_handler.json
+          activation_function: ReLU
+          normalisation_method: manual
+          test_data_fraction: 0.2
+          embeddings_initializer: uniform
+          optimizer: adam
+          loss: cce
+          learning_rate: 0.1
+          metrics:
+          - accuracy
+          batch_size: 32
+          epochs: 100
