@@ -19,7 +19,7 @@ stages:
     cmd:
     - python scripts/train_autoembedder.py ./data/training_input/
     params:
-    - train_model
+    - train_autoembedder
     deps:
     - scripts/train_autoembedder.py
     - ./feature_handling/feature_handler.json

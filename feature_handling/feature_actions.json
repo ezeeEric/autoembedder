@@ -1,5 +1,6 @@
 {
     "drop": [
-        "year"
+        "year",
+        "species"
     ]
 }

@@ -1,7 +1,7 @@
 data_preprocessing:
     feature_handler_dir: ./feature_handling/
     feature_action_file: ./feature_handling/feature_actions.json
-train_model:
+train_autoembedder:
     feature_handler_file: ./feature_handling/feature_handler.json
     # manual_encoder_architecture: [4,4,2] #empty list [] for automatic autencoder shape
     manual_encoder_architecture: [] #empty list [] for automatic autencoder shape
@@ -35,5 +35,3 @@ train_simple_classification_model:
     # - precision
     batch_size: 32
     epochs: 100
-test_model:
-    test: 0

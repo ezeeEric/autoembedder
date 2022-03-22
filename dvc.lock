@@ -104,8 +104,8 @@ stages:
     - python scripts/preprocess_data.py
     deps:
     - path: ./feature_handling/feature_actions.json
-      md5: e8e3e9914c06f1bf8886c8259f317275
-      size: 38
+      md5: f9c04c2712b6eb69abd73ba0a9616149
+      size: 57
     - path: scripts/preprocess_data.py
       md5: 97ac2b82ba83262cdcbee3e7453a0c10
       size: 2894
@@ -122,12 +122,56 @@ stages:
           feature_action_file: ./feature_handling/feature_actions.json
     outs:
     - path: data/training_input/
-      md5: 76518463305c60240aba1a1514d686a0.dir
-      size: 12754
+      md5: b7a9e006780f8633319be0ced4a02b74.dir
+      size: 10938
       nfiles: 1
     - path: feature_handling/feature_handler.json
-      md5: 070f9288be784dc10bfabf9626d828fd
-      size: 2365
+      md5: 62f7200fd6015792d09a3831a2ba4d73
+      size: 2424
     - path: feature_handling/feature_handler_pretty_summary.json
       md5: 85530058600ceb2075fc5fa4246b76da
       size: 594
+  train_autoembedder:
+    cmd:
+    - python scripts/train_autoembedder.py ./data/training_input/
+    deps:
+    - path: ./autoembedder/
+      md5: 2c28fa5e18fce19a137852d5c30a3671.dir
+      size: 37608
+      nfiles: 5
+    - path: ./data/training_input/
+      md5: b7a9e006780f8633319be0ced4a02b74.dir
+      size: 10938
+      nfiles: 1
+    - path: ./feature_handling/feature_handler.json
+      md5: 62f7200fd6015792d09a3831a2ba4d73
+      size: 2424
+    - path: ./utils/feature_handler.py
+      md5: 4bd8400f2e2c620f11b68b30d7f1c12f
+      size: 12163
+    - path: scripts/train_autoembedder.py
+      md5: 653534a9106a6ca179d2168d3131363d
+      size: 6872
+    params:
+      params.yaml:
+        train_autoembedder:
+          feature_handler_file: ./feature_handling/feature_handler.json
+          manual_encoder_architecture: []
+          manual_decoder_architecture: []
+          activation_function: ReLU
+          test_data_fraction: 0.2
+          embeddings_initializer: uniform
+          normalisation_method: manual
+          optimizer: adam
+          loss: mse
+          learning_rate: 0.05
+          metric:
+          - accuracy
+          - precision
+          batch_size: 32
+          epochs: 100
+    outs:
+    - path: ./data/model/
+      md5: 9f974d25ab97529e72092ded03f9e69c.dir
+      size: 263819
+      nfiles: 4

@@ -11,8 +11,6 @@ import tensorflow as tf
 from sklearn.preprocessing import OrdinalEncoder, MinMaxScaler, StandardScaler
 from sklearn.model_selection import train_test_split
 
-print(f"tensorflow {tf.__version__}")
-
 from autoembedder.autoembedder import AutoEmbedder
 from utils.feature_handler import FeatureHandler
 from utils.params import with_params
@@ -198,7 +196,7 @@ def train_autoembedder(df: pd.DataFrame, params: dict) -> pd.DataFrame:
     return auto_embedder
 
 
-@with_params("params.yaml", "train_model")
+@with_params("params.yaml", "train_autoembedder")
 def main(params):
 
     input_files = get_sorted_input_files(
