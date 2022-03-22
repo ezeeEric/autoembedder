@@ -42,7 +42,7 @@ stages:
   train_supervised_classification_embedding:
     desc: "Test the trained AutoEmbedding model."
     cmd:
-    - python scripts/test_autoembedder.py ./data/training_input/ ./data/model/autoembedder
+    - python scripts/supervised_classification_wautoembedding.py ./data/training_input/ ./data/model/autoembedder
     params:
     - test_model
     deps:
@@ -50,4 +50,3 @@ stages:
     - ./data/training_input/
     - ./data/model/
     - ./autoembedder/
-  python scripts/supervised_classification_wembedding.py ./data/training_input
