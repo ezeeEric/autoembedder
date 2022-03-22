@@ -56,6 +56,8 @@ def prepare_penguin_data(
     numerical_features, categorical_features = load_features(
         df, params["feature_handler_file"]
     )
+    # TODO this is ugly handling of the target
+    categorical_features.append("species")
     train_df, test_df, encoding_reference_values = prepare_data_for_fit(
         df,
         numerical_features,
@@ -85,6 +87,7 @@ def prepare_penguin_data(
     )
 
 
+# TODO steer me
 def run_simple_classification(
     train_data_num, train_data_cat, y, model
 ) -> tf.keras.Model:

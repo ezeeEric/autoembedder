@@ -155,12 +155,14 @@ def load_features(
     df: pd.DataFrame, feature_handler_file: str
 ) -> Tuple[list[str], list[str]]:
     feature_handler = FeatureHandler.from_json(feature_handler_file)
-    numerical_features, categorical_features = select_features(df, feature_handler)
-    return numerical_features, categorical_features
+    numerical_features, categorical_features, target_features = select_features(
+        df, feature_handler
+    )
+    return numerical_features, categorical_features, target_features
 
 
 def train_autoembedder(df: pd.DataFrame, params: dict) -> pd.DataFrame:
-    numerical_features, categorical_features = load_features(
+    numerical_features, categorical_features, _ = load_features(
         df, params["feature_handler_file"]
     )
     train_df, test_df, encoding_reference_values = prepare_data_for_fit(

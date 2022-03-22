@@ -25,15 +25,23 @@ def select_features(df: pd.DataFrame, feature_handler: FeatureHandler) -> None:
     features_autoembedding_categorical = feature_handler.get_selected_features_names(
         include_features_with_flags=["is_non_numerical"],
         exclude_features_with_flags=["is_constant", "is_index"],
-        exclude_features_with_actions=["drop"],
+        exclude_features_with_actions=["drop", "target"],
         available_feature_names=df.columns,
     )
-    return features_autoembedding_numerical, features_autoembedding_categorical
+    other_features = feature_handler.get_selected_features_names(
+        include_features_with_actions=["target"],
+        available_feature_names=df.columns,
+    )
+    return (
+        features_autoembedding_numerical,
+        features_autoembedding_categorical,
+        other_features,
+    )
 
 
 def filter_columns(df: pd.DataFrame, feature_handler: FeatureHandler) -> pd.DataFrame:
-    numerical_cols, categorical_cols = select_features(df, feature_handler)
-    return df[numerical_cols + categorical_cols]
+    numerical_cols, categorical_cols, other_cols = select_features(df, feature_handler)
+    return df[numerical_cols + categorical_cols + other_cols]
 
 
 def remove_duplicates(df: pd.DataFrame) -> pd.DataFrame:

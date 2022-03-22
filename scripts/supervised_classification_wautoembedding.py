@@ -18,16 +18,19 @@ from scripts.supervised_classification_wembedding import (
     evaluate_simple_classification,
     prepare_penguin_data,
 )
-from autoembedder.embedder import Embedder
+from autoembedder.autoembedder import AutoEmbedder
 from scripts.test_autoembedder import get_model
 
 OUTPUT_DIRECTORY = ""
 
 
-class SimpleClassificationNetwork(Embedder):
-    def __init__(self, n_numerical_inputs: int, **kwargs) -> None:
-        super().__init__(**kwargs)
+class SimpleClassificationNetworkWithEmbedder(SimpleClassificationNetwork):
+    def __init__(
+        self, n_numerical_inputs: int, autoembedder: AutoEmbedder, **kwargs
+    ) -> None:
+        super().__init__(n_numerical_inputs, **kwargs)
 
+        self.autoembedder = autoembedder
         input_length = n_numerical_inputs + sum(self.embedding_layers_output_dimensions)
 
         self.classification_model = tf.keras.Sequential(
@@ -38,6 +41,32 @@ class SimpleClassificationNetwork(Embedder):
                 tf.keras.layers.Dense(3, activation="softmax"),
             ]
         )
+
+    def train_step(self, input_batch: tf.Tensor) -> dict:
+        (data_cat, data_num), target = input_batch
+        # for layer_idx, layer in enumerate(self.embedding_layers):
+        #     encoded_column = get_encoded_column(inputs, layer_idx)
+        #     embedded_column = layer(encoded_column)
+        embedding_layer_output = self.autoembedder._forward_call_embedder(data_cat)
+        # print(embedding_layer_output)
+        exit()
+        # with tf.GradientTape() as tape:
+        #     auto_encoder_input = prepare_data_for_encoder(
+        #         numerical_input, embedding_layer_output
+        #     )
+
+        #     auto_encoder_output = self(auto_encoder_input, training=True)
+        #     loss = self.compiled_loss(
+        #         y_true=auto_encoder_input, y_pred=auto_encoder_output
+        #     )
+
+        # # Compute gradients
+        # trainable_vars = self.trainable_variables
+        # gradients = tape.gradient(loss, trainable_vars)
+
+        # # Update weights
+        # self.optimizer.apply_gradients(zip(gradients, trainable_vars))
+        # return {"loss": loss}
 
     def call(self, inputs: list[tf.Tensor], training: bool = None) -> tf.Tensor:
         # feed through embedder
@@ -51,7 +80,7 @@ class SimpleClassificationNetwork(Embedder):
         return self.classification_model(full_input)
 
 
-@with_params("params.yaml", "train_model")
+@with_params("params.yaml", "train_simple_classification_model")
 def main(params: dict):
 
     input_files = get_sorted_input_files(
@@ -61,8 +90,6 @@ def main(params: dict):
     )
 
     df = pd.read_feather(input_files[0])
-
-    autoembedder = get_model(sys.argv[2])
 
     (
         train_df_num,
@@ -74,13 +101,13 @@ def main(params: dict):
         num_feat,
         encoding_reference_values,
     ) = prepare_penguin_data(df, params)
-
-    model = SimpleClassificationNetwork(
+    autoembedder = get_model(sys.argv[2])
+    model = SimpleClassificationNetworkWithEmbedder(
         n_numerical_inputs=len(num_feat),
+        autoembedder=autoembedder,
         encoding_reference_values=encoding_reference_values,
         config=params,
     )
-
     run_simple_classification(train_df_num, train_df_cat, train_df_target, model)
     evaluate_simple_classification(model, test_df_num, test_df_cat, test_df_target)
 
