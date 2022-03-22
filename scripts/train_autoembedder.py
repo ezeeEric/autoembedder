@@ -11,8 +11,6 @@ import tensorflow as tf
 from sklearn.preprocessing import OrdinalEncoder, MinMaxScaler, StandardScaler
 from sklearn.model_selection import train_test_split
 
-print(f"tensorflow {tf.__version__}")
-
 from autoembedder.autoembedder import AutoEmbedder
 from utils.feature_handler import FeatureHandler
 from utils.params import with_params
@@ -157,12 +155,14 @@ def load_features(
     df: pd.DataFrame, feature_handler_file: str
 ) -> Tuple[list[str], list[str]]:
     feature_handler = FeatureHandler.from_json(feature_handler_file)
-    numerical_features, categorical_features = select_features(df, feature_handler)
-    return numerical_features, categorical_features
+    numerical_features, categorical_features, target_features = select_features(
+        df, feature_handler
+    )
+    return numerical_features, categorical_features, target_features
 
 
 def train_autoembedder(df: pd.DataFrame, params: dict) -> pd.DataFrame:
-    numerical_features, categorical_features = load_features(
+    numerical_features, categorical_features, _ = load_features(
         df, params["feature_handler_file"]
     )
     train_df, test_df, encoding_reference_values = prepare_data_for_fit(
@@ -198,7 +198,7 @@ def train_autoembedder(df: pd.DataFrame, params: dict) -> pd.DataFrame:
     return auto_embedder
 
 
-@with_params("params.yaml", "train_model")
+@with_params("params.yaml", "train_autoembedder")
 def main(params):
 
     input_files = get_sorted_input_files(

@@ -18,16 +18,19 @@ from scripts.supervised_classification_wembedding import (
     evaluate_simple_classification,
     prepare_penguin_data,
 )
-from autoembedder.embedder import Embedder
+from autoembedder.autoembedder import AutoEmbedder
 from scripts.test_autoembedder import get_model
 
 OUTPUT_DIRECTORY = ""
 
 
-class SimpleClassificationNetwork(Embedder):
-    def __init__(self, n_numerical_inputs: int, **kwargs) -> None:
-        super().__init__(**kwargs)
+class SimpleClassificationNetworkWithEmbedder(SimpleClassificationNetwork):
+    def __init__(
+        self, n_numerical_inputs: int, autoembedder: AutoEmbedder, **kwargs
+    ) -> None:
+        super().__init__(n_numerical_inputs, **kwargs)
 
+        self.autoembedder = autoembedder
         input_length = n_numerical_inputs + sum(self.embedding_layers_output_dimensions)
 
         self.classification_model = tf.keras.Sequential(
@@ -39,19 +42,42 @@ class SimpleClassificationNetwork(Embedder):
             ]
         )
 
-    def call(self, inputs: list[tf.Tensor], training: bool = None) -> tf.Tensor:
-        # feed through embedder
+    def train_step(self, input_batch: tf.Tensor) -> dict:
+        (data_cat, data_num), target = input_batch
+        embedding_layer_output = self.autoembedder._forward_call_embedder(data_cat)
+        network_input = tf.concat([data_num, embedding_layer_output], axis=1)
+        with tf.GradientTape() as tape:
+            network_output = self(network_input, training=True)
+            loss = self.compiled_loss(y_true=target, y_pred=network_output)
+        # Compute gradients
+        trainable_vars = self.trainable_variables
+        # https://www.tensorflow.org/api_docs/python/tf/UnconnectedGradients
+        gradients = tape.gradient(
+            loss, trainable_vars, unconnected_gradients=tf.UnconnectedGradients.ZERO
+        )
 
-        # get output and feed to network
+        # Update weights
+        self.optimizer.apply_gradients(zip(gradients, trainable_vars))
+        return {"loss": loss}
 
-        input_cat_enc = inputs[0]
-        input_num = tf.cast(inputs[1], dtype=tf.float64)
-        embedded_input = self._forward_call_embedder(input_cat_enc)
-        full_input = tf.concat([embedded_input, input_num], axis=1)
-        return self.classification_model(full_input)
+    def test_step(self, input_batch: tf.Tensor) -> dict:
+        (data_cat, data_num), target = input_batch
+        embedding_layer_output = self.autoembedder._forward_call_embedder(data_cat)
+        network_input = tf.concat([data_num, embedding_layer_output], axis=1)
+        network_output = self(network_input, training=True)
+        # Updates the metrics tracking the loss
+        self.compiled_loss(target, network_output, regularization_losses=self.losses)
+        # Update the metrics.
+        self.compiled_metrics.update_state(target, network_output)
+        # Return a dict mapping metric names to current value.
+        # Note that it will include the loss (tracked in self.metrics).
+        return {m.name: m.result() for m in self.metrics}
+
+    def call(self, input_data: tf.Tensor, training: bool = None) -> tf.Tensor:
+        return self.classification_model(input_data)
 
 
-@with_params("params.yaml", "train_model")
+@with_params("params.yaml", "train_simple_classification_model")
 def main(params: dict):
 
     input_files = get_sorted_input_files(
@@ -62,8 +88,6 @@ def main(params: dict):
 
     df = pd.read_feather(input_files[0])
 
-    autoembedder = get_model(sys.argv[2])
-
     (
         train_df_num,
         train_df_cat,
@@ -71,16 +95,17 @@ def main(params: dict):
         test_df_cat,
         train_df_target,
         test_df_target,
-        num_feat,
         encoding_reference_values,
+        encoding_reference_values_target,
     ) = prepare_penguin_data(df, params)
 
-    model = SimpleClassificationNetwork(
-        n_numerical_inputs=len(num_feat),
+    autoembedder = get_model(sys.argv[2])
+    model = SimpleClassificationNetworkWithEmbedder(
+        n_numerical_inputs=len(train_df_num.columns),
+        autoembedder=autoembedder,
         encoding_reference_values=encoding_reference_values,
         config=params,
     )
-
     run_simple_classification(train_df_num, train_df_cat, train_df_target, model)
     evaluate_simple_classification(model, test_df_num, test_df_cat, test_df_target)
 

@@ -53,26 +53,29 @@ def prepare_penguin_data(
     params: dict[str],
 ) -> list:
 
-    numerical_features, categorical_features = load_features(
+    numerical_features, categorical_features, target_features = load_features(
         df, params["feature_handler_file"]
     )
     train_df, test_df, encoding_reference_values = prepare_data_for_fit(
         df,
         numerical_features,
-        categorical_features,
+        categorical_features + target_features,
         normalisation_method=params["normalisation_method"],
         test_data_fraction=params["test_data_fraction"],
     )
 
-    train_df_target = tf.keras.utils.to_categorical(train_df.pop("species"))
-    test_df_target = tf.keras.utils.to_categorical(test_df.pop("species"))
-    num_feat = ["bill_depth_mm", "bill_length_mm", "body_mass_g", "flipper_length_mm"]
-    categorical_features.remove("species")
-    encoding_reference_values.pop("species")
+    train_df_num, train_df_cat, train_df_target = (
+        train_df[numerical_features],
+        train_df[categorical_features],
+        tf.keras.utils.to_categorical(train_df[target_features]),
+    )
+    test_df_num, test_df_cat, test_df_target = (
+        test_df[numerical_features],
+        test_df[categorical_features],
+        tf.keras.utils.to_categorical(test_df[target_features]),
+    )
 
-    train_df_num, train_df_cat = train_df[num_feat], train_df[categorical_features]
-    test_df_num, test_df_cat = test_df[num_feat], test_df[categorical_features]
-
+    encoding_reference_values_target = encoding_reference_values.pop("species")
     return (
         train_df_num,
         train_df_cat,
@@ -80,20 +83,21 @@ def prepare_penguin_data(
         test_df_cat,
         train_df_target,
         test_df_target,
-        num_feat,
         encoding_reference_values,
+        encoding_reference_values_target,
     )
 
 
+# TODO steer me
 def run_simple_classification(
-    train_data_num, train_data_cat, y, model
+    train_data_num, train_data_cat, target_data, model
 ) -> tf.keras.Model:
     model.compile(
         loss=tf.keras.losses.categorical_crossentropy,
         optimizer=tf.keras.optimizers.SGD(learning_rate=0.05),
         metrics=["accuracy"],
     )
-    model.fit([train_data_cat, train_data_num], y, epochs=100, verbose=1)
+    model.fit([train_data_cat, train_data_num], target_data, epochs=100, verbose=1)
     pass
 
 
@@ -105,7 +109,7 @@ def evaluate_simple_classification(
     print(f" Model accuracy on the test set: {100*accuracy}")
 
 
-@with_params("params.yaml", "train_model")
+@with_params("params.yaml", "train_simple_classification_model")
 def main(params: dict):
 
     input_files = get_sorted_input_files(
@@ -123,12 +127,12 @@ def main(params: dict):
         test_df_cat,
         train_df_target,
         test_df_target,
-        num_feat,
         encoding_reference_values,
+        encoding_reference_values_target,
     ) = prepare_penguin_data(df, params)
 
     model = SimpleClassificationNetwork(
-        n_numerical_inputs=len(num_feat),
+        n_numerical_inputs=len(train_df_num.columns),
         encoding_reference_values=encoding_reference_values,
         config=params,
     )

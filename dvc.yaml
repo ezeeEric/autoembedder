@@ -19,7 +19,7 @@ stages:
     cmd:
     - python scripts/train_autoembedder.py ./data/training_input/
     params:
-    - train_model
+    - train_autoembedder
     deps:
     - scripts/train_autoembedder.py
     - ./feature_handling/feature_handler.json
@@ -40,13 +40,18 @@ stages:
     - ./data/model/
     - ./autoembedder/
   train_supervised_classification_embedding:
-    desc: "Test the trained AutoEmbedding model."
+    cmd:
+    - python scripts/supervised_classification_wembedding.py ./data/training_input/
+    params:
+    - train_simple_classification_model
+    deps:
+    - ./data/training_input/
+    - ./scripts/supervised_classification_wembedding.py
+  train_supervised_classification_autoembedding:
     cmd:
     - python scripts/supervised_classification_wautoembedding.py ./data/training_input/ ./data/model/autoembedder
     params:
-    - test_model
+    - train_simple_classification_model
     deps:
-    - scripts/test_autoembedder.py
     - ./data/training_input/
-    - ./data/model/
-    - ./autoembedder/
+    - ./scripts/supervised_classification_wautoembedding.py

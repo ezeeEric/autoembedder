@@ -104,11 +104,11 @@ stages:
     - python scripts/preprocess_data.py
     deps:
     - path: ./feature_handling/feature_actions.json
-      md5: e8e3e9914c06f1bf8886c8259f317275
-      size: 38
+      md5: 861bff553bc372dc5cc343e909f69b4f
+      size: 79
     - path: scripts/preprocess_data.py
-      md5: 97ac2b82ba83262cdcbee3e7453a0c10
-      size: 2894
+      md5: 9be17c606a7d20ecee1bc47c02c69d9e
+      size: 3144
     - path: utils/feature_handler.py
       md5: 4bd8400f2e2c620f11b68b30d7f1c12f
       size: 12163
@@ -126,8 +126,105 @@ stages:
       size: 12754
       nfiles: 1
     - path: feature_handling/feature_handler.json
-      md5: 070f9288be784dc10bfabf9626d828fd
-      size: 2365
+      md5: dfb240b251b8a11fa558492ebc47fe47
+      size: 2456
     - path: feature_handling/feature_handler_pretty_summary.json
       md5: 85530058600ceb2075fc5fa4246b76da
       size: 594
+  train_autoembedder:
+    cmd:
+    - python scripts/train_autoembedder.py ./data/training_input/
+    deps:
+    - path: ./autoembedder/
+      md5: 749fcaef01c80767764dcfdc1278692b.dir
+      size: 37608
+      nfiles: 5
+    - path: ./data/training_input/
+      md5: 76518463305c60240aba1a1514d686a0.dir
+      size: 12754
+      nfiles: 1
+    - path: ./feature_handling/feature_handler.json
+      md5: dfb240b251b8a11fa558492ebc47fe47
+      size: 2456
+    - path: ./utils/feature_handler.py
+      md5: 4bd8400f2e2c620f11b68b30d7f1c12f
+      size: 12163
+    - path: scripts/train_autoembedder.py
+      md5: 58641c533d3179a7fe46e9e64a51429e
+      size: 6923
+    params:
+      params.yaml:
+        train_autoembedder:
+          feature_handler_file: ./feature_handling/feature_handler.json
+          manual_encoder_architecture: []
+          manual_decoder_architecture: []
+          activation_function: ReLU
+          test_data_fraction: 0.2
+          embeddings_initializer: uniform
+          normalisation_method: manual
+          optimizer: adam
+          loss: mse
+          learning_rate: 0.05
+          metric:
+          - accuracy
+          - precision
+          batch_size: 32
+          epochs: 100
+    outs:
+    - path: ./data/model/
+      md5: 1d2c06d788f19705fca5f1667b913333.dir
+      size: 263811
+      nfiles: 4
+  train_supervised_classification_embedding:
+    cmd:
+    - python scripts/supervised_classification_wembedding.py ./data/training_input/
+    deps:
+    - path: ./data/training_input/
+      md5: 76518463305c60240aba1a1514d686a0.dir
+      size: 12754
+      nfiles: 1
+    - path: ./scripts/supervised_classification_wembedding.py
+      md5: 439c1951d58dffd34f653f0ec0ea5d64
+      size: 4644
+    params:
+      params.yaml:
+        train_simple_classification_model:
+          feature_handler_file: ./feature_handling/feature_handler.json
+          activation_function: ReLU
+          normalisation_method: manual
+          test_data_fraction: 0.2
+          embeddings_initializer: uniform
+          optimizer: adam
+          loss: cce
+          learning_rate: 0.1
+          metrics:
+          - accuracy
+          batch_size: 32
+          epochs: 100
+  train_supervised_classification_autoembedding:
+    cmd:
+    - python scripts/supervised_classification_wautoembedding.py ./data/training_input/
+      ./data/model/autoembedder
+    deps:
+    - path: ./data/training_input/
+      md5: 76518463305c60240aba1a1514d686a0.dir
+      size: 12754
+      nfiles: 1
+    - path: ./scripts/supervised_classification_wautoembedding.py
+      md5: eabf5cbf3663d467f9d24801c5a640f3
+      size: 4115
+    params:
+      params.yaml:
+        train_simple_classification_model:
+          feature_handler_file: ./feature_handling/feature_handler.json
+          activation_function: ReLU
+          normalisation_method: manual
+          test_data_fraction: 0.2
+          embeddings_initializer: uniform
+          optimizer: adam
+          loss: cce
+          learning_rate: 0.1
+          metrics:
+          - accuracy
+          batch_size: 32
+          epochs: 100
