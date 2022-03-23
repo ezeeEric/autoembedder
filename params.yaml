@@ -3,8 +3,8 @@ data_preprocessing:
     feature_action_file: ./feature_handling/feature_actions.json
 train_autoembedder:
     feature_handler_file: ./feature_handling/feature_handler.json
-    # manual_encoder_architecture: [4,4,2] #empty list [] for automatic autencoder shape
-    manual_encoder_architecture: [] #empty list [] for automatic autencoder shape
+    manual_encoder_architecture: [7,5] #empty list [] for automatic autencoder shape
+    # manual_encoder_architecture: [] #empty list [] for automatic autencoder shape
     manual_decoder_architecture: [] #empty list [] for default symmetric autoencoder shape
     activation_function: ReLU
     test_data_fraction: 0.2
@@ -12,7 +12,7 @@ train_autoembedder:
     normalisation_method: manual
     optimizer: adam
     loss: mse
-    learning_rate: 0.05
+    learning_rate: 0.01
     metric:
     - accuracy
     - precision

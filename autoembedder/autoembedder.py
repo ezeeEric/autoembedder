@@ -129,6 +129,8 @@ class AutoEmbedder(Embedder):
         self.encoder = self.setup_encoder(self.encoder_shape)
         self.decoder = self.setup_decoder(self.decoder_shape)
 
+        self.last_input_output = []
+
     def get_config(self):
         config_dict = {
             "numerical_features": self.numerical_features,
@@ -163,7 +165,7 @@ class AutoEmbedder(Embedder):
         dec_layers.append(
             layers.Dense(
                 decoder_shape[-1],
-                activation="sigmoid",
+                activation="tanh",
                 name=f"decoder_{len(decoder_shape)}",
             )
         )
@@ -226,9 +228,20 @@ class AutoEmbedder(Embedder):
             )
 
             auto_encoder_output = self(auto_encoder_input, training=True)
+            # print("Input", auto_encoder_input)
+            # print("Output", auto_encoder_output)
             loss = self.compiled_loss(
                 y_true=auto_encoder_input, y_pred=auto_encoder_output
             )
+
+        self.last_input_output = [
+            input_batch,
+            numerical_input,
+            embedding_layer_input,
+            embedding_layer_output,
+            auto_encoder_input,
+            auto_encoder_output,
+        ]
 
         # split autoencoder output to get reconstructed embedding values for confusion metric
         _, embedding_layer_outputs_reco = split_autoencoder_output(

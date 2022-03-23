@@ -59,6 +59,29 @@ def save_autoembedder_model(
     auto_embedder.save(out_file)
 
 
+class AutoembedderCallbacks(tf.keras.callbacks.Callback):
+    def on_train_end(self, logs=None):
+        #     print(f"Input\n{self.model.last_input_output[0]}")
+        #     print(f"Output\n{self.model.last_input_output[1]}")
+
+        # def on_epoch_end(self, epoch, logs=None):
+
+        print(f"\ninput_batch\n {self.model.last_input_output[0]}")
+        print(f"\numerical_input\n {self.model.last_input_output[1]}")
+        print(f"\nembedding_layer_input\n {self.model.last_input_output[2]}")
+        print(f"\nembedding_layer_output\n {self.model.last_input_output[3]}")
+        print(f"\nauto_encoder_input\n {self.model.last_input_output[4]}")
+        print(f"\nauto_encoder_output\n {self.model.last_input_output[5]}")
+        # self.last_input_output = [
+        #     input_batch,
+        #     numerical_input,
+        #     embedding_layer_input,
+        #     embedding_layer_output,
+        #     auto_encoder_input,
+        #     auto_encoder_output,
+        # ]
+
+
 def normalise_numerical_input_columns(
     df: pd.DataFrame, method: str = "minmax"
 ) -> pd.DataFrame:
@@ -94,7 +117,9 @@ def compile_model(
         raise NotImplementedError()
 
     if loss_name == "mse":
-        loss = tf.keras.losses.MeanSquaredError()
+        loss = tf.keras.losses.MeanSquaredError(
+            reduction=tf.keras.losses.Reduction.NONE
+        )
     elif loss_name == "bce":
         loss = tf.keras.losses.BinaryCrossentropy()
     elif loss_name == "cce":
@@ -123,7 +148,13 @@ def train_model(
     df: pd.DataFrame, model: AutoEmbedder, batch_size: int, epochs: int
 ) -> None:
     model.match_feature_to_input_column_idx(columns=df.columns)
-    model.fit(tf.convert_to_tensor(df), batch_size=batch_size, epochs=epochs, verbose=1)
+    model.fit(
+        tf.convert_to_tensor(df),
+        batch_size=batch_size,
+        epochs=epochs,
+        verbose=1,
+        callbacks=[AutoembedderCallbacks()],
+    )
     return model
 
 
