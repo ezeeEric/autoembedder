@@ -8,6 +8,8 @@ from tensorflow.keras import layers
 import pandas as pd
 
 from autoembedder.embedder import Embedder
+from autoembedder.embedding_confusion_metric import EmbeddingConfusionMetric
+
 from sklearn.preprocessing import OrdinalEncoder
 
 
@@ -113,6 +115,11 @@ class AutoEmbedder(Embedder):
 
         self.feature_idx_map = feature_idx_map
 
+        # TODO should this be a member (issues when loading from disk?)
+        self._loss_tracker_epoch = tf.keras.metrics.Mean(name="epoch_loss")
+        self._embedding_confusion_metric = EmbeddingConfusionMetric()
+        self.embeddings_reference_values = {}
+
         self.encoder_shape, self.decoder_shape = determine_autoencoder_shape(
             self.embedding_layers_output_dimensions,
             len(self.numerical_features),
@@ -179,7 +186,6 @@ class AutoEmbedder(Embedder):
     def create_embedding_reference(
         self,
     ) -> None:
-        self.embeddings_reference_values = {}
         for idx, (feature_name, feature_vocabulary) in enumerate(
             self.encoding_reference_values.items()
         ):
@@ -196,6 +202,7 @@ class AutoEmbedder(Embedder):
             self.embeddings_reference_values[feature_name] = list(
                 map(tuple, embedded_vocabulary.numpy())
             )
+        return self.embeddings_reference_values
 
     def train_step(self, input_batch: tf.Tensor) -> dict:
         """A single training step on a batch of the data. This gets called within model.fit() and is repeated for every batch in every epoch.
@@ -223,13 +230,42 @@ class AutoEmbedder(Embedder):
                 y_true=auto_encoder_input, y_pred=auto_encoder_output
             )
 
+        # split autoencoder output to get reconstructed embedding values for confusion metric
+        _, embedding_layer_outputs_reco = split_autoencoder_output(
+            auto_encoder_output,
+            numerical_input.shape[1],
+            self.embedding_layers_output_dimensions,
+        )
+        embeddings_reference_values = self.create_embedding_reference()
+
         # Compute gradients
         trainable_vars = self.trainable_variables
         gradients = tape.gradient(loss, trainable_vars)
 
         # Update weights
         self.optimizer.apply_gradients(zip(gradients, trainable_vars))
-        return {"loss": loss}
+
+        # Compute our own metrics
+        self._loss_tracker_epoch.update_state(loss)
+        self._embedding_confusion_metric.update_state(
+            embedding_layer_input,
+            embedding_layer_outputs_reco,
+            embeddings_reference_values,
+        )
+        return {
+            "loss": self._loss_tracker_epoch.result(),
+            # "emb_conf": self._embedding_confusion_metric.result(),
+            **self._embedding_confusion_metric.result(),
+        }
+
+    @property
+    def metrics(self):
+        # We list our `Metric` objects here so that `reset_states()` can be
+        # called automatically at the start of each epoch
+        # or at the start of `evaluate()`.
+        # If you don't implement this property, you have to call
+        # `reset_states()` yourself at the time of your choosing.
+        return [self._loss_tracker_epoch, self._embedding_confusion_metric]
 
     def test_step(self, input_batch: tf.Tensor) -> dict:
         numerical_input, embedding_layer_input = prepare_data_for_embedder(

@@ -12,6 +12,7 @@ from sklearn.preprocessing import OrdinalEncoder, MinMaxScaler, StandardScaler
 from sklearn.model_selection import train_test_split
 
 from autoembedder.autoembedder import AutoEmbedder
+from autoembedder.embedding_confusion_metric import EmbeddingConfusionMetric
 from utils.feature_handler import FeatureHandler
 from utils.params import with_params
 from utils.utils import create_output_dir, get_sorted_input_files
@@ -122,7 +123,7 @@ def train_model(
     df: pd.DataFrame, model: AutoEmbedder, batch_size: int, epochs: int
 ) -> None:
     model.match_feature_to_input_column_idx(columns=df.columns)
-    model.fit(tf.convert_to_tensor(df), batch_size=batch_size, epochs=epochs, verbose=0)
+    model.fit(tf.convert_to_tensor(df), batch_size=batch_size, epochs=epochs, verbose=1)
     return model
 
 
