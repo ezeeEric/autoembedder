@@ -136,8 +136,8 @@ stages:
     - python scripts/train_autoembedder.py ./data/training_input/
     deps:
     - path: ./autoembedder/
-      md5: e9a73252f491fba26b668e49fe5ea434.dir
-      size: 47675
+      md5: 7419b9db1d975249775993a75da37833.dir
+      size: 47949
       nfiles: 7
     - path: ./data/training_input/
       md5: 76518463305c60240aba1a1514d686a0.dir
@@ -150,8 +150,8 @@ stages:
       md5: 4bd8400f2e2c620f11b68b30d7f1c12f
       size: 12163
     - path: scripts/train_autoembedder.py
-      md5: 281a16baeeffcb1ec16074655bf365b8
-      size: 7000
+      md5: accfb3d38e9a9580e34e7d243142a365
+      size: 7386
     params:
       params.yaml:
         train_autoembedder:
@@ -160,20 +160,20 @@ stages:
           manual_decoder_architecture: []
           activation_function: ReLU
           test_data_fraction: 0.2
-          embeddings_initializer: uniform
+          embeddings_initializer: random_normal
           normalisation_method: manual
           optimizer: adam
           loss: mse
-          learning_rate: 0.05
+          learning_rate: 0.005
           metric:
           - accuracy
           - precision
           batch_size: 32
-          epochs: 100
+          epochs: 10
     outs:
     - path: ./data/model/
-      md5: 5c84efb7b936f5b886c3601eedac74cf.dir
-      size: 268034
+      md5: 70b2ac1a9ea3961a5ad93175dfc45d45.dir
+      size: 267694
       nfiles: 4
   train_supervised_classification_embedding:
     cmd:
