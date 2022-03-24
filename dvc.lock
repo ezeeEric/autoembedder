@@ -171,12 +171,12 @@ stages:
           metric:
           - accuracy
           - precision
-          batch_size: 32
-          epochs: 50
+          batch_size: 64
+          epochs: 100
     outs:
     - path: ./data/model/
-      md5: b9a6ffe6768886dfb7baae24392133cb.dir
-      size: 270534
+      md5: 222a810ada56a1c03721bd165e3e69bf.dir
+      size: 270972
       nfiles: 4
   train_supervised_classification_embedding:
     cmd:

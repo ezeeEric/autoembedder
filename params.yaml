@@ -16,8 +16,8 @@ train_autoembedder:
     metric:
     - accuracy
     - precision
-    batch_size: 32
-    epochs: 50
+    batch_size: 64
+    epochs: 100
 test_model:
     feature_handler_file: ./feature_handling/feature_handler.json
     batch_size: 1000

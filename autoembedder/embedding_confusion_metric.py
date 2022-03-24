@@ -9,6 +9,9 @@ class EmbeddingConfusionMetric(tf.keras.metrics.Metric):
         # __init__(self), in which you will create state variables for your metric.
         super(EmbeddingConfusionMetric, self).__init__(name=name, **kwargs)
         self._accuracy = tf.keras.metrics.Accuracy()
+        from sklearn.metrics import precision_score
+
+        self._precision = precision_score
         self._cosine_loss = tf.keras.losses.CosineSimilarity(
             axis=-1, reduction=tf.keras.losses.Reduction.NONE
         )
@@ -43,6 +46,13 @@ class EmbeddingConfusionMetric(tf.keras.metrics.Metric):
                 embedding_layer_input[:, idx],
                 tf.convert_to_tensor(matched_category_idx),
             )
+            # self.confusion_metric_dict[
+            #     f"{this_feature_name}_precision"
+            # ] = self._precision(
+            #     embedding_layer_input[:, idx],
+            #     tf.convert_to_tensor(matched_category_idx),
+            #     average="micro",
+            # )
 
     def result(self):
         # result(self), which uses the state variables to compute the final results.
