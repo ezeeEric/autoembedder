@@ -129,6 +129,8 @@ class AutoEmbedder(Embedder):
         self.encoder = self.setup_encoder(self.encoder_shape)
         self.decoder = self.setup_decoder(self.decoder_shape)
 
+        self.last_input_output = []
+
     def get_config(self):
         config_dict = {
             "numerical_features": self.numerical_features,
@@ -163,7 +165,7 @@ class AutoEmbedder(Embedder):
         dec_layers.append(
             layers.Dense(
                 decoder_shape[-1],
-                activation="sigmoid",
+                activation="tanh",
                 name=f"decoder_{len(decoder_shape)}",
             )
         )
@@ -220,7 +222,6 @@ class AutoEmbedder(Embedder):
         )
         with tf.GradientTape() as tape:
             embedding_layer_output = self._forward_call_embedder(embedding_layer_input)
-
             auto_encoder_input = prepare_data_for_encoder(
                 numerical_input, embedding_layer_output
             )
@@ -231,12 +232,23 @@ class AutoEmbedder(Embedder):
             )
 
         # split autoencoder output to get reconstructed embedding values for confusion metric
-        _, embedding_layer_outputs_reco = split_autoencoder_output(
+        numerical_input_reco, embedding_layer_outputs_reco = split_autoencoder_output(
             auto_encoder_output,
             numerical_input.shape[1],
             self.embedding_layers_output_dimensions,
         )
         embeddings_reference_values = self.create_embedding_reference()
+        self.last_input_output = [
+            input_batch,
+            numerical_input,
+            embedding_layer_input,
+            embedding_layer_output,
+            auto_encoder_input,
+            auto_encoder_output,
+            numerical_input_reco,
+            embedding_layer_outputs_reco,
+            embeddings_reference_values,
+        ]
 
         # Compute gradients
         trainable_vars = self.trainable_variables
