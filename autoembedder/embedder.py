@@ -57,7 +57,6 @@ class Embedder(Model):
         # output_dim=int(input_size ** 0.25)
         # https://developers.googleblog.com/2017/11/introducing-tensorflow-feature-columns.html
         # embedding_output_dimension = int(input_dim ** 0.25)
-        # TODO
         embedding_output_dimension = n_categories
 
         # this assumes we use one layer per input feature. Sentence embeddings
@@ -69,8 +68,9 @@ class Embedder(Model):
             output_dim=embedding_output_dimension,
             input_length=input_length,
             dtype=np.float64,
-            embeddings_initializer=tf.keras.initializers.GlorotNormal(seed=42),
-            # embeddings_initializer=self.config["embeddings_initializer"].lower(),
+            embeddings_initializer=tf.keras.initializers.RandomUniform(
+                minval=-1, maxval=1, seed=None
+            ),
             name=f"embedding_{feature_name}",
         )
         return embedding_layer, embedding_output_dimension

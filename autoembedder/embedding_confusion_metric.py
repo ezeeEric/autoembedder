@@ -1,12 +1,7 @@
 """
 
 """
-import numpy as np
 import tensorflow as tf
-import pandas as pd
-
-from autoembedder.embedder import Embedder
-from sklearn.preprocessing import OrdinalEncoder
 
 
 class EmbeddingConfusionMetric(tf.keras.metrics.Metric):
@@ -22,16 +17,11 @@ class EmbeddingConfusionMetric(tf.keras.metrics.Metric):
 
     def update_state(
         self,
-        embedding_layer_input,
+        embedding_layer_output,
         embedding_layer_outputs_reco,
         embeddings_reference_values,
     ):
         # update_state(self, y_true, y_pred, sample_weight=None), which uses the targets y_true and the model predictions y_pred to update the state variables.
-        # print(embedding_layer_input)
-        # print(embedding_layer_outputs_reco)
-        # print(embeddings_reference_values)
-        # exit()
-        # TODO debug me
         for idx, embedded_feature_batch in enumerate(embedding_layer_outputs_reco):
             this_feature_name = list(embeddings_reference_values.keys())[idx]
             reference_embeddings = tf.convert_to_tensor(
@@ -49,7 +39,7 @@ class EmbeddingConfusionMetric(tf.keras.metrics.Metric):
             self.confusion_metric_dict[
                 f"{this_feature_name}_accuracy"
             ] = self._accuracy(
-                embedding_layer_input[:, idx],
+                embedding_layer_output[:, idx],
                 tf.convert_to_tensor(matched_category_idx),
             )
 

@@ -72,6 +72,10 @@ class AutoembedderCallbacks(tf.keras.callbacks.Callback):
         print(f"\nembedding_layer_output\n {self.model.last_input_output[3]}")
         print(f"\nauto_encoder_input\n {self.model.last_input_output[4]}")
         print(f"\nauto_encoder_output\n {self.model.last_input_output[5]}")
+        print(f"\nnumerical_input_reco\n {self.model.last_input_output[6]}")
+        print(f"\nembedding_layer_outputs_reco\n {self.model.last_input_output[7]}")
+        print(f"\nembeddings_reference_values\n {self.model.last_input_output[8]}")
+
         # self.last_input_output = [
         #     input_batch,
         #     numerical_input,

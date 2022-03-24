@@ -222,18 +222,22 @@ class AutoEmbedder(Embedder):
         )
         with tf.GradientTape() as tape:
             embedding_layer_output = self._forward_call_embedder(embedding_layer_input)
-
             auto_encoder_input = prepare_data_for_encoder(
                 numerical_input, embedding_layer_output
             )
 
             auto_encoder_output = self(auto_encoder_input, training=True)
-            # print("Input", auto_encoder_input)
-            # print("Output", auto_encoder_output)
             loss = self.compiled_loss(
                 y_true=auto_encoder_input, y_pred=auto_encoder_output
             )
 
+        # split autoencoder output to get reconstructed embedding values for confusion metric
+        numerical_input_reco, embedding_layer_outputs_reco = split_autoencoder_output(
+            auto_encoder_output,
+            numerical_input.shape[1],
+            self.embedding_layers_output_dimensions,
+        )
+        embeddings_reference_values = self.create_embedding_reference()
         self.last_input_output = [
             input_batch,
             numerical_input,
@@ -241,15 +245,10 @@ class AutoEmbedder(Embedder):
             embedding_layer_output,
             auto_encoder_input,
             auto_encoder_output,
+            numerical_input_reco,
+            embedding_layer_outputs_reco,
+            embeddings_reference_values,
         ]
-
-        # split autoencoder output to get reconstructed embedding values for confusion metric
-        _, embedding_layer_outputs_reco = split_autoencoder_output(
-            auto_encoder_output,
-            numerical_input.shape[1],
-            self.embedding_layers_output_dimensions,
-        )
-        embeddings_reference_values = self.create_embedding_reference()
 
         # Compute gradients
         trainable_vars = self.trainable_variables
@@ -261,7 +260,7 @@ class AutoEmbedder(Embedder):
         # Compute our own metrics
         self._loss_tracker_epoch.update_state(loss)
         self._embedding_confusion_metric.update_state(
-            embedding_layer_input,
+            embedding_layer_output,
             embedding_layer_outputs_reco,
             embeddings_reference_values,
         )
