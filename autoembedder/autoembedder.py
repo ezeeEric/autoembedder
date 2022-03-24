@@ -260,7 +260,7 @@ class AutoEmbedder(Embedder):
         # Compute our own metrics
         self._loss_tracker_epoch.update_state(loss)
         self._embedding_confusion_metric.update_state(
-            embedding_layer_output,
+            embedding_layer_input,
             embedding_layer_outputs_reco,
             embeddings_reference_values,
         )

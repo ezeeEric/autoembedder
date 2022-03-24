@@ -17,7 +17,7 @@ class EmbeddingConfusionMetric(tf.keras.metrics.Metric):
 
     def update_state(
         self,
-        embedding_layer_output,
+        embedding_layer_input,
         embedding_layer_outputs_reco,
         embeddings_reference_values,
     ):
@@ -30,27 +30,17 @@ class EmbeddingConfusionMetric(tf.keras.metrics.Metric):
             reference_embeddings = tf.convert_to_tensor(
                 list(embeddings_reference_values.values())[idx], dtype=tf.float64
             )
-            print(reference_embeddings)
-            print(embedded_feature_batch)
-            exit()
-            # cos_sims = []
-            # for ref_emb in reference_embeddings:
-            #     cos_dist = self._cosine_loss(
-            #         ref_emb, tf.cast(embedded_feature_batch, tf.float64)
-            #     )
-            #     print(ref_emb)
-            #     print(tf.cast(embedded_feature_batch, tf.float64))
-            #     print(cos_dist)
-            #     exit()
-            # cosine_similarities = tf.transpose(tf.convert_to_tensor(cos_sims))
-            # matched_category_idx = tf.math.argmax(cosine_similarities, axis=1)
+            matched_category_idx = []
+            for emb_pred in embedded_feature_batch:
+                cos_dist = self._cosine_loss(
+                    reference_embeddings, tf.cast(emb_pred, tf.float64)
+                )
+                matched_category_idx.append(tf.math.argmin(cos_dist))
 
-            # print(embedding_layer_output[:, idx])
-            # print(tf.convert_to_tensor(matched_category_idx))
             self.confusion_metric_dict[
                 f"{this_feature_name}_accuracy"
             ] = self._accuracy(
-                embedding_layer_output[:, idx],
+                embedding_layer_input[:, idx],
                 tf.convert_to_tensor(matched_category_idx),
             )
 
