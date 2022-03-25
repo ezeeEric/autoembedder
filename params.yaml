@@ -2,6 +2,7 @@ data_preprocessing:
     feature_handler_dir: ./feature_handling/
     feature_action_file: ./feature_handling/feature_actions.json
 train_autoembedder:
+    output_directory: ./data/model
     feature_handler_file: ./feature_handling/feature_handler.json
     manual_encoder_architecture: [8,6,4] #empty list [] for automatic autencoder shape
     # manual_encoder_architecture: [] #empty list [] for automatic autencoder shape

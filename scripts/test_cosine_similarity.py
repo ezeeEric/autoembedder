@@ -1,3 +1,6 @@
+"""This is a learning test for the cosine similarity
+    """
+
 import tensorflow as tf
 import pandas as pd
 

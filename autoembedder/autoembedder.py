@@ -4,13 +4,34 @@ Embedding categorial data by training an embedding layer in an unsupervised way
 """
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras import layers
 import pandas as pd
 
 from autoembedder.embedder import Embedder
 from autoembedder.embedding_confusion_metric import EmbeddingConfusionMetric
 
 from sklearn.preprocessing import OrdinalEncoder
+
+
+class AutoembedderCallbacks(tf.keras.callbacks.Callback):
+    # https://www.tensorflow.org/guide/keras/custom_callback
+    def on_epoch_end(self, epoch, logs=None):
+        pass
+
+    def on_train_end(self, logs=None):
+        # print(f"\ninput_batch\n {self.model.last_input_output[0]}")
+        # print(f"\numerical_input\n {self.model.last_input_output[1]}")
+        # print(f"\nembedding_layer_input\n {self.model.last_input_output[2]}")
+        # print(f"\nembedding_layer_output\n {self.model.last_input_output[3]}")
+        # print(f"\nauto_encoder_input\n {self.model.last_input_output[4]}")
+        # print(f"\nauto_encoder_output\n {self.model.last_input_output[5]}")
+        # print(f"\nnumerical_input_reco\n {self.model.last_input_output[6]}")
+        # print(f"\nembedding_layer_outputs_reco\n {self.model.last_input_output[7]}")
+        # print(f"\nembeddings_reference_values\n {self.model.last_input_output[8]}")
+        pass
+
+    def on_test_begin(self, logs=None):
+        self.model._embedding_confusion_metric.reset_state()
+        self.model.create_embedding_reference()
 
 
 def determine_autoencoder_shape(
@@ -37,9 +58,9 @@ def determine_autoencoder_shape(
 
 def create_dense_layers(
     shape: list[int], name: str, activation_fct: str
-) -> list[layers.Dense]:
+) -> list[tf.keras.layers.Dense]:
     return [
-        layers.Dense(
+        tf.keras.layers.Dense(
             n_nodes, activation=activation_fct.lower(), name=f"{name}_{layer_idx}"
         )
         for layer_idx, n_nodes in enumerate(shape)
@@ -75,8 +96,7 @@ def load_ordinal_encoder_for_feature(
 ) -> OrdinalEncoder:
     encoder = OrdinalEncoder()
     encoder.categories_ = [np.array(encoding_dict[feature_name], dtype=object)]
-    # TODO The following is a hack. The loading and saving of the OrdinalEncoder by only
-    # using the dictionary above requires this _missing_indices to be set.
+    # Loading the OrdinalEncoder like this requires the variable below to be set.
     encoder._missing_indices = {}
     return encoder
 
@@ -161,9 +181,9 @@ class AutoEmbedder(Embedder):
             activation_fct=self.config["activation_function"],
         )
 
-        # the last layer is a sigmoid activation
+        # the last layer is a tanh activation
         dec_layers.append(
-            layers.Dense(
+            tf.keras.layers.Dense(
                 decoder_shape[-1],
                 activation="tanh",
                 name=f"decoder_{len(decoder_shape)}",
@@ -266,7 +286,6 @@ class AutoEmbedder(Embedder):
         )
         return {
             "loss": self._loss_tracker_epoch.result(),
-            # "emb_conf": self._embedding_confusion_metric.result(),
             **self._embedding_confusion_metric.result(),
         }
 
@@ -296,37 +315,18 @@ class AutoEmbedder(Embedder):
         auto_encoder_output = self(auto_encoder_input, training=True)
 
         # split autoencoder output to get reconstructed embedding values
-        numerical_input_reco, embedding_layer_outputs_reco = split_autoencoder_output(
+        _, embedding_layer_outputs_reco = split_autoencoder_output(
             auto_encoder_output,
             numerical_input.shape[1],
             self.embedding_layers_output_dimensions,
         )
-        cosine_loss = tf.keras.losses.CosineSimilarity(
-            axis=-1, reduction=tf.keras.losses.Reduction.NONE
+        self._embedding_confusion_metric.update_state(
+            embedding_layer_input,
+            embedding_layer_outputs_reco,
+            self.embeddings_reference_values,
         )
-        # TODO can these loops be replace with tensor operations?
-        # matched_category_idx = []
-        accuracy = tf.keras.metrics.Accuracy()
-        metric_dict = {}
-        for idx, embedded_feature_batch in enumerate(embedding_layer_outputs_reco):
-            this_feature_name = list(self.embeddings_reference_values.keys())[idx]
-            reference_embeddings = tf.convert_to_tensor(
-                list(self.embeddings_reference_values.values())[idx], dtype=tf.float64
-            )
-            cos_sims = []
-            for ref_emb in reference_embeddings:
-                cos_dist = cosine_loss(
-                    ref_emb, tf.cast(embedded_feature_batch, tf.float64)
-                )
-                cos_sims.append(1 - cos_dist)
-            cosine_similarities = tf.transpose(tf.convert_to_tensor(cos_sims))
-            matched_category_idx = tf.math.argmax(cosine_similarities, axis=1)
-            metric_dict[f"{this_feature_name}_accuracy"] = accuracy(
-                embedding_layer_input[:, idx],
-                tf.convert_to_tensor(matched_category_idx),
-            )
 
-        return metric_dict
+        return self._embedding_confusion_metric.result()
 
     def predict(self, input_column: pd.Series) -> pd.DataFrame:
         """Takes a categorical column of an input dataframe and returns a

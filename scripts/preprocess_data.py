@@ -1,11 +1,8 @@
-import sys
 import json
 import pandas as pd
-import seaborn as sns
-
-sns.set_style("whitegrid")
-
+from typing import Tuple
 from palmerpenguins import load_penguins
+
 from utils.feature_handler import FeatureHandler
 from utils.params import with_params
 from utils.utils import create_output_dir
@@ -37,6 +34,16 @@ def select_features(df: pd.DataFrame, feature_handler: FeatureHandler) -> None:
         features_autoembedding_categorical,
         other_features,
     )
+
+
+def load_features(
+    df: pd.DataFrame, feature_handler_file: str
+) -> Tuple[list[str], list[str]]:
+    feature_handler = FeatureHandler.from_json(feature_handler_file)
+    numerical_features, categorical_features, target_features = select_features(
+        df, feature_handler
+    )
+    return numerical_features, categorical_features, target_features
 
 
 def filter_columns(df: pd.DataFrame, feature_handler: FeatureHandler) -> pd.DataFrame:
