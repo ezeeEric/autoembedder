@@ -11,7 +11,7 @@ print(f"tensorflow {tf.__version__}")
 
 from utils.feature_handler import FeatureHandler
 from utils.params import with_params
-from utils.utils import get_sorted_input_files
+from utils.utils import get_sorted_input_files, load_model
 from scripts.supervised_classification_wembedding import (
     SimpleClassificationNetwork,
     run_simple_classification,
@@ -19,7 +19,6 @@ from scripts.supervised_classification_wembedding import (
     prepare_penguin_data,
 )
 from autoembedder.autoembedder import AutoEmbedder
-from scripts.test_autoembedder import get_model
 
 OUTPUT_DIRECTORY = ""
 
@@ -99,7 +98,7 @@ def main(params: dict):
         encoding_reference_values_target,
     ) = prepare_penguin_data(df, params)
 
-    autoembedder = get_model(sys.argv[2])
+    autoembedder = load_model(sys.argv[2])
     model = SimpleClassificationNetworkWithEmbedder(
         n_numerical_inputs=len(train_df_num.columns),
         autoembedder=autoembedder,

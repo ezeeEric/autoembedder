@@ -1,104 +1,5 @@
 schema: '2.0'
 stages:
-  prepare_train_input:
-    cmd:
-    - python concat_reports.py ../data/feathered/
-    deps:
-    - path: ../data/feathered/
-      md5: 689806ca7931c99d68994d28ba4015e6.dir
-      size: 1740730474
-      nfiles: 13
-    - path: ../feature_handling/feature_handler.json
-      md5: 73f0566e372f9ea1afdf89cbb7ad816e
-      size: 41861
-    - path: ../mldq/feature_handler.py
-      md5: 3ef83d0afb83cce70b1bc2e163848fa0
-      size: 14103
-    - path: ../mldq/params.py
-      md5: edbe52eb8c2150cae39bb569e5a341af
-      size: 1880
-    - path: ../mldq/simple_script.py
-      md5: 7bc61defb132c56824b9257e6d2b7cd3
-      size: 7413
-    - path: concat_reports.py
-      md5: c187d6d17b58e92d40c49b7287f0cdbd
-      size: 2261
-    params:
-      params.yaml:
-        prepare_train_input:
-          feature_handler_file: ../feature_handling/feature_handler.json
-    outs:
-    - path: train_input/
-      md5: a151a3ad75fc98a6c1e61aa8756d5971.dir
-      size: 232061690
-      nfiles: 1
-  train:
-    cmd:
-    - python scripts/train_autoembedder.py ./data/training_input/
-    deps:
-    - path: ./autoembedder/
-      md5: f99fcc2c03cafef24be7946c51733747.dir
-      size: 37491
-      nfiles: 5
-    - path: ./data/training_input/
-      md5: 76518463305c60240aba1a1514d686a0.dir
-      size: 12754
-      nfiles: 1
-    - path: ./feature_handling/feature_handler.json
-      md5: 070f9288be784dc10bfabf9626d828fd
-      size: 2365
-    - path: ./utils/feature_handler.py
-      md5: 4bd8400f2e2c620f11b68b30d7f1c12f
-      size: 12163
-    - path: scripts/train_autoembedder.py
-      md5: 7e14a071591310234d69f70ef6bfa34b
-      size: 5979
-    params:
-      params.yaml:
-        train_model:
-          feature_handler_file: ./feature_handling/feature_handler.json
-          manual_encoder_architecture:
-          - 4
-          - 4
-          - 2
-          manual_decoder_architecture: []
-          activation_function: ReLU
-          test_data_fraction: 0.2
-          embeddings_initializer: uniform
-          optimizer: adam
-          loss: mse
-          batch_size: 32
-          epochs: 100
-          learning_rate: 0.05
-    outs:
-    - path: ./data/model/
-      md5: 8831c650462ef96892acf36b9730ff8b.dir
-      size: 273748
-      nfiles: 4
-  test:
-    cmd:
-    - python scripts/test_autoembedder.py ./data/training_input/ ./data/model/autoembedder
-    deps:
-    - path: ./autoembedder/
-      md5: 018d78e19a0059bbe0f6bd667c222755.dir
-      size: 37491
-      nfiles: 5
-    - path: ./data/model/
-      md5: b70764264840a5169de6041c54391ff8.dir
-      size: 274238
-      nfiles: 4
-    - path: ./data/training_input/
-      md5: 76518463305c60240aba1a1514d686a0.dir
-      size: 12754
-      nfiles: 1
-    - path: scripts/test_autoembedder.py
-      md5: 83dd0e25eb86ab19fe680cebba96e953
-      size: 1562
-    params:
-      params.yaml:
-        test_model:
-          feature_handler_file: ./feature_handling/feature_handler.json
-          batch_size: 9
   data_preprocessing:
     cmd:
     - python scripts/preprocess_data.py
@@ -107,11 +8,11 @@ stages:
       md5: 861bff553bc372dc5cc343e909f69b4f
       size: 79
     - path: scripts/preprocess_data.py
-      md5: 9be17c606a7d20ecee1bc47c02c69d9e
-      size: 3144
+      md5: bea00623484e72979177af6f938b5616
+      size: 3464
     - path: utils/feature_handler.py
-      md5: 4bd8400f2e2c620f11b68b30d7f1c12f
-      size: 12163
+      md5: 9a04f8dac17bf76301bdb8c4e172a274
+      size: 12139
     - path: utils/params.py
       md5: edbe52eb8c2150cae39bb569e5a341af
       size: 1880
@@ -136,8 +37,8 @@ stages:
     - python scripts/train_autoembedder.py ./data/training_input/
     deps:
     - path: ./autoembedder/
-      md5: 3efe98960ea63310f07cd7893a889869.dir
-      size: 44235
+      md5: b088b4fe1d54e8385687b89495b8bd35.dir
+      size: 46053
       nfiles: 7
     - path: ./data/training_input/
       md5: 76518463305c60240aba1a1514d686a0.dir
@@ -147,14 +48,15 @@ stages:
       md5: dfb240b251b8a11fa558492ebc47fe47
       size: 2456
     - path: ./utils/feature_handler.py
-      md5: 4bd8400f2e2c620f11b68b30d7f1c12f
-      size: 12163
+      md5: 9a04f8dac17bf76301bdb8c4e172a274
+      size: 12139
     - path: scripts/train_autoembedder.py
-      md5: 6928d5d9f3d1b99762500d129c13ac58
-      size: 8375
+      md5: bcd257e382b9cef2bb78b2ed1c6fa3f7
+      size: 6834
     params:
       params.yaml:
         train_autoembedder:
+          output_directory: ./data/model
           feature_handler_file: ./feature_handling/feature_handler.json
           manual_encoder_architecture:
           - 8
@@ -175,8 +77,8 @@ stages:
           epochs: 100
     outs:
     - path: ./data/model/
-      md5: 222a810ada56a1c03721bd165e3e69bf.dir
-      size: 270972
+      md5: 4a56a7e4f0af2fc9cfe1462ed57a8b49.dir
+      size: 271042
       nfiles: 4
   train_supervised_classification_embedding:
     cmd:

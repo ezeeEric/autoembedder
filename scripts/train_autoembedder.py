@@ -1,9 +1,12 @@
 """
-python scripts/supervised_classification_wembedding.py ./data/training_input
+Script to train the Autoembedder model. Input is a single file containing the
+full vocabulary. Feature selection follows the data preprocessing. Output is the
+trained model.
+
+python scripts/train_autoembedder.py ./data/training_input <input_pattern>
 """
 
 import sys
-import os
 import numpy as np
 import pandas as pd
 from typing import Tuple
@@ -11,15 +14,12 @@ import tensorflow as tf
 from sklearn.preprocessing import OrdinalEncoder, MinMaxScaler, StandardScaler
 from sklearn.model_selection import train_test_split
 
-from autoembedder.autoembedder import AutoEmbedder
-from autoembedder.embedding_confusion_metric import EmbeddingConfusionMetric
-from utils.feature_handler import FeatureHandler
 from utils.params import with_params
-from utils.utils import create_output_dir, get_sorted_input_files
-from scripts.preprocess_data import select_features
+from utils.utils import get_sorted_input_files, save_model
 
+from scripts.preprocess_data import load_features
 
-OUTPUT_DIRECTORY = "./data/model"
+from autoembedder.autoembedder import AutoEmbedder, AutoembedderCallbacks
 
 
 def create_encoding_reference_values(
@@ -35,6 +35,7 @@ def create_encoding_reference_values(
     }
 
 
+# TODO check duplication with apply_...
 def encode_categorical_input_ordinal(
     df: pd.DataFrame,
 ) -> Tuple[np.ndarray, dict]:
@@ -51,41 +52,7 @@ def encode_categorical_input_ordinal(
     return df_enc, encoding_reference_values
 
 
-def save_autoembedder_model(
-    auto_embedder: AutoEmbedder,
-    out_path: str,
-) -> None:
-    out_file = os.path.join(out_path, "autoembedder")
-    auto_embedder.save(out_file)
-
-
-class AutoembedderCallbacks(tf.keras.callbacks.Callback):
-    def on_train_end(self, logs=None):
-        #     print(f"Input\n{self.model.last_input_output[0]}")
-        #     print(f"Output\n{self.model.last_input_output[1]}")
-
-        # def on_epoch_end(self, epoch, logs=None):
-
-        print(f"\ninput_batch\n {self.model.last_input_output[0]}")
-        print(f"\numerical_input\n {self.model.last_input_output[1]}")
-        print(f"\nembedding_layer_input\n {self.model.last_input_output[2]}")
-        print(f"\nembedding_layer_output\n {self.model.last_input_output[3]}")
-        print(f"\nauto_encoder_input\n {self.model.last_input_output[4]}")
-        print(f"\nauto_encoder_output\n {self.model.last_input_output[5]}")
-        print(f"\nnumerical_input_reco\n {self.model.last_input_output[6]}")
-        print(f"\nembedding_layer_outputs_reco\n {self.model.last_input_output[7]}")
-        print(f"\nembeddings_reference_values\n {self.model.last_input_output[8]}")
-
-        # self.last_input_output = [
-        #     input_batch,
-        #     numerical_input,
-        #     embedding_layer_input,
-        #     embedding_layer_output,
-        #     auto_encoder_input,
-        #     auto_encoder_output,
-        # ]
-
-
+# TODO should this be in preprocessing?
 def normalise_numerical_input_columns(
     df: pd.DataFrame, method: str = "minmax"
 ) -> pd.DataFrame:
@@ -105,6 +72,7 @@ def normalise_numerical_input_columns(
     return df_transformed
 
 
+# TODO should this be split up a bit?
 def compile_model(
     model: tf.keras.Model,
     learning_rate: float,
@@ -159,7 +127,6 @@ def train_model(
         verbose=1,
         callbacks=[AutoembedderCallbacks()],
     )
-    return model
 
 
 def test_model(df: pd.DataFrame, model: AutoEmbedder, batch_size: int) -> None:
@@ -168,12 +135,12 @@ def test_model(df: pd.DataFrame, model: AutoEmbedder, batch_size: int) -> None:
 
 
 def prepare_data_for_fit(
-    df: tf.Tensor,
+    df: pd.DataFrame,
     numerical_features: list[str],
     categorical_features: list[str],
     normalisation_method: str,
     test_data_fraction: float,
-) -> tf.Tensor:
+) -> Tuple[pd.DataFrame, pd.DataFrame, OrdinalEncoder]:
     """This function first encodes the categorical input, then normalises the numerical input and finally merges the result."""
     # TODO this is somewhat duplicated with apply_ordinal_encoding_column()
     df_encoded, embedding_encoder = encode_categorical_input_ordinal(
@@ -185,16 +152,6 @@ def prepare_data_for_fit(
     df = pd.concat([df_numericals_normalised, df_encoded], axis=1)
     train_df, test_df = train_test_split(df, test_size=test_data_fraction)
     return train_df, test_df, embedding_encoder
-
-
-def load_features(
-    df: pd.DataFrame, feature_handler_file: str
-) -> Tuple[list[str], list[str]]:
-    feature_handler = FeatureHandler.from_json(feature_handler_file)
-    numerical_features, categorical_features, target_features = select_features(
-        df, feature_handler
-    )
-    return numerical_features, categorical_features, target_features
 
 
 def train_autoembedder(df: pd.DataFrame, params: dict) -> pd.DataFrame:
@@ -220,7 +177,7 @@ def train_autoembedder(df: pd.DataFrame, params: dict) -> pd.DataFrame:
         optimizer_name=params["optimizer"],
         loss_name=params["loss"],
     )
-    auto_embedder = train_model(
+    train_model(
         df=train_df,
         model=auto_embedder,
         batch_size=params["batch_size"],
@@ -242,11 +199,15 @@ def main(params):
         input_patterns=sys.argv[2].split(",") if len(sys.argv) > 2 else None,
         input_extension="feather",
     )
-    create_output_dir(OUTPUT_DIRECTORY)
 
-    df = pd.read_feather(input_files[0])
+    if len(input_files) == 1:
+        df = pd.read_feather(input_files[0])
+    else:
+        print(f"Warning, expected single file in input, got: {input_files}")
+
     autoembedder_model = train_autoembedder(df, params)
-    save_autoembedder_model(autoembedder_model, OUTPUT_DIRECTORY)
+
+    save_model(autoembedder_model, params["output_directory"])
 
 
 if __name__ == "__main__":

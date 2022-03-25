@@ -4,13 +4,29 @@ Embedding categorial data by training an embedding layer in an unsupervised way
 """
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras import layers
 import pandas as pd
 
 from autoembedder.embedder import Embedder
 from autoembedder.embedding_confusion_metric import EmbeddingConfusionMetric
 
 from sklearn.preprocessing import OrdinalEncoder
+
+
+class AutoembedderCallbacks(tf.keras.callbacks.Callback):
+    def on_epoch_end(self, epoch, logs=None):
+        pass
+
+    def on_train_end(self, logs=None):
+        # print(f"\ninput_batch\n {self.model.last_input_output[0]}")
+        # print(f"\numerical_input\n {self.model.last_input_output[1]}")
+        # print(f"\nembedding_layer_input\n {self.model.last_input_output[2]}")
+        # print(f"\nembedding_layer_output\n {self.model.last_input_output[3]}")
+        # print(f"\nauto_encoder_input\n {self.model.last_input_output[4]}")
+        # print(f"\nauto_encoder_output\n {self.model.last_input_output[5]}")
+        # print(f"\nnumerical_input_reco\n {self.model.last_input_output[6]}")
+        # print(f"\nembedding_layer_outputs_reco\n {self.model.last_input_output[7]}")
+        # print(f"\nembeddings_reference_values\n {self.model.last_input_output[8]}")
+        pass
 
 
 def determine_autoencoder_shape(
@@ -37,9 +53,9 @@ def determine_autoencoder_shape(
 
 def create_dense_layers(
     shape: list[int], name: str, activation_fct: str
-) -> list[layers.Dense]:
+) -> list[tf.keras.layers.Dense]:
     return [
-        layers.Dense(
+        tf.keras.layers.Dense(
             n_nodes, activation=activation_fct.lower(), name=f"{name}_{layer_idx}"
         )
         for layer_idx, n_nodes in enumerate(shape)
@@ -163,7 +179,7 @@ class AutoEmbedder(Embedder):
 
         # the last layer is a sigmoid activation
         dec_layers.append(
-            layers.Dense(
+            tf.keras.layers.Dense(
                 decoder_shape[-1],
                 activation="tanh",
                 name=f"decoder_{len(decoder_shape)}",
