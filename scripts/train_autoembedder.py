@@ -35,7 +35,6 @@ def create_encoding_reference_values(
     }
 
 
-# TODO check duplication with apply_...
 def encode_categorical_input_ordinal(
     df: pd.DataFrame,
 ) -> Tuple[np.ndarray, dict]:
@@ -130,8 +129,11 @@ def train_model(
 
 
 def test_model(df: pd.DataFrame, model: AutoEmbedder, batch_size: int) -> None:
-    model.create_embedding_reference()
-    model.evaluate(tf.convert_to_tensor(df), batch_size=batch_size)
+    model.evaluate(
+        tf.convert_to_tensor(df),
+        batch_size=batch_size,
+        callbacks=[AutoembedderCallbacks()],
+    )
 
 
 def prepare_data_for_fit(
@@ -142,7 +144,6 @@ def prepare_data_for_fit(
     test_data_fraction: float,
 ) -> Tuple[pd.DataFrame, pd.DataFrame, OrdinalEncoder]:
     """This function first encodes the categorical input, then normalises the numerical input and finally merges the result."""
-    # TODO this is somewhat duplicated with apply_ordinal_encoding_column()
     df_encoded, embedding_encoder = encode_categorical_input_ordinal(
         df[categorical_features]
     )
