@@ -63,14 +63,23 @@ class Embedder(Model):
         # would use multiple inputs here; however there's no intrinsic
         # positional relation between our words.
         input_length = 1
+
+        # the initialisation of the embedding layer weights is important for performance
+        if self.config["embeddings_initializer"] == "uniform":
+            embeddings_initializer = (
+                tf.keras.initializers.RandomUniform(minval=-1, maxval=1, seed=None),
+            )
+        else:
+            raise NotImplementedError(
+                f"embeddings_initializer {self.config['embeddings_initializer']} not implemented."
+            )
+
         embedding_layer = tf.keras.layers.Embedding(
             input_dim=input_dim,
             output_dim=embedding_output_dimension,
             input_length=input_length,
             dtype=np.float64,
-            embeddings_initializer=tf.keras.initializers.RandomUniform(
-                minval=-1, maxval=1, seed=None
-            ),
+            embeddings_initializer=embeddings_initializer,
             name=f"embedding_{feature_name}",
         )
         return embedding_layer, embedding_output_dimension
