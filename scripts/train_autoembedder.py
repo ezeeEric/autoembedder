@@ -77,7 +77,6 @@ def compile_model(
     learning_rate: float,
     optimizer_name: str = "sgd",
     loss_name: str = "mse",
-    metrics: list[str] = [],
 ) -> None:
 
     if optimizer_name == "sgd":
@@ -98,21 +97,9 @@ def compile_model(
     else:
         raise NotImplementedError(f"Metric {loss_name} not implemented.")
 
-    selected_metrics = []
-
-    for metric_name in list(metrics):
-        if metric_name == "accuracy":
-            selected_metrics.append(tf.keras.metrics.Accuracy())
-        elif metric_name == "precision":
-            selected_metrics.append(tf.keras.metrics.Precision())
-        else:
-            raise NotImplementedError(f"Metric {metric_name} not implemented.")
-
     # explicitely setting run_eagerly=True is necessary in tf 2.0 when dealing
     # with custom layers and losses
-    model.compile(
-        optimizer=optimizer, loss=loss, metrics=selected_metrics, run_eagerly=True
-    )
+    model.compile(optimizer=optimizer, loss=loss, run_eagerly=True)
 
 
 def train_model(
