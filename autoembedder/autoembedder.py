@@ -170,7 +170,7 @@ class AutoEmbedder(Embedder):
         encoder_layers = create_dense_layers(
             shape=encoder_shape,
             name="encoder",
-            activation_fct=self.config["activation_function"],
+            activation_fct=self.config["hidden_layer_activation_function"],
         )
         return tf.keras.Sequential(encoder_layers, name="encoder")
 
@@ -178,14 +178,14 @@ class AutoEmbedder(Embedder):
         dec_layers = create_dense_layers(
             shape=decoder_shape[:-1],
             name="decoder",
-            activation_fct=self.config["activation_function"],
+            activation_fct=self.config["hidden_layer_activation_function"],
         )
 
         # the last layer is a tanh activation
         dec_layers.append(
             tf.keras.layers.Dense(
                 decoder_shape[-1],
-                activation="tanh",
+                activation=self.config["hidden_layer_activation_function"],
                 name=f"decoder_{len(decoder_shape)}",
             )
         )
