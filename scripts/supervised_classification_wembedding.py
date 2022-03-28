@@ -13,39 +13,10 @@ from utils.feature_handler import FeatureHandler
 from utils.params import with_params
 from utils.utils import get_sorted_input_files
 from scripts.train_autoembedder import load_features, prepare_data_for_fit
+from models.base_classification_network import BaseClassificationNetwork
 
-
-from autoembedder.embedder import Embedder
 
 OUTPUT_DIRECTORY = ""
-
-
-class SimpleClassificationNetwork(Embedder):
-    def __init__(self, n_numerical_inputs: int, **kwargs) -> None:
-        super().__init__(**kwargs)
-
-        input_length = n_numerical_inputs + sum(self.embedding_layers_output_dimensions)
-
-        self.classification_model = tf.keras.Sequential(
-            [
-                tf.keras.layers.Dense(input_length, activation="relu"),
-                tf.keras.layers.Dense(4, activation="relu"),
-                tf.keras.layers.Dense(4, activation="relu"),
-                tf.keras.layers.Dense(3, activation="softmax"),
-            ]
-        )
-
-    def call(self, inputs: list[tf.Tensor], training: bool = None) -> tf.Tensor:
-        """Forward call of this model. Data is passed through the following
-        sequence in training and evaluation. As we use this model as parent
-        class and overwrite the call() in its children but do need the forward
-        call logic as well, the forward call is living in another method."""
-        input_cat_enc = inputs[0]
-        input_num = tf.cast(inputs[1], dtype=tf.float64)
-        embedded_input = self._forward_call_embedder(input_cat_enc)
-        full_input = tf.concat([embedded_input, input_num], axis=1)
-        return self.classification_model(full_input)
-
 
 # TODO this function should rather be part of main
 def prepare_penguin_data(
@@ -109,7 +80,7 @@ def evaluate_simple_classification(
     print(f" Model accuracy on the test set: {100*accuracy}")
 
 
-@with_params("params.yaml", "train_simple_classification_model")
+@with_params("params.yaml", "train_classification_models")
 def main(params: dict):
 
     input_files = get_sorted_input_files(
@@ -128,10 +99,10 @@ def main(params: dict):
         train_df_target,
         test_df_target,
         encoding_reference_values,
-        encoding_reference_values_target,
+        _,
     ) = prepare_penguin_data(df, params)
 
-    model = SimpleClassificationNetwork(
+    model = BaseClassificationNetwork(
         n_numerical_inputs=len(train_df_num.columns),
         encoding_reference_values=encoding_reference_values,
         config=params,
