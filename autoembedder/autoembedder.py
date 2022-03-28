@@ -138,6 +138,7 @@ class AutoEmbedder(Embedder):
         # TODO should this be a member (issues when loading from disk?)
         self._loss_tracker_epoch = tf.keras.metrics.Mean(name="epoch_loss")
         self._embedding_confusion_metric = EmbeddingConfusionMetric()
+        self._embedding_confusion_metric = EmbeddingConfusionMetric()
         self.embeddings_reference_values = {}
 
         self.encoder_shape, self.decoder_shape = determine_autoencoder_shape(
