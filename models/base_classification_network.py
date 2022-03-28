@@ -7,14 +7,23 @@ class BaseClassificationNetwork(Embedder):
         super().__init__(**kwargs)
 
         input_length = n_numerical_inputs + sum(self.embedding_layers_output_dimensions)
+        n_nodes_per_layer = [input_length] + self.config["n_nodes_per_layer"]
 
         self.classification_model = tf.keras.Sequential(
-            [
-                tf.keras.layers.Dense(input_length, activation="relu"),
-                tf.keras.layers.Dense(4, activation="relu"),
-                tf.keras.layers.Dense(4, activation="relu"),
-                tf.keras.layers.Dense(3, activation="softmax"),
-            ]
+            name="base_classification_model"
+        )
+        for n_nodes in n_nodes_per_layer[:-1]:
+            self.classification_model.add(
+                tf.keras.layers.Dense(
+                    n_nodes, activation=self.config["hidden_layer_activation_function"]
+                )
+            )
+
+        self.classification_model.add(
+            tf.keras.layers.Dense(
+                n_nodes_per_layer[-1],
+                activation=self.config["output_layer_activation_function"],
+            )
         )
 
     def call(self, inputs: list[tf.Tensor], training: bool = None) -> tf.Tensor:
@@ -22,8 +31,7 @@ class BaseClassificationNetwork(Embedder):
         sequence in training and evaluation. As we use this model as parent
         class and overwrite the call() in its children but do need the forward
         call logic as well, the forward call is living in another method."""
-        input_cat_enc = inputs[0]
+        embedded_input = self._forward_call_embedder(inputs[0])
         input_num = tf.cast(inputs[1], dtype=tf.float64)
-        embedded_input = self._forward_call_embedder(input_cat_enc)
         full_input = tf.concat([embedded_input, input_num], axis=1)
         return self.classification_model(full_input)

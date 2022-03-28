@@ -16,9 +16,11 @@ train_autoembedder:
     learning_rate: 0.005
     batch_size: 64
     epochs: 100
-train_simple_classification_model:
+train_classification_models:
     feature_handler_file: ./feature_handling/feature_handler.json
-    activation_function: ReLU
+    hidden_layer_activation_function: relu
+    output_layer_activation_function: softmax
+    n_nodes_per_layer: [4,4,3]
     normalisation_method: manual
     test_data_fraction: 0.2
     embeddings_initializer: uniform

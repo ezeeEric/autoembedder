@@ -80,7 +80,7 @@ def evaluate_simple_classification(
     print(f" Model accuracy on the test set: {100*accuracy}")
 
 
-@with_params("params.yaml", "train_simple_classification_model")
+@with_params("params.yaml", "train_classification_models")
 def main(params: dict):
 
     input_files = get_sorted_input_files(
