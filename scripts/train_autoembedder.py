@@ -101,7 +101,7 @@ def train_autoembedder(df: pd.DataFrame, params: dict) -> pd.DataFrame:
         df=train_df,
         model=auto_embedder,
         batch_size=params["batch_size"],
-        epochs=params["epochs"],
+        epochs=params["n_epochs"],
     )
     test_model(
         test_df,

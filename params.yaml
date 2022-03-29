@@ -15,7 +15,7 @@ train_autoembedder:
     loss: mse
     learning_rate: 0.005
     batch_size: 64
-    epochs: 100
+    n_epochs: 100
 train_classification_models:
     feature_handler_file: ./feature_handling/feature_handler.json
     hidden_layer_activation_function: relu
@@ -26,9 +26,10 @@ train_classification_models:
     embeddings_initializer: uniform
     optimizer: adam
     loss: cce
-    learning_rate: 0.1
+    learning_rate: 0.005
     metrics:
     - accuracy
     # - precision
     batch_size: 32
-    epochs: 100
+    n_epochs: 100
+    verbosity_level: 1

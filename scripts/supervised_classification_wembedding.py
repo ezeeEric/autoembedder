@@ -7,8 +7,6 @@ import sys
 import pandas as pd
 import tensorflow as tf
 
-print(f"tensorflow {tf.__version__}")
-
 from utils.params import with_params
 from utils.utils import get_sorted_input_files, load_model
 
@@ -19,25 +17,48 @@ from models.autoembedder_classification_model import AutoEmbedderClassificationM
 
 OUTPUT_DIRECTORY = ""
 
-# TODO steer me
-def run_simple_classification(
-    train_data_num, train_data_cat, target_data, model
-) -> tf.keras.Model:
+
+def compile_model(
+    model: tf.keras.Model,
+    config: dict,
+) -> None:
     model.compile(
         loss=tf.keras.losses.categorical_crossentropy,
-        optimizer=tf.keras.optimizers.SGD(learning_rate=0.05),
-        metrics=["accuracy"],
+        optimizer=tf.keras.optimizers.SGD(learning_rate=config["learning_rate"]),
+        metrics=list(config["metrics"]),
     )
-    model.fit([train_data_cat, train_data_num], target_data, epochs=100, verbose=1)
-    pass
 
 
-def evaluate_simple_classification(
-    model, test_df_num, test_df_cat, test_target
+def train_model(
+    train_data_num: pd.DataFrame,
+    train_data_cat: pd.DataFrame,
+    train_data_target: pd.DataFrame,
+    model: tf.keras.Model,
+    config: dict,
 ) -> None:
-    loss, accuracy = model.evaluate([test_df_cat, test_df_num], test_target, verbose=0)
+
+    model.fit(
+        [train_data_cat, train_data_num],
+        train_data_target,
+        epochs=config["n_epochs"],
+        verbose=config["verbosity_level"],
+    )
+
+
+def test_model(
+    test_data_num: pd.DataFrame,
+    test_data_cat: pd.DataFrame,
+    test_data_target: pd.DataFrame,
+    model: tf.keras.Model,
+    config: dict,
+) -> None:
+    loss, accuracy = model.evaluate(
+        [test_data_cat, test_data_num],
+        test_data_target,
+        verbose=config["verbosity_level"],
+    )
     print(f" Model loss on the test set: {loss}")
-    print(f" Model accuracy on the test set: {100*accuracy}")
+    print(f" Model accuracy on the test set: {100*accuracy}%")
 
 
 @with_params("params.yaml", "train_classification_models")
@@ -78,8 +99,21 @@ def main(params: dict):
             encoding_reference_values=encoding_reference_values,
             config=params,
         )
-    run_simple_classification(train_df_num, train_df_cat, train_df_target, model)
-    evaluate_simple_classification(model, test_df_num, test_df_cat, test_df_target)
+    compile_model(model=model, config=params)
+    train_model(
+        train_data_num=train_df_num,
+        train_data_cat=train_df_cat,
+        train_data_target=train_df_target,
+        model=model,
+        config=params,
+    )
+    test_model(
+        test_data_num=test_df_num,
+        test_data_cat=test_df_cat,
+        test_data_target=test_df_target,
+        model=model,
+        config=params,
+    )
 
 
 if __name__ == "__main__":

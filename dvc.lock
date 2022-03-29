@@ -87,8 +87,8 @@ stages:
       size: 12754
       nfiles: 1
     - path: ./scripts/supervised_classification_wembedding.py
-      md5: 9ad25cb2e79741fb94bc13d8423fe408
-      size: 2595
+      md5: d6dda57a200f834338326b69baa6ad23
+      size: 3179
     params:
       params.yaml:
         train_classification_models:
@@ -104,11 +104,12 @@ stages:
           embeddings_initializer: uniform
           optimizer: adam
           loss: cce
-          learning_rate: 0.1
+          learning_rate: 0.005
           metrics:
           - accuracy
           batch_size: 32
-          epochs: 100
+          n_epochs: 100
+          verbosity_level: 1
   train_supervised_classification_autoembedding:
     cmd:
     - python scripts/supervised_classification_wembedding.py ./data/training_input/
@@ -119,8 +120,8 @@ stages:
       size: 12754
       nfiles: 1
     - path: ./scripts/supervised_classification_wembedding.py
-      md5: 9ad25cb2e79741fb94bc13d8423fe408
-      size: 2595
+      md5: d6dda57a200f834338326b69baa6ad23
+      size: 3179
     params:
       params.yaml:
         train_classification_models:
@@ -140,4 +141,5 @@ stages:
           metrics:
           - accuracy
           batch_size: 32
-          epochs: 100
+          n_epochs: 100
+          verbosity_level: 1
