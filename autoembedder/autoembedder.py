@@ -136,6 +136,7 @@ class AutoEmbedder(Embedder):
         self.feature_idx_map = feature_idx_map
 
         # TODO should this be a member (issues when loading from disk?)
+        # this requires to set the @metric property and overwrite it in all child classes
         self._loss_tracker_epoch = tf.keras.metrics.Mean(name="epoch_loss")
         self._embedding_confusion_metric = EmbeddingConfusionMetric()
         self.embeddings_reference_values = {}

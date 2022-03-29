@@ -1,9 +1,12 @@
-import glob
 import os
-from typing import Dict, Tuple
-
+import glob
+import numpy as np
 import pandas as pd
 import tensorflow as tf
+from typing import Dict, Tuple
+
+from sklearn.preprocessing import OrdinalEncoder, MinMaxScaler, StandardScaler
+from sklearn.model_selection import train_test_split
 
 from autoembedder.autoembedder import AutoEmbedder
 
@@ -62,3 +65,71 @@ def get_dtype_dict(df: pd.DataFrame) -> Dict[str, list[str]]:
         else:
             df_type_dict["categorical"].append(col_name)
     return df_type_dict
+
+
+# TODO should this be in preprocessing?
+def normalise_numerical_input_columns(
+    df: pd.DataFrame, method: str = "minmax"
+) -> pd.DataFrame:
+    if method == "minmax":
+        df_transformed = pd.DataFrame(
+            MinMaxScaler().fit_transform(df), columns=df.columns
+        )
+    elif method == "standard":
+        df_transformed = pd.DataFrame(
+            StandardScaler().fit_transform(df), columns=df.columns
+        )
+    elif method == "manual":
+        epsilon = 1e-12
+        df_transformed = (df - df.min()) / (df.max() - df.min() + epsilon)
+    else:
+        raise NotImplementedError(f"{method} not a valid transformation method.")
+    return df_transformed
+
+
+def create_encoding_reference_values(
+    feature_names: list,
+    encoder: OrdinalEncoder,
+) -> dict[str, list]:
+    """Convert a np.ndarray without column names to a dictionary of lists. Key
+    is the feature name, values are the different categories used during
+    encoding."""
+    return {
+        feature_name: encoder.categories_[i]
+        for i, feature_name in enumerate(feature_names)
+    }
+
+
+def encode_categorical_input_ordinal(
+    df: pd.DataFrame,
+) -> Tuple[np.ndarray, dict]:
+
+    embedding_input_encoder = OrdinalEncoder()
+    data_enc = embedding_input_encoder.fit_transform(df)
+
+    df_enc = pd.DataFrame(data_enc, columns=df.columns)
+
+    encoding_reference_values = create_encoding_reference_values(
+        df.columns, embedding_input_encoder
+    )
+
+    return df_enc, encoding_reference_values
+
+
+def prepare_data_for_fit(
+    df: pd.DataFrame,
+    numerical_features: list[str],
+    categorical_features: list[str],
+    normalisation_method: str,
+    test_data_fraction: float,
+) -> Tuple[pd.DataFrame, pd.DataFrame, OrdinalEncoder]:
+    """This function first encodes the categorical input, then normalises the numerical input and finally merges the result."""
+    df_encoded, embedding_encoder = encode_categorical_input_ordinal(
+        df[categorical_features]
+    )
+    df_numericals_normalised = normalise_numerical_input_columns(
+        df[numerical_features], method=normalisation_method
+    )
+    df = pd.concat([df_numericals_normalised, df_encoded], axis=1)
+    train_df, test_df = train_test_split(df, test_size=test_data_fraction)
+    return train_df, test_df, embedding_encoder

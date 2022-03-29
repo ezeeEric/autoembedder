@@ -32,15 +32,15 @@ stages:
     cmd:
     - python scripts/supervised_classification_wembedding.py ./data/training_input/
     params:
-    - train_simple_classification_model
+    - train_classification_models
     deps:
     - ./data/training_input/
     - ./scripts/supervised_classification_wembedding.py
   train_supervised_classification_autoembedding:
     cmd:
-    - python scripts/supervised_classification_wautoembedding.py ./data/training_input/ ./data/model/autoembedder
+    - python scripts/supervised_classification_wembedding.py ./data/training_input/ ./data/model/autoembedder
     params:
-    - train_simple_classification_model
+    - train_classification_models
     deps:
     - ./data/training_input/
-    - ./scripts/supervised_classification_wautoembedding.py
+    - ./scripts/supervised_classification_wembedding.py
