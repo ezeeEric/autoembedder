@@ -8,6 +8,8 @@ Usage (for testing): >> python feature_handler.py ../data/feathered
 
 import os
 import json
+from typing import Tuple
+
 from dataclasses import dataclass, field
 
 import pandas as pd
@@ -302,3 +304,56 @@ class FeatureHandler:
         return available_features_in_reference(
             selected_features_names, available_feature_names
         )
+
+
+def load_feature_actions(feature_action_file: str) -> dict:
+    print("Loading feature action file.")
+    with open(feature_action_file) as f:
+        feature_actions = json.load(f)
+    return feature_actions
+
+
+def create_feature_handler(
+    df: pd.DataFrame, outdir: str, feature_actions_file: str
+) -> FeatureHandler:
+    feature_actions = load_feature_actions(feature_actions_file)
+    feature_handler = FeatureHandler.from_df(df, feature_actions)
+    create_output_dir(outdir)
+    feature_handler.set_user_actions()
+    feature_handler.to_json(outdir)
+    feature_handler.pretty_print_to_json(outdir)
+    return feature_handler
+
+
+def select_features(df: pd.DataFrame, feature_handler: FeatureHandler) -> None:
+    features_autoembedding_numerical = feature_handler.get_selected_features_names(
+        include_features_with_flags=["is_numerical"],
+        exclude_features_with_flags=["is_constant", "is_index"],
+        exclude_features_with_actions=["drop"],
+        available_feature_names=df.columns,
+    )
+    features_autoembedding_categorical = feature_handler.get_selected_features_names(
+        include_features_with_flags=["is_non_numerical"],
+        exclude_features_with_flags=["is_constant", "is_index"],
+        exclude_features_with_actions=["drop", "target"],
+        available_feature_names=df.columns,
+    )
+    other_features = feature_handler.get_selected_features_names(
+        include_features_with_actions=["target"],
+        available_feature_names=df.columns,
+    )
+    return (
+        features_autoembedding_numerical,
+        features_autoembedding_categorical,
+        other_features,
+    )
+
+
+def load_features(
+    df: pd.DataFrame, feature_handler_file: str
+) -> Tuple[list[str], list[str]]:
+    feature_handler = FeatureHandler.from_json(feature_handler_file)
+    numerical_features, categorical_features, target_features = select_features(
+        df, feature_handler
+    )
+    return numerical_features, categorical_features, target_features

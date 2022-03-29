@@ -10,8 +10,11 @@ import tensorflow as tf
 print(f"tensorflow {tf.__version__}")
 
 from utils.params import with_params
-from utils.utils import get_sorted_input_files, prepare_penguin_data
+from utils.utils import get_sorted_input_files, load_model
+
+from scripts.preprocess_data import prepare_penguin_data
 from models.base_classification_network import BaseClassificationNetwork
+from models.autoembedder_classification_model import AutoEmbedderClassificationModel
 
 
 OUTPUT_DIRECTORY = ""
@@ -42,7 +45,7 @@ def main(params: dict):
 
     input_files = get_sorted_input_files(
         input_dir=sys.argv[1],
-        input_patterns=sys.argv[2].split(",") if len(sys.argv) > 2 else None,
+        input_patterns="",
         input_extension="feather",
     )
 
@@ -59,11 +62,22 @@ def main(params: dict):
         _,
     ) = prepare_penguin_data(df, params)
 
-    model = BaseClassificationNetwork(
-        n_numerical_inputs=len(train_df_num.columns),
-        encoding_reference_values=encoding_reference_values,
-        config=params,
-    )
+    if len(sys.argv) > 2:
+        print(f"Pretrained Autoembedder {sys.argv[2]} will be used in classification.")
+        autoembedder = load_model(sys.argv[2])
+        model = AutoEmbedderClassificationModel(
+            n_numerical_inputs=len(train_df_num.columns),
+            autoembedder=autoembedder,
+            encoding_reference_values=encoding_reference_values,
+            config=params,
+        )
+    else:
+        print(f"No pretrained model defined, using basic model.")
+        model = BaseClassificationNetwork(
+            n_numerical_inputs=len(train_df_num.columns),
+            encoding_reference_values=encoding_reference_values,
+            config=params,
+        )
     run_simple_classification(train_df_num, train_df_cat, train_df_target, model)
     evaluate_simple_classification(model, test_df_num, test_df_cat, test_df_target)
 

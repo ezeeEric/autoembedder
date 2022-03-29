@@ -12,6 +12,11 @@ class AutoEmbedderClassificationModel(BaseClassificationNetwork):
 
     @property
     def metrics(self):
+        # TODO
+        """This resets the metrics property to the tensorflow default. The
+        parent class has a special setting only applicable for the
+        Autoembedder training.
+        """
         return self.compiled_loss.metrics + self.compiled_metrics.metrics
 
     def train_step(self, input_batch: tf.Tensor) -> dict:

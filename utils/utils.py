@@ -1,12 +1,14 @@
 import os
 import glob
+import numpy as np
 import pandas as pd
 import tensorflow as tf
 from typing import Dict, Tuple
 
+from sklearn.preprocessing import OrdinalEncoder, MinMaxScaler, StandardScaler
+from sklearn.model_selection import train_test_split
 
 from autoembedder.autoembedder import AutoEmbedder
-from scripts.train_autoembedder import load_features, prepare_data_for_fit
 
 
 def create_output_dir(out_dir: str) -> str:
@@ -65,41 +67,69 @@ def get_dtype_dict(df: pd.DataFrame) -> Dict[str, list[str]]:
     return df_type_dict
 
 
-def prepare_penguin_data(
+# TODO should this be in preprocessing?
+def normalise_numerical_input_columns(
+    df: pd.DataFrame, method: str = "minmax"
+) -> pd.DataFrame:
+    if method == "minmax":
+        df_transformed = pd.DataFrame(
+            MinMaxScaler().fit_transform(df), columns=df.columns
+        )
+    elif method == "standard":
+        df_transformed = pd.DataFrame(
+            StandardScaler().fit_transform(df), columns=df.columns
+        )
+    elif method == "manual":
+        epsilon = 1e-12
+        df_transformed = (df - df.min()) / (df.max() - df.min() + epsilon)
+    else:
+        raise NotImplementedError(f"{method} not a valid transformation method.")
+    return df_transformed
+
+
+def create_encoding_reference_values(
+    feature_names: list,
+    encoder: OrdinalEncoder,
+) -> dict[str, list]:
+    """Convert a np.ndarray without column names to a dictionary of lists. Key
+    is the feature name, values are the different categories used during
+    encoding."""
+    return {
+        feature_name: encoder.categories_[i]
+        for i, feature_name in enumerate(feature_names)
+    }
+
+
+def encode_categorical_input_ordinal(
     df: pd.DataFrame,
-    params: dict[str],
-) -> list:
+) -> Tuple[np.ndarray, dict]:
 
-    numerical_features, categorical_features, target_features = load_features(
-        df, params["feature_handler_file"]
-    )
-    train_df, test_df, encoding_reference_values = prepare_data_for_fit(
-        df,
-        numerical_features,
-        categorical_features + target_features,
-        normalisation_method=params["normalisation_method"],
-        test_data_fraction=params["test_data_fraction"],
+    embedding_input_encoder = OrdinalEncoder()
+    data_enc = embedding_input_encoder.fit_transform(df)
+
+    df_enc = pd.DataFrame(data_enc, columns=df.columns)
+
+    encoding_reference_values = create_encoding_reference_values(
+        df.columns, embedding_input_encoder
     )
 
-    train_df_num, train_df_cat, train_df_target = (
-        train_df[numerical_features],
-        train_df[categorical_features],
-        tf.keras.utils.to_categorical(train_df[target_features]),
-    )
-    test_df_num, test_df_cat, test_df_target = (
-        test_df[numerical_features],
-        test_df[categorical_features],
-        tf.keras.utils.to_categorical(test_df[target_features]),
-    )
+    return df_enc, encoding_reference_values
 
-    encoding_reference_values_target = encoding_reference_values.pop("species")
-    return (
-        train_df_num,
-        train_df_cat,
-        test_df_num,
-        test_df_cat,
-        train_df_target,
-        test_df_target,
-        encoding_reference_values,
-        encoding_reference_values_target,
+
+def prepare_data_for_fit(
+    df: pd.DataFrame,
+    numerical_features: list[str],
+    categorical_features: list[str],
+    normalisation_method: str,
+    test_data_fraction: float,
+) -> Tuple[pd.DataFrame, pd.DataFrame, OrdinalEncoder]:
+    """This function first encodes the categorical input, then normalises the numerical input and finally merges the result."""
+    df_encoded, embedding_encoder = encode_categorical_input_ordinal(
+        df[categorical_features]
     )
+    df_numericals_normalised = normalise_numerical_input_columns(
+        df[numerical_features], method=normalisation_method
+    )
+    df = pd.concat([df_numericals_normalised, df_encoded], axis=1)
+    train_df, test_df = train_test_split(df, test_size=test_data_fraction)
+    return train_df, test_df, embedding_encoder

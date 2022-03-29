@@ -7,68 +7,19 @@ python scripts/train_autoembedder.py ./data/training_input <input_pattern>
 """
 
 import sys
-import numpy as np
 import pandas as pd
-from typing import Tuple
 import tensorflow as tf
-from sklearn.preprocessing import OrdinalEncoder, MinMaxScaler, StandardScaler
-from sklearn.model_selection import train_test_split
 
 from utils.params import with_params
-from utils.utils import get_sorted_input_files, save_model
+from utils.utils import (
+    get_sorted_input_files,
+    save_model,
+    prepare_data_for_fit,
+    load_features,
+)
 
-from scripts.preprocess_data import load_features
 
 from autoembedder.autoembedder import AutoEmbedder, AutoembedderCallbacks
-
-
-def create_encoding_reference_values(
-    feature_names: list,
-    encoder: OrdinalEncoder,
-) -> dict[str, list]:
-    """Convert a np.ndarray without column names to a dictionary of lists. Key
-    is the feature name, values are the different categories used during
-    encoding."""
-    return {
-        feature_name: encoder.categories_[i]
-        for i, feature_name in enumerate(feature_names)
-    }
-
-
-def encode_categorical_input_ordinal(
-    df: pd.DataFrame,
-) -> Tuple[np.ndarray, dict]:
-
-    embedding_input_encoder = OrdinalEncoder()
-    data_enc = embedding_input_encoder.fit_transform(df)
-
-    df_enc = pd.DataFrame(data_enc, columns=df.columns)
-
-    encoding_reference_values = create_encoding_reference_values(
-        df.columns, embedding_input_encoder
-    )
-
-    return df_enc, encoding_reference_values
-
-
-# TODO should this be in preprocessing?
-def normalise_numerical_input_columns(
-    df: pd.DataFrame, method: str = "minmax"
-) -> pd.DataFrame:
-    if method == "minmax":
-        df_transformed = pd.DataFrame(
-            MinMaxScaler().fit_transform(df), columns=df.columns
-        )
-    elif method == "standard":
-        df_transformed = pd.DataFrame(
-            StandardScaler().fit_transform(df), columns=df.columns
-        )
-    elif method == "manual":
-        epsilon = 1e-12
-        df_transformed = (df - df.min()) / (df.max() - df.min() + epsilon)
-    else:
-        raise NotImplementedError(f"{method} not a valid transformation method.")
-    return df_transformed
 
 
 # TODO should this be split up a bit?
@@ -121,25 +72,6 @@ def test_model(df: pd.DataFrame, model: AutoEmbedder, batch_size: int) -> None:
         batch_size=batch_size,
         callbacks=[AutoembedderCallbacks()],
     )
-
-
-def prepare_data_for_fit(
-    df: pd.DataFrame,
-    numerical_features: list[str],
-    categorical_features: list[str],
-    normalisation_method: str,
-    test_data_fraction: float,
-) -> Tuple[pd.DataFrame, pd.DataFrame, OrdinalEncoder]:
-    """This function first encodes the categorical input, then normalises the numerical input and finally merges the result."""
-    df_encoded, embedding_encoder = encode_categorical_input_ordinal(
-        df[categorical_features]
-    )
-    df_numericals_normalised = normalise_numerical_input_columns(
-        df[numerical_features], method=normalisation_method
-    )
-    df = pd.concat([df_numericals_normalised, df_encoded], axis=1)
-    train_df, test_df = train_test_split(df, test_size=test_data_fraction)
-    return train_df, test_df, embedding_encoder
 
 
 def train_autoembedder(df: pd.DataFrame, params: dict) -> pd.DataFrame:

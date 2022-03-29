@@ -8,11 +8,11 @@ stages:
       md5: 861bff553bc372dc5cc343e909f69b4f
       size: 79
     - path: scripts/preprocess_data.py
-      md5: bea00623484e72979177af6f938b5616
-      size: 3464
+      md5: f76b491fd50ce4a31bf46d0e095fac23
+      size: 2774
     - path: utils/feature_handler.py
-      md5: 9a04f8dac17bf76301bdb8c4e172a274
-      size: 12139
+      md5: 19b7da5e24243edeab1a54aadbb7c1eb
+      size: 14152
     - path: utils/params.py
       md5: edbe52eb8c2150cae39bb569e5a341af
       size: 1880
@@ -87,13 +87,18 @@ stages:
       size: 12754
       nfiles: 1
     - path: ./scripts/supervised_classification_wembedding.py
-      md5: 439c1951d58dffd34f653f0ec0ea5d64
-      size: 4644
+      md5: 9ad25cb2e79741fb94bc13d8423fe408
+      size: 2595
     params:
       params.yaml:
-        train_simple_classification_model:
+        train_classification_models:
           feature_handler_file: ./feature_handling/feature_handler.json
-          activation_function: ReLU
+          hidden_layer_activation_function: relu
+          output_layer_activation_function: softmax
+          n_nodes_per_layer:
+          - 4
+          - 4
+          - 3
           normalisation_method: manual
           test_data_fraction: 0.2
           embeddings_initializer: uniform
@@ -106,21 +111,26 @@ stages:
           epochs: 100
   train_supervised_classification_autoembedding:
     cmd:
-    - python scripts/supervised_classification_wautoembedding.py ./data/training_input/
+    - python scripts/supervised_classification_wembedding.py ./data/training_input/
       ./data/model/autoembedder
     deps:
     - path: ./data/training_input/
       md5: 76518463305c60240aba1a1514d686a0.dir
       size: 12754
       nfiles: 1
-    - path: ./scripts/supervised_classification_wautoembedding.py
-      md5: eabf5cbf3663d467f9d24801c5a640f3
-      size: 4115
+    - path: ./scripts/supervised_classification_wembedding.py
+      md5: 9ad25cb2e79741fb94bc13d8423fe408
+      size: 2595
     params:
       params.yaml:
-        train_simple_classification_model:
+        train_classification_models:
           feature_handler_file: ./feature_handling/feature_handler.json
-          activation_function: ReLU
+          hidden_layer_activation_function: relu
+          output_layer_activation_function: softmax
+          n_nodes_per_layer:
+          - 4
+          - 4
+          - 3
           normalisation_method: manual
           test_data_fraction: 0.2
           embeddings_initializer: uniform
