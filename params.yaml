@@ -13,6 +13,7 @@ train_autoembedder:
     normalisation_method: manual
     optimizer: adam
     loss: mse
+    metrics: []
     learning_rate: 0.005
     batch_size: 64
     n_epochs: 100

@@ -10,6 +10,7 @@ import tensorflow as tf
 
 from utils.params import with_params
 from utils.utils import get_sorted_input_files, load_model
+from utils.engine import compile_model
 
 from scripts.preprocess_data import prepare_penguin_data
 from models.base_classification_network import BaseClassificationNetwork
@@ -17,17 +18,6 @@ from models.autoembedder_classification_model import AutoEmbedderClassificationM
 
 
 OUTPUT_DIRECTORY = ""
-
-
-def compile_model(
-    model: tf.keras.Model,
-    config: dict,
-) -> None:
-    model.compile(
-        loss=tf.keras.losses.categorical_crossentropy,
-        optimizer=tf.keras.optimizers.SGD(learning_rate=config["learning_rate"]),
-        metrics=list(config["metrics"]),
-    )
 
 
 def train_model(

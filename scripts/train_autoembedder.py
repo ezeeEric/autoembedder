@@ -6,7 +6,6 @@ trained model.
 python scripts/train_autoembedder.py ./data/training_input <input_pattern>
 """
 
-from pickletools import optimize
 import sys
 import pandas as pd
 import tensorflow as tf
@@ -17,37 +16,11 @@ from utils.utils import (
     get_sorted_input_files,
     save_model,
     prepare_data_for_fit,
-    load_features,
 )
+from utils.feature_handler import load_features
 
 
 from autoembedder.autoembedder import AutoEmbedder, AutoembedderCallbacks
-
-
-# TODO should this be split up a bit?
-def compile_model(
-    model: tf.keras.Model,
-    learning_rate: float,
-    optimizer_name: str = "sgd",
-    loss_name: str = "mse",
-) -> None:
-
-    optimizer = engine.get_optimizer(name=optimizer_name, learning_rate=learning_rate)
-
-    if loss_name == "mse":
-        loss = tf.keras.losses.MeanSquaredError(
-            reduction=tf.keras.losses.Reduction.NONE
-        )
-    elif loss_name == "bce":
-        loss = tf.keras.losses.BinaryCrossentropy()
-    elif loss_name == "cce":
-        loss = tf.keras.losses.CategoricalCrossentropy()
-    else:
-        raise NotImplementedError(f"Metric {loss_name} not implemented.")
-
-    # explicitely setting run_eagerly=True is necessary in tf 2.0 when dealing
-    # with custom layers and losses
-    model.compile(optimizer=optimizer, loss=loss, run_eagerly=True)
 
 
 def train_model(
@@ -88,12 +61,7 @@ def train_autoembedder(df: pd.DataFrame, params: dict) -> pd.DataFrame:
         categorical_features=categorical_features,
         config=params,
     )
-    compile_model(
-        model=auto_embedder,
-        learning_rate=params["learning_rate"],
-        optimizer_name=params["optimizer"],
-        loss_name=params["loss"],
-    )
+    engine.compile_model(model=auto_embedder, config=params)
     train_model(
         df=train_df,
         model=auto_embedder,
