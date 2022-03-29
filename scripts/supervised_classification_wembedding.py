@@ -1,6 +1,7 @@
-"""Train the AutoEmbedder Model.
+"""
+If a model is provided using a second argument, the classification is run using the pretrained autoembedder.
 
-python train_autoembedder.py ./train_input/
+- python scripts/supervised_classification_wembedding.py ./data/training_input/ [./data/model/autoembedder]
 """
 
 import sys
