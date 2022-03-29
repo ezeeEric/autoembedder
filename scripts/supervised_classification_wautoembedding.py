@@ -10,11 +10,10 @@ import tensorflow as tf
 print(f"tensorflow {tf.__version__}")
 
 from utils.params import with_params
-from utils.utils import get_sorted_input_files, load_model
+from utils.utils import get_sorted_input_files, load_model, prepare_penguin_data
 from scripts.supervised_classification_wembedding import (
     run_simple_classification,
     evaluate_simple_classification,
-    prepare_penguin_data,
 )
 from models.autoembedder_classification_model import AutoEmbedderClassificationModel
 

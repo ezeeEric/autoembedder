@@ -1,11 +1,12 @@
-import glob
 import os
-from typing import Dict, Tuple
-
+import glob
 import pandas as pd
 import tensorflow as tf
+from typing import Dict, Tuple
+
 
 from autoembedder.autoembedder import AutoEmbedder
+from scripts.train_autoembedder import load_features, prepare_data_for_fit
 
 
 def create_output_dir(out_dir: str) -> str:
@@ -62,3 +63,43 @@ def get_dtype_dict(df: pd.DataFrame) -> Dict[str, list[str]]:
         else:
             df_type_dict["categorical"].append(col_name)
     return df_type_dict
+
+
+def prepare_penguin_data(
+    df: pd.DataFrame,
+    params: dict[str],
+) -> list:
+
+    numerical_features, categorical_features, target_features = load_features(
+        df, params["feature_handler_file"]
+    )
+    train_df, test_df, encoding_reference_values = prepare_data_for_fit(
+        df,
+        numerical_features,
+        categorical_features + target_features,
+        normalisation_method=params["normalisation_method"],
+        test_data_fraction=params["test_data_fraction"],
+    )
+
+    train_df_num, train_df_cat, train_df_target = (
+        train_df[numerical_features],
+        train_df[categorical_features],
+        tf.keras.utils.to_categorical(train_df[target_features]),
+    )
+    test_df_num, test_df_cat, test_df_target = (
+        test_df[numerical_features],
+        test_df[categorical_features],
+        tf.keras.utils.to_categorical(test_df[target_features]),
+    )
+
+    encoding_reference_values_target = encoding_reference_values.pop("species")
+    return (
+        train_df_num,
+        train_df_cat,
+        test_df_num,
+        test_df_cat,
+        train_df_target,
+        test_df_target,
+        encoding_reference_values,
+        encoding_reference_values_target,
+    )
