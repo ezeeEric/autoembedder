@@ -6,10 +6,12 @@ trained model.
 python scripts/train_autoembedder.py ./data/training_input <input_pattern>
 """
 
+from pickletools import optimize
 import sys
 import pandas as pd
 import tensorflow as tf
 
+import utils.engine as engine
 from utils.params import with_params
 from utils.utils import (
     get_sorted_input_files,
@@ -30,12 +32,7 @@ def compile_model(
     loss_name: str = "mse",
 ) -> None:
 
-    if optimizer_name == "sgd":
-        optimizer = tf.keras.optimizers.SGD(learning_rate=learning_rate)
-    elif optimizer_name == "adam":
-        optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
-    else:
-        raise NotImplementedError()
+    optimizer = engine.get_optimizer(name=optimizer_name, learning_rate=learning_rate)
 
     if loss_name == "mse":
         loss = tf.keras.losses.MeanSquaredError(
