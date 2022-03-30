@@ -3,12 +3,8 @@ import tensorflow as tf
 
 from palmerpenguins import load_penguins
 
-from utils.feature_handler import (
-    FeatureHandler,
-    create_feature_handler,
-    select_features,
-    load_features,
-)
+from utils.feature_handler import FeatureHandler
+from utils.data import create_feature_handler, select_features, load_features
 from utils.params import with_params
 from utils.utils import create_output_dir, prepare_data_for_fit
 
