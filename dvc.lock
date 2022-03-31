@@ -28,15 +28,15 @@ stages:
           dataset_path: ./data/adult_income_dataset/adult.data
     outs:
     - path: data/training_input/
-      md5: 24419b2771a4d9b75e66c16d5d044666.dir
-      size: 2103010
+      md5: bc39173eab8717e9546f8c4a7a804cf0.dir
+      size: 2072370
       nfiles: 1
     - path: feature_handling/feature_handler.json
-      md5: 0f2d2fc0acbeb0906f666ccf8941a482
-      size: 4263
+      md5: 5d1a75980d75e9eee4c18b42e586f13b
+      size: 4273
     - path: feature_handling/feature_handler_pretty_summary.json
-      md5: 48ee5a6a2a25f78d6807b441afeccb9e
-      size: 950
+      md5: 333f2b13ae4dd72f5dfa18f93d35b647
+      size: 922
   train_autoembedder:
     cmd:
     - python scripts/train_autoembedder.py ./data/training_input/
