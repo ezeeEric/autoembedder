@@ -24,7 +24,11 @@ def remove_duplicates(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def load_data() -> pd.DataFrame:
-    return load_penguins()
+    if False:
+        return load_penguins()
+    else:
+        indir = "./data/adult_income_dataset/adult.data"
+        return pd.read_csv(indir, sep=",", index_col=False)
 
 
 def save_df(df: pd.DataFrame) -> None:
