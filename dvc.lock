@@ -4,7 +4,10 @@ stages:
     cmd:
     - python scripts/preprocess_data.py
     deps:
-    - path: ./feature_handling/feature_actions.json
+    - path: ./feature_handling/feature_actions_adult_income.json
+      md5: 2aeeb4a8319b945fa914c400e939e197
+      size: 58
+    - path: ./feature_handling/feature_actions_penguins.json
       md5: 861bff553bc372dc5cc343e909f69b4f
       size: 79
     - path: scripts/preprocess_data.py
@@ -20,7 +23,7 @@ stages:
       params.yaml:
         data_preprocessing:
           feature_handler_dir: ./feature_handling/
-          feature_action_file: ./feature_handling/feature_actions.json
+          feature_action_file: ./feature_handling/feature_actions_adult_income.json
           dataset_tag: adults
           dataset_path: ./data/adult_income_dataset/adult.data
     outs:
@@ -29,8 +32,8 @@ stages:
       size: 2103010
       nfiles: 1
     - path: feature_handling/feature_handler.json
-      md5: 5e433122be2a884a3751668b74c126c9
-      size: 4292
+      md5: 0f2d2fc0acbeb0906f666ccf8941a482
+      size: 4263
     - path: feature_handling/feature_handler_pretty_summary.json
       md5: 48ee5a6a2a25f78d6807b441afeccb9e
       size: 950

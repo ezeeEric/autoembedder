@@ -1,6 +1,6 @@
 data_preprocessing:
     feature_handler_dir: ./feature_handling/
-    feature_action_file: ./feature_handling/feature_actions.json
+    feature_action_file: ./feature_handling/feature_actions_adult_income.json
     #TODO implement clever switch?
     dataset_tag: adults #penguins
     dataset_path: ./data/adult_income_dataset/adult.data #ignored with penguin setting
