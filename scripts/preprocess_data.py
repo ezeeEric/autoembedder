@@ -23,12 +23,15 @@ def remove_duplicates(df: pd.DataFrame) -> pd.DataFrame:
     return df.drop_duplicates(ignore_index=True)
 
 
-def load_data() -> pd.DataFrame:
-    if False:
+def load_data(config: dict) -> pd.DataFrame:
+
+    if config["dataset_tag"] == "penguins":
         return load_penguins()
-    else:
-        indir = "./data/adult_income_dataset/adult.data"
+    elif config["dataset_tag"] == "adults":
+        indir = config["dataset_path"]
         return pd.read_csv(indir, sep=",", index_col=False)
+    else:
+        raise NotImplementedError(f"Unknown dataset {config['dataset_tag']}.")
 
 
 def save_df(df: pd.DataFrame) -> None:
@@ -42,8 +45,7 @@ def drop_entries_with_nan(df: pd.DataFrame) -> pd.DataFrame:
 
 @with_params("params.yaml", "data_preprocessing")
 def main(params: dict):
-    df = load_data()
-
+    df = load_data(params)
     feature_handler = create_feature_handler(
         df, params["feature_handler_dir"], params["feature_action_file"]
     )
