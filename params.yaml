@@ -1,3 +1,5 @@
+
+
 data_preprocessing:
     feature_handler_dir: ./feature_handling/
     feature_action_file: ./feature_handling/feature_actions_adult_income.json
@@ -7,7 +9,7 @@ data_preprocessing:
 train_autoembedder:
     output_directory: ./data/model
     feature_handler_file: ./feature_handling/feature_handler.json
-    manual_encoder_architecture: [8,6,4] #empty list [] for automatic autencoder shape
+    manual_encoder_architecture: [108,74,50] #empty list [] for automatic autencoder shape
     manual_decoder_architecture: [] #empty list [] for default symmetric autoencoder shape
     hidden_layer_activation_function: ReLU
     output_layer_activation_function: tanh
@@ -18,8 +20,8 @@ train_autoembedder:
     loss: mse
     metrics: []
     learning_rate: 0.005
-    batch_size: 64
-    n_epochs: 100
+    batch_size: 1024
+    n_epochs: 1
 train_classification_models:
     feature_handler_file: ./feature_handling/feature_handler.json
     hidden_layer_activation_function: relu

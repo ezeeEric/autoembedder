@@ -17,8 +17,7 @@ from utils.utils import (
     save_model,
     prepare_data_for_fit,
 )
-from utils.feature_handler import load_features
-
+from utils.data import load_features
 
 from autoembedder.autoembedder import AutoEmbedder, AutoembedderCallbacks
 

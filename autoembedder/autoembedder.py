@@ -152,6 +152,11 @@ class AutoEmbedder(Embedder):
 
         self.last_input_output = []
 
+    def __str__(self) -> str:
+        out_string = "Autoembedder\n"
+        out_string += "\n".join([f"{key}:{val}" for key, val in self.__dict__.items()])
+        return f"{out_string}\n{super().__str__()}"
+
     def get_config(self):
         config_dict = {
             "numerical_features": self.numerical_features,
