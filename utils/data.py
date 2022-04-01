@@ -120,12 +120,13 @@ def prepare_data(df: pd.DataFrame, params: dict[str]) -> list:
     )
 
     df_encoded, encoding_reference_values = encode_categorical_input_ordinal(
-        df[categorical_features]
+        df[categorical_features + target_features]
     )
     df_numericals_normalised = normalise_numerical_input_columns(
         df[numerical_features], method=params["normalisation_method"]
     )
     df = pd.concat([df_numericals_normalised, df_encoded], axis=1)
+
     train_df, test_df = train_test_split(df, test_size=params["test_data_fraction"])
 
     train_df_num, train_df_cat, train_df_target = (

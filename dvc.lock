@@ -10,13 +10,16 @@ stages:
     - path: ./feature_handling/feature_actions_penguins.json
       md5: 861bff553bc372dc5cc343e909f69b4f
       size: 79
-    - path: scripts/preprocess_data.py
+    - path: ./scripts/preprocess_data.py
       md5: fe66b68f2dd5ad815519e6821613024f
       size: 1836
-    - path: utils/feature_handler.py
+    - path: ./utils/data.py
+      md5: f0e7f3b7d68ac244ddac7b452e1d5a14
+      size: 5191
+    - path: ./utils/feature_handler.py
       md5: c37ecc5c73593a41e10789c8846aced0
       size: 12139
-    - path: utils/params.py
+    - path: ./utils/params.py
       md5: edbe52eb8c2150cae39bb569e5a341af
       size: 1880
     params:
@@ -27,11 +30,11 @@ stages:
           dataset_tag: adults
           dataset_path: ./data/adult_income_dataset/adult.data
     outs:
-    - path: data/training_input/
+    - path: ./data/training_input/
       md5: bc39173eab8717e9546f8c4a7a804cf0.dir
       size: 2072370
       nfiles: 1
-    - path: feature_handling/feature_handler.json
+    - path: ./feature_handling/feature_handler.json
       md5: 5d1a75980d75e9eee4c18b42e586f13b
       size: 4273
     - path: feature_handling/feature_handler_pretty_summary.json
@@ -52,12 +55,15 @@ stages:
     - path: ./feature_handling/feature_handler.json
       md5: 5d1a75980d75e9eee4c18b42e586f13b
       size: 4273
+    - path: ./scripts/train_autoembedder.py
+      md5: c4063aa84e23e4a5a3febaaf4fb5f8a3
+      size: 3010
+    - path: ./utils/data.py
+      md5: f0e7f3b7d68ac244ddac7b452e1d5a14
+      size: 5191
     - path: ./utils/feature_handler.py
       md5: c37ecc5c73593a41e10789c8846aced0
       size: 12139
-    - path: scripts/train_autoembedder.py
-      md5: e046c2ad9811830b01fbf546332d5246
-      size: 2751
     params:
       params.yaml:
         train_autoembedder:
@@ -81,8 +87,8 @@ stages:
           n_epochs: 1
     outs:
     - path: ./data/model/
-      md5: 970dd08dd78bb3520af765d94acc467f.dir
-      size: 1198307
+      md5: 89f492072a88cb1b2e992d7524eebb29.dir
+      size: 1198369
       nfiles: 4
   train_supervised_classification_embedding:
     cmd:
@@ -95,6 +101,15 @@ stages:
     - path: ./scripts/supervised_classification_wembedding.py
       md5: 8ba9ab725dca3bb19297dafadc94a2f0
       size: 3278
+    - path: ./utils/data.py
+      md5: f0e7f3b7d68ac244ddac7b452e1d5a14
+      size: 5191
+    - path: ./utils/engine.py
+      md5: 947de9a00d4aec5544307aca89598d75
+      size: 1604
+    - path: ./utils/utils.py
+      md5: 68e095e276449b7c52f4c7449e33515a
+      size: 2216
     params:
       params.yaml:
         train_classification_models:
@@ -123,8 +138,8 @@ stages:
       ./data/model/autoembedder
     deps:
     - path: ./data/model/
-      md5: 970dd08dd78bb3520af765d94acc467f.dir
-      size: 1198307
+      md5: 89f492072a88cb1b2e992d7524eebb29.dir
+      size: 1198369
       nfiles: 4
     - path: ./data/training_input/
       md5: bc39173eab8717e9546f8c4a7a804cf0.dir
@@ -133,6 +148,15 @@ stages:
     - path: ./scripts/supervised_classification_wembedding.py
       md5: 8ba9ab725dca3bb19297dafadc94a2f0
       size: 3278
+    - path: ./utils/data.py
+      md5: f0e7f3b7d68ac244ddac7b452e1d5a14
+      size: 5191
+    - path: ./utils/engine.py
+      md5: 947de9a00d4aec5544307aca89598d75
+      size: 1604
+    - path: ./utils/utils.py
+      md5: 68e095e276449b7c52f4c7449e33515a
+      size: 2216
     params:
       params.yaml:
         train_classification_models:
