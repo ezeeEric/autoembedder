@@ -45,6 +45,8 @@ def drop_entries_with_nan(df: pd.DataFrame) -> pd.DataFrame:
 
 @with_params("params.yaml", "data_preprocessing")
 def main(params: dict):
+    # print(params)
+    # exit()
     df = load_data(params)
     feature_handler = create_feature_handler(
         df, params["feature_handler_dir"], params["feature_action_file"]

@@ -61,10 +61,7 @@ def load_features(
     return numerical_features, categorical_features, target_features
 
 
-def prepare_penguin_data(
-    df: pd.DataFrame,
-    params: dict[str],
-) -> list:
+def prepare_data(df: pd.DataFrame, params: dict[str]) -> list:
 
     numerical_features, categorical_features, target_features = load_features(
         df, params["feature_handler_file"]
@@ -88,7 +85,9 @@ def prepare_penguin_data(
         tf.keras.utils.to_categorical(test_df[target_features]),
     )
 
-    encoding_reference_values_target = encoding_reference_values.pop("species")
+    encoding_reference_values_target = [
+        encoding_reference_values.pop(target) for target in target_features
+    ]
     return (
         train_df_num,
         train_df_cat,

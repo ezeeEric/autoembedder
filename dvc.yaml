@@ -1,3 +1,8 @@
+
+# vars:
+# - config/penguin_data.yaml
+# - config/adult_income_data.yaml
+
 stages:
   data_preprocessing:
     desc: "Create complete vocabulary for training the Autoembedder"
@@ -44,4 +49,5 @@ stages:
     - train_classification_models
     deps:
     - ./data/training_input/
+    - ./data/model/
     - ./scripts/supervised_classification_wembedding.py
