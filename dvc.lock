@@ -4,12 +4,15 @@ stages:
     cmd:
     - python scripts/preprocess_data.py
     deps:
-    - path: ./feature_handling/feature_actions.json
+    - path: ./feature_handling/feature_actions_adult_income.json
+      md5: 2aeeb4a8319b945fa914c400e939e197
+      size: 58
+    - path: ./feature_handling/feature_actions_penguins.json
       md5: 861bff553bc372dc5cc343e909f69b4f
       size: 79
     - path: scripts/preprocess_data.py
-      md5: 9b34b9739e30497718751fd7e5dce93f
-      size: 1650
+      md5: 487e9f61044f2b4d894e6ddc0f2571fa
+      size: 1803
     - path: utils/feature_handler.py
       md5: c37ecc5c73593a41e10789c8846aced0
       size: 12139
@@ -20,48 +23,50 @@ stages:
       params.yaml:
         data_preprocessing:
           feature_handler_dir: ./feature_handling/
-          feature_action_file: ./feature_handling/feature_actions.json
+          feature_action_file: ./feature_handling/feature_actions_adult_income.json
+          dataset_tag: adults
+          dataset_path: ./data/adult_income_dataset/adult.data
     outs:
     - path: data/training_input/
-      md5: 24419b2771a4d9b75e66c16d5d044666.dir
-      size: 2103010
+      md5: bc39173eab8717e9546f8c4a7a804cf0.dir
+      size: 2072370
       nfiles: 1
     - path: feature_handling/feature_handler.json
-      md5: 5e433122be2a884a3751668b74c126c9
-      size: 4292
+      md5: 5d1a75980d75e9eee4c18b42e586f13b
+      size: 4273
     - path: feature_handling/feature_handler_pretty_summary.json
-      md5: 48ee5a6a2a25f78d6807b441afeccb9e
-      size: 950
+      md5: 333f2b13ae4dd72f5dfa18f93d35b647
+      size: 922
   train_autoembedder:
     cmd:
     - python scripts/train_autoembedder.py ./data/training_input/
     deps:
     - path: ./autoembedder/
-      md5: 194401ecd5a5633b3ba2b89d31c6b952.dir
-      size: 45339
+      md5: 6399baa626786a08081896a6f32e1a75.dir
+      size: 45949
       nfiles: 7
     - path: ./data/training_input/
-      md5: 76518463305c60240aba1a1514d686a0.dir
-      size: 12754
+      md5: bc39173eab8717e9546f8c4a7a804cf0.dir
+      size: 2072370
       nfiles: 1
     - path: ./feature_handling/feature_handler.json
-      md5: dfb240b251b8a11fa558492ebc47fe47
-      size: 2456
+      md5: 5d1a75980d75e9eee4c18b42e586f13b
+      size: 4273
     - path: ./utils/feature_handler.py
-      md5: 19b7da5e24243edeab1a54aadbb7c1eb
-      size: 14152
+      md5: c37ecc5c73593a41e10789c8846aced0
+      size: 12139
     - path: scripts/train_autoembedder.py
-      md5: 990077e5671b8a01b2458cc675840562
-      size: 2763
+      md5: e046c2ad9811830b01fbf546332d5246
+      size: 2751
     params:
       params.yaml:
         train_autoembedder:
           output_directory: ./data/model
           feature_handler_file: ./feature_handling/feature_handler.json
           manual_encoder_architecture:
-          - 8
-          - 6
-          - 4
+          - 108
+          - 74
+          - 50
           manual_decoder_architecture: []
           hidden_layer_activation_function: ReLU
           output_layer_activation_function: tanh
@@ -72,12 +77,12 @@ stages:
           loss: mse
           metrics: []
           learning_rate: 0.005
-          batch_size: 64
-          n_epochs: 100
+          batch_size: 1024
+          n_epochs: 1
     outs:
     - path: ./data/model/
-      md5: eb842542b8b7ee99f63b8393988e6dc3.dir
-      size: 274305
+      md5: 970dd08dd78bb3520af765d94acc467f.dir
+      size: 1198307
       nfiles: 4
   train_supervised_classification_embedding:
     cmd:
