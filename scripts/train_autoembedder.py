@@ -15,9 +15,13 @@ from utils.params import with_params
 from utils.utils import (
     get_sorted_input_files,
     save_model,
-    prepare_data_for_fit,
 )
-from utils.data import load_features
+from utils.data import (
+    load_features,
+    encode_categorical_input_ordinal,
+    normalise_numerical_input_columns,
+)
+from sklearn.model_selection import train_test_split
 
 from autoembedder.autoembedder import AutoEmbedder, AutoembedderCallbacks
 
@@ -47,13 +51,16 @@ def train_autoembedder(df: pd.DataFrame, params: dict) -> pd.DataFrame:
     numerical_features, categorical_features, _ = load_features(
         df, params["feature_handler_file"]
     )
-    train_df, test_df, encoding_reference_values = prepare_data_for_fit(
-        df,
-        numerical_features,
-        categorical_features,
-        normalisation_method=params["normalisation_method"],
-        test_data_fraction=params["test_data_fraction"],
+    df_encoded, encoding_reference_values = encode_categorical_input_ordinal(
+        df[categorical_features]
     )
+    df_numericals_normalised = normalise_numerical_input_columns(
+        df[numerical_features], method=params["normalisation_method"]
+    )
+    df = pd.concat([df_numericals_normalised, df_encoded], axis=1)
+
+    train_df, test_df = train_test_split(df, test_size=params["test_data_fraction"])
+
     auto_embedder = AutoEmbedder(
         encoding_reference_values=encoding_reference_values,
         numerical_features=numerical_features,

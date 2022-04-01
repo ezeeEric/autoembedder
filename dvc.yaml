@@ -11,14 +11,15 @@ stages:
     params:
     - data_preprocessing
     deps:
-    - scripts/preprocess_data.py
-    - utils/feature_handler.py
-    - utils/params.py
+    - ./scripts/preprocess_data.py
+    - ./utils/feature_handler.py
+    - ./utils/params.py
+    - ./utils/data.py
     - ./feature_handling/feature_actions_adult_income.json
     - ./feature_handling/feature_actions_penguins.json
     outs:
-    - data/training_input/
-    - feature_handling/feature_handler.json
+    - ./data/training_input/
+    - ./feature_handling/feature_handler.json
     - feature_handling/feature_handler_pretty_summary.json
   train_autoembedder:
     desc: "Train the AutoEmbedding model and save to disk."
@@ -27,9 +28,10 @@ stages:
     params:
     - train_autoembedder
     deps:
-    - scripts/train_autoembedder.py
+    - ./scripts/train_autoembedder.py
     - ./feature_handling/feature_handler.json
     - ./utils/feature_handler.py
+    - ./utils/data.py
     - ./data/training_input/
     - ./autoembedder/
     outs:
@@ -41,6 +43,9 @@ stages:
     - train_classification_models
     deps:
     - ./data/training_input/
+    - ./utils/data.py
+    - ./utils/engine.py
+    - ./utils/utils.py
     - ./scripts/supervised_classification_wembedding.py
   train_supervised_classification_autoembedding:
     cmd:
@@ -48,6 +53,9 @@ stages:
     params:
     - train_classification_models
     deps:
+    - ./utils/data.py
+    - ./utils/engine.py
+    - ./utils/utils.py
     - ./data/training_input/
     - ./data/model/
     - ./scripts/supervised_classification_wembedding.py
