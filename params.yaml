@@ -1,5 +1,3 @@
-
-
 data_preprocessing:
     feature_handler_dir: ./feature_handling/
     feature_action_file: ./feature_handling/feature_actions_adult_income.json
@@ -23,19 +21,21 @@ train_autoembedder:
     batch_size: 1024
     n_epochs: 1
 train_classification_models:
+    dataset_tag: adults #penguins
     feature_handler_file: ./feature_handling/feature_handler.json
     hidden_layer_activation_function: relu
     output_layer_activation_function: softmax
-    n_nodes_per_layer: [4,4,3]
+    # n_nodes_per_layer: [4,4,3]
+    n_nodes_per_layer: [108,74,50]
     normalisation_method: manual
     test_data_fraction: 0.2
     embeddings_initializer: uniform
     optimizer: adam
     loss: cce
-    learning_rate: 0.005
+    learning_rate: 0.001
     metrics:
     - accuracy
     # - precision
-    batch_size: 32
-    n_epochs: 100
+    batch_size: 2048
+    n_epochs: 10
     verbosity_level: 1

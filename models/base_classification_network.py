@@ -3,11 +3,15 @@ from autoembedder.embedder import Embedder
 
 
 class BaseClassificationNetwork(Embedder):
-    def __init__(self, n_numerical_inputs: int, **kwargs) -> None:
+    def __init__(
+        self, n_numerical_inputs: int, n_target_classes: int, **kwargs
+    ) -> None:
         super().__init__(**kwargs)
 
         input_length = n_numerical_inputs + sum(self.embedding_layers_output_dimensions)
-        n_nodes_per_layer = [input_length] + self.config["n_nodes_per_layer"]
+        n_nodes_per_layer = (
+            [input_length] + self.config["n_nodes_per_layer"] + [n_target_classes]
+        )
 
         self.classification_model = tf.keras.Sequential(
             name="base_classification_model"

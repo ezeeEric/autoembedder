@@ -11,8 +11,8 @@ stages:
       md5: 861bff553bc372dc5cc343e909f69b4f
       size: 79
     - path: scripts/preprocess_data.py
-      md5: 487e9f61044f2b4d894e6ddc0f2571fa
-      size: 1803
+      md5: fe66b68f2dd5ad815519e6821613024f
+      size: 1836
     - path: utils/feature_handler.py
       md5: c37ecc5c73593a41e10789c8846aced0
       size: 12139
@@ -89,32 +89,33 @@ stages:
     - python scripts/supervised_classification_wembedding.py ./data/training_input/
     deps:
     - path: ./data/training_input/
-      md5: 76518463305c60240aba1a1514d686a0.dir
-      size: 12754
+      md5: bc39173eab8717e9546f8c4a7a804cf0.dir
+      size: 2072370
       nfiles: 1
     - path: ./scripts/supervised_classification_wembedding.py
-      md5: 43704ae81a052631da4ba8ef4755a98b
-      size: 3082
+      md5: 8ba9ab725dca3bb19297dafadc94a2f0
+      size: 3278
     params:
       params.yaml:
         train_classification_models:
+          dataset_tag: adults
           feature_handler_file: ./feature_handling/feature_handler.json
           hidden_layer_activation_function: relu
           output_layer_activation_function: softmax
           n_nodes_per_layer:
-          - 4
-          - 4
-          - 3
+          - 108
+          - 74
+          - 50
           normalisation_method: manual
           test_data_fraction: 0.2
           embeddings_initializer: uniform
           optimizer: adam
           loss: cce
-          learning_rate: 0.005
+          learning_rate: 0.001
           metrics:
           - accuracy
-          batch_size: 32
-          n_epochs: 100
+          batch_size: 2048
+          n_epochs: 10
           verbosity_level: 1
   train_supervised_classification_autoembedding:
     cmd:

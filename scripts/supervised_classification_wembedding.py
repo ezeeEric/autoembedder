@@ -11,8 +11,8 @@ import tensorflow as tf
 from utils.params import with_params
 from utils.utils import get_sorted_input_files, load_model
 from utils.engine import compile_model
+from utils.data import prepare_data
 
-from scripts.preprocess_data import prepare_penguin_data
 from models.base_classification_network import BaseClassificationNetwork
 from models.autoembedder_classification_model import AutoEmbedderClassificationModel
 
@@ -31,6 +31,7 @@ def train_model(
     model.fit(
         [train_data_cat, train_data_num],
         train_data_target,
+        batch_size=config["batch_size"],
         epochs=config["n_epochs"],
         verbose=config["verbosity_level"],
     )
@@ -46,6 +47,7 @@ def test_model(
     loss, accuracy = model.evaluate(
         [test_data_cat, test_data_num],
         test_data_target,
+        batch_size=config["batch_size"],
         verbose=config["verbosity_level"],
     )
     print(f" Model loss on the test set: {loss}")
@@ -72,13 +74,16 @@ def main(params: dict):
         test_df_target,
         encoding_reference_values,
         _,
-    ) = prepare_penguin_data(df, params)
+    ) = prepare_data(df, params)
+
+    n_target_classes = train_df_target.shape[1]
 
     if len(sys.argv) > 2:
         print(f"Pretrained Autoembedder {sys.argv[2]} will be used in classification.")
         autoembedder = load_model(sys.argv[2])
         model = AutoEmbedderClassificationModel(
             n_numerical_inputs=len(train_df_num.columns),
+            n_target_classes=n_target_classes,
             autoembedder=autoembedder,
             encoding_reference_values=encoding_reference_values,
             config=params,
@@ -87,6 +92,7 @@ def main(params: dict):
         print(f"No pretrained model defined, using basic model.")
         model = BaseClassificationNetwork(
             n_numerical_inputs=len(train_df_num.columns),
+            n_target_classes=n_target_classes,
             encoding_reference_values=encoding_reference_values,
             config=params,
         )
