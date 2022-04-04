@@ -27,10 +27,14 @@ from autoembedder.autoembedder import AutoEmbedder, AutoembedderCallbacks
 
 
 def train_model(
-    df: pd.DataFrame, model: AutoEmbedder, batch_size: int, epochs: int
+    df: pd.DataFrame,
+    validation_df: pd.DataFrame,
+    model: AutoEmbedder,
+    batch_size: int,
+    epochs: int,
 ) -> None:
     autoembedder_callback = AutoembedderCallbacks(
-        training_data=tf.convert_to_tensor(df)
+        validation_data=tf.convert_to_tensor(validation_df)
     )
     model.match_feature_to_input_column_idx(columns=df.columns)
     model.fit(
@@ -44,7 +48,7 @@ def train_model(
 
 def test_model(df: pd.DataFrame, model: AutoEmbedder, batch_size: int) -> None:
     autoembedder_callback = AutoembedderCallbacks(
-        training_data=tf.convert_to_tensor(df)
+        validation_data=tf.convert_to_tensor(df)
     )
     model.evaluate(
         tf.convert_to_tensor(df),
@@ -76,6 +80,7 @@ def train_autoembedder(df: pd.DataFrame, params: dict) -> pd.DataFrame:
     engine.compile_model(model=auto_embedder, config=params)
     train_model(
         df=train_df,
+        validation_df=test_df,
         model=auto_embedder,
         batch_size=params["batch_size"],
         epochs=params["n_epochs"],
