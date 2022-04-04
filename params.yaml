@@ -7,7 +7,7 @@ data_preprocessing:
 train_autoembedder:
     output_directory: ./data/model
     feature_handler_file: ./feature_handling/feature_handler.json
-    manual_encoder_architecture: [108,74,50] #empty list [] for automatic autencoder shape
+    manual_encoder_architecture: [108,90,70] #empty list [] for automatic autencoder shape
     manual_decoder_architecture: [] #empty list [] for default symmetric autoencoder shape
     hidden_layer_activation_function: ReLU
     output_layer_activation_function: tanh
@@ -19,7 +19,7 @@ train_autoembedder:
     metrics: []
     learning_rate: 0.005
     batch_size: 1024
-    n_epochs: 2
+    n_epochs: 20
 train_classification_models:
     dataset_tag: adults #penguins
     feature_handler_file: ./feature_handling/feature_handler.json

@@ -20,6 +20,7 @@ class AutoembedderCallbacks(tf.keras.callbacks.Callback):
 
     # https://www.tensorflow.org/guide/keras/custom_callback
     def on_epoch_end(self, epoch, logs=None):
+        print()
         metrics = self.model.test_step(input_batch=self.validation_data)
         for metric_name, metric_val in metrics.items():
             print(f"{metric_name}: {metric_val.numpy().item():.2f}")

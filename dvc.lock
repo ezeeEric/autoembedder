@@ -45,8 +45,8 @@ stages:
     - python scripts/train_autoembedder.py ./data/training_input/
     deps:
     - path: ./autoembedder/
-      md5: c8bd3f461c9489859a4cf532b600f405.dir
-      size: 47082
+      md5: 384a41ffdcd1b354e2e8cf381fa94b99.dir
+      size: 47053
       nfiles: 7
     - path: ./data/training_input/
       md5: bc39173eab8717e9546f8c4a7a804cf0.dir
@@ -71,8 +71,8 @@ stages:
           feature_handler_file: ./feature_handling/feature_handler.json
           manual_encoder_architecture:
           - 108
-          - 74
-          - 50
+          - 90
+          - 70
           manual_decoder_architecture: []
           hidden_layer_activation_function: ReLU
           output_layer_activation_function: tanh
@@ -84,11 +84,11 @@ stages:
           metrics: []
           learning_rate: 0.005
           batch_size: 1024
-          n_epochs: 2
+          n_epochs: 20
     outs:
     - path: ./data/model/
-      md5: 6b3ca78cd1a4ee3b9b40946de767384a.dir
-      size: 1198205
+      md5: 7908678405a68aa4a35f1d4e91bc7ff9.dir
+      size: 1309535
       nfiles: 4
   train_supervised_classification_embedding:
     cmd:
