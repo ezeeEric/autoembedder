@@ -5,6 +5,7 @@ Embedding categorial data by training an embedding layer in an unsupervised way
 import numpy as np
 import tensorflow as tf
 import pandas as pd
+from typing import Tuple
 
 from autoembedder.embedder import Embedder
 from autoembedder.embedding_confusion_metric import EmbeddingConfusionMetric
@@ -13,9 +14,15 @@ from sklearn.preprocessing import OrdinalEncoder
 
 
 class AutoembedderCallbacks(tf.keras.callbacks.Callback):
+    def __init__(self, validation_data: Tuple[tf.Tensor, tf.Tensor]) -> None:
+        super().__init__()
+        self.validation_data = validation_data
+
     # https://www.tensorflow.org/guide/keras/custom_callback
     def on_epoch_end(self, epoch, logs=None):
-        pass
+        metrics = self.model.test_step(input_batch=self.validation_data)
+        for metric_name, metric_val in metrics.items():
+            print(f"{metric_name}: {metric_val.numpy().item():.2f}")
 
     def on_train_end(self, logs=None):
         # print(f"\ninput_batch\n {self.model.last_input_output[0]}")
@@ -285,11 +292,11 @@ class AutoEmbedder(Embedder):
 
         # Compute our own metrics
         self._loss_tracker_epoch.update_state(loss)
-        self._embedding_confusion_metric.update_state(
-            embedding_layer_input,
-            embedding_layer_outputs_reco,
-            embeddings_reference_values,
-        )
+        # self._embedding_confusion_metric.update_state(
+        #     embedding_layer_input,
+        #     embedding_layer_outputs_reco,
+        #     embeddings_reference_values,
+        # )
         return {
             "loss": self._loss_tracker_epoch.result(),
             **self._embedding_confusion_metric.result(),

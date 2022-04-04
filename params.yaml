@@ -19,7 +19,7 @@ train_autoembedder:
     metrics: []
     learning_rate: 0.005
     batch_size: 1024
-    n_epochs: 1
+    n_epochs: 2
 train_classification_models:
     dataset_tag: adults #penguins
     feature_handler_file: ./feature_handling/feature_handler.json
