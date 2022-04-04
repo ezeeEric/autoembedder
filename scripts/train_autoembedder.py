@@ -29,21 +29,27 @@ from autoembedder.autoembedder import AutoEmbedder, AutoembedderCallbacks
 def train_model(
     df: pd.DataFrame, model: AutoEmbedder, batch_size: int, epochs: int
 ) -> None:
+    autoembedder_callback = AutoembedderCallbacks(
+        training_data=tf.convert_to_tensor(df)
+    )
     model.match_feature_to_input_column_idx(columns=df.columns)
     model.fit(
         tf.convert_to_tensor(df),
         batch_size=batch_size,
         epochs=epochs,
         verbose=1,
-        callbacks=[AutoembedderCallbacks()],
+        callbacks=[autoembedder_callback],
     )
 
 
 def test_model(df: pd.DataFrame, model: AutoEmbedder, batch_size: int) -> None:
+    autoembedder_callback = AutoembedderCallbacks(
+        training_data=tf.convert_to_tensor(df)
+    )
     model.evaluate(
         tf.convert_to_tensor(df),
         batch_size=batch_size,
-        callbacks=[AutoembedderCallbacks()],
+        callbacks=[autoembedder_callback],
     )
 
 

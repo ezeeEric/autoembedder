@@ -5,16 +5,46 @@ Embedding categorial data by training an embedding layer in an unsupervised way
 import numpy as np
 import tensorflow as tf
 import pandas as pd
+from typing import Tuple
 
 from autoembedder.embedder import Embedder
 from autoembedder.embedding_confusion_metric import EmbeddingConfusionMetric
 
 from sklearn.preprocessing import OrdinalEncoder
 
+from sklearn.metrics import roc_auc_score
+from keras.callbacks import Callback
+
+# class IntervalEvaluation(Callback):
+#     def __init__(self, validation_data=(), interval=10):
+#         super(Callback, self).__init__()
+
+#         self.interval = interval
+#         self.X_val, self.y_val = validation_data
+
+#     def on_epoch_end(self, epoch, logs={}):
+#         if epoch % self.interval == 0:
+#             y_pred = self.model.predict_proba(self.X_val, verbose=0)
+#             score = roc_auc_score(self.y_val, y_pred)
+#             print("interval evaluation - epoch: {:d} - score: {:.6f}".format(epoch, score))
+# ival = IntervalEvaluation(validation_data=(x_test2, y_test2), interval=1)
+# model.fit(x_train, y_train,
+#           batch_size=8196,
+#           epochs=256,
+#           validation_data=[x_test, y_test],
+#           class_weight=class_weight,
+#           callbacks=[ival],
+#           verbose=1 )
+
 
 class AutoembedderCallbacks(tf.keras.callbacks.Callback):
+    def __init__(self, training_data: Tuple[tf.Tensor, tf.Tensor]) -> None:
+        super().__init__()
+        self.train_data = training_data
+
     # https://www.tensorflow.org/guide/keras/custom_callback
     def on_epoch_end(self, epoch, logs=None):
+        print("eyyyyooo")
         pass
 
     def on_train_end(self, logs=None):
@@ -285,11 +315,11 @@ class AutoEmbedder(Embedder):
 
         # Compute our own metrics
         self._loss_tracker_epoch.update_state(loss)
-        self._embedding_confusion_metric.update_state(
-            embedding_layer_input,
-            embedding_layer_outputs_reco,
-            embeddings_reference_values,
-        )
+        # self._embedding_confusion_metric.update_state(
+        #     embedding_layer_input,
+        #     embedding_layer_outputs_reco,
+        #     embeddings_reference_values,
+        # )
         return {
             "loss": self._loss_tracker_epoch.result(),
             **self._embedding_confusion_metric.result(),
