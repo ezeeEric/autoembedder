@@ -1,0 +1,50 @@
+name: autoembedder_cml
+on: [push]
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    # optionally use a convenient Ubuntu LTS + DVC + CML image
+    container: docker://ghcr.io/iterative/cml:0-dvc2-base1
+    steps:
+      - uses: actions/checkout@v2
+      # may need to setup NodeJS & Python3 on e.g. self-hosted
+      # - uses: actions/setup-node@v2
+      #   with:
+      #     node-version: '16'
+      # - uses: actions/setup-python@v2
+      #   with:
+      #     python-version: '3.x'
+      - uses: iterative/setup-cml@v1
+      - name: Train model
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+        run: |
+          echo "GOOGLE_APPLICATION_CREDENTIALS ${GOOGLE_APPLICATION_CREDENTIALS}"  >> report.md
+          cml-send-comment report.md
+
+          # Install requirements
+          pip install -r requirements.txt
+
+          # # Pull data & run-cache from S3 and reproduce pipeline
+          # dvc pull
+
+          dvc repro train_autoembedder
+
+          # # Report metrics
+          # echo "## Metrics" >> report.md
+          # git fetch --prune
+          # dvc metrics diff master --show-md >> report.md
+
+          # # Publish confusion matrix diff
+          # echo "## Plots" >> report.md
+          # echo "### Class confusions" >> report.md
+          # dvc plots diff --target classes.csv --template confusion -x actual -y predicted --show-vega master > vega.json
+          # vl2png vega.json -s 1.5 | cml-publish --md >> report.md
+
+          # # Publish regularization function diff
+          # echo "### Effects of regularization" >> report.md
+          # dvc plots diff --target estimators.csv -x Regularization --show-vega master > vega.json
+          # vl2png vega.json -s 1.5 | cml-publish --md >> report.md
+
+          # cml-send-comment report.md

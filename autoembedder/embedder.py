@@ -1,6 +1,5 @@
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras.models import Model
 import pandas as pd
 
 
@@ -8,7 +7,7 @@ def get_encoded_column(input: np.ndarray, slice_idx: int) -> list[np.ndarray]:
     return input[:, slice_idx]
 
 
-class Embedder(Model):
+class Embedder(tf.keras.models.Model):
     def __init__(
         self,
         encoding_reference_values: dict[str, list],

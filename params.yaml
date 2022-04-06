@@ -1,13 +1,16 @@
 data_preprocessing:
     feature_handler_dir: ./feature_handling/
-    feature_action_file: ./feature_handling/feature_actions_adult_income.json
+    # feature_action_file: ./feature_handling/feature_actions_adult_income.json
+    feature_action_file: ./feature_handling/feature_actions_penguins.json
     #TODO implement clever switch?
-    dataset_tag: adults #penguins
+    # dataset_tag: adults #penguins
+    dataset_tag: penguins
     dataset_path: ./data/adult_income_dataset/adult.data #ignored with penguin setting
 train_autoembedder:
     output_directory: ./data/model
     feature_handler_file: ./feature_handling/feature_handler.json
-    manual_encoder_architecture: [108,74,50] #empty list [] for automatic autencoder shape
+    # manual_encoder_architecture: [108,90,70] #empty list [] for automatic autencoder shape
+    manual_encoder_architecture: [] #empty list [] for automatic autencoder shape
     manual_decoder_architecture: [] #empty list [] for default symmetric autoencoder shape
     hidden_layer_activation_function: ReLU
     output_layer_activation_function: tanh
@@ -18,8 +21,9 @@ train_autoembedder:
     loss: mse
     metrics: []
     learning_rate: 0.005
-    batch_size: 1024
-    n_epochs: 2
+    # batch_size: 1024
+    batch_size: 32
+    n_epochs: 100
 train_classification_models:
     dataset_tag: adults #penguins
     feature_handler_file: ./feature_handling/feature_handler.json
