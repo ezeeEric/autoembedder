@@ -27,9 +27,9 @@ jobs:
           pip install -r requirements.txt
 
           # # Pull data & run-cache from S3 and reproduce pipeline
-          dvc pull
+          # dvc pull
 
-          # dvc repro
+          dvc repro train_autoembedder
 
           # # Report metrics
           # echo "## Metrics" >> report.md
