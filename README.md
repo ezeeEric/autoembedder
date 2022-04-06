@@ -17,12 +17,11 @@ penguins.head()
 
 In the following, the usage of the Autoembedding model to embed categorical data is described.
 
-:warning: **Disclaimer**: While the model architecture has been checked thoroughly, this part of the code is still
-experimental - in particular, hyperparameters have not been tuned. Using the embeddings in the detection methods of the main pipelines will require further scrutiny.
+:warning: **Disclaimer**: The embedding layers can be trained out of the box with minimal adjustments to the code. However, in order to achieve optimal performance, hyperparameters need to be adjusted for a given dataset/problem. This requires empirical testing.
 
 ### Overview
 
-The investment datasets include 88 features (or columns, used interchangeably here). 37 of these are numerical (these also include categorical, discrete features), 51 are non-numerical, categorical features. While simple approaches of encoding this data like ordinal encoding
+Real-world datasets can include categorical data, which require pre-processing, eg. transformation into numerical values, before being fed to a machine learning algorithm.  While simple approaches like ordinal encoding
 
 > [giraffe, opossum, chipmunk]  -> [1, 2, 3])
 
@@ -35,10 +34,10 @@ Embedding layers can be used as part of Neural Network trainings to mitigate the
 
 > [giraffe, opossum, chipmunk]  -> [[ 0.12, 0.22,...],[ 0.87, 0.78, ... ],[ 0.11, 0.094, ... ]]
 
-This mapping (eg weights & biases of the embedding layer) are usually learned together with the rest of the model in a supervised fashion. An advantage is, that the embedding is learned as part of the whole model on the complete feature set. The embedding hence reflects the best way of translating data for the task at hand.
+This mapping (eg. weights & biases of embedding layers) are usually learned together with the rest of the model in a supervised fashion. This has the advantage that the embedding is learned as part of the whole model on the complete feature set. The resulting embedding hence reflects the optimal way of translating data for a given oiptimisation target.
 
 
-The [Autoembedder Model](https://medium.com/kirey-group/autoembedder-training-embedding-layers-on-unsupervised-tasks-fc364c0f6eec) provides a way of training an embedding layer in an unsupervised fashion by using an Autoencoder as backend.
+The [Autoembedder Model](https://medium.com/kirey-group/autoembedder-training-embedding-layers-on-unsupervised-tasks-fc364c0f6eec) provides a way of training an embedding layer in an **unsupervised manner** by using an Autoencoder as backend.
 
 ### The Model
 
@@ -46,9 +45,9 @@ The [Autoembedder Model](https://medium.com/kirey-group/autoembedder-training-em
 
 The data is split into categorical (e.g. non-numerical) and  continuous (eg.
 numerical, non-discrete) feature sets. The categorical features are encoded
-using an ordinal encoding. These encoded features are  used as input to the
-embedding layers. The output of these layers are concatenated with the
-continuous features and used as input to the AutoEncoder.
+using an alphabetically ordered, ordinal encoding. These encoded features form
+the input to the embedding layers. The outputs of these layers are concatenated
+with the continuous features and used as input to the AutoEncoder.
 
 This encoder is trained by calculating the loss between its input and output;
 the Autoencoder learns how to reconstruct its input. Together with the
@@ -56,21 +55,24 @@ parameters of the Autoencoder layers, the embedding layer parameters are
 adjusted using backpropagation. This allows for the unsupervised training of
 these layers.
 
-Once the training is completed, the Autoencoder is discarded an
-the embedding layers can be used for the Anomaly detection tasks.
+Once the training is completed, the Autoencoder is discarded and the embedding
+layers can be used to embedd categorical features in unsupervised machine
+learning tasks.
 
 ### Implementation
 The model is implemented using `tensorflow 2.8.0` and `sklearn 1.0`. The files can be found in the directory `./autoembedder/`:
 
 | File  | Description |
 | ------------- | ------------- |
-| `embedding/embedder.py`  | Class defining and wrapping all Embedding layers  |
-| `embedding/auto_embedder.py`  | The AutoEmbedding model; defines Autoencoder architecture and methods used in training and testing |
-| `concat_reports.py`  | Script for training input preparation  |
-| `train_autoembedder.py`  | Script to steer building, training and saving the model  |
-| `test_auto_embedder.py`  | Testing the trained model, loading it from disk |
-| `dvc.yaml`  | Definition of pipeline stages  |
-| `params.yaml`  | Parameters used in scripts  |
+| `auto_embedder/`  | Contains the autoembedder model and its parent class the embedder.  |
+| `data/`  | Input and output files. Tracked using DVC. |
+| `feature_handling/`  | Configuration files to register features and their required processing.  |
+| `models/`  | Simple classification models to test the autoembedding layers usefulness.  |
+| `scripts/`  | Scripts to run the preprocessing, training and testing. |
+| `utils/`  | Various tools used module-wide. |
+| `dvc.yaml`  | Definition of pipeline stages.  |
+| `params.yaml`  | Parameters used in scripts.  |
+| `.github/workflows/cml.yaml`  | Definition of github continuous integration workflow (github actions).  |
 
 ### Usage
 The autoembedding `dvc` pipeline defined in `autoembedding/dvc.yaml` includes all relevant steps to use the Autoembedding model:

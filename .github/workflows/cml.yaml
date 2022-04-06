@@ -20,16 +20,16 @@ jobs:
           REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
         run: |
-          echo "GOOGLE_APPLICATION_CREDENTIALS ${GOOGLE_APPLICATION_CREDENTIALS}"  >> report.md
+          echo "Test the github action"  >> report.md
           cml-send-comment report.md
 
           # Install requirements
-          pip install -r requirements.txt
+          # pip install -r requirements.txt
 
           # # Pull data & run-cache from S3 and reproduce pipeline
           # dvc pull
 
-          dvc repro train_autoembedder
+          # dvc repro train_autoembedder
 
           # # Report metrics
           # echo "## Metrics" >> report.md
