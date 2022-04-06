@@ -17,12 +17,11 @@ penguins.head()
 
 In the following, the usage of the Autoembedding model to embed categorical data is described.
 
-:warning: **Disclaimer**: While the model architecture has been checked thoroughly, this part of the code is still
-experimental - in particular, hyperparameters have not been tuned. Using the embeddings in the detection methods of the main pipelines will require further scrutiny.
+:warning: **Disclaimer**: The embedding layers can be trained out of the box with minimal adjustments to the code. However, in order to achieve optimal performance, hyperparameters need to be adjusted for a given dataset/problem. This requires empirical testing.
 
 ### Overview
 
-The investment datasets include 88 features (or columns, used interchangeably here). 37 of these are numerical (these also include categorical, discrete features), 51 are non-numerical, categorical features. While simple approaches of encoding this data like ordinal encoding
+Real-world datasets can include categorical data, which require pre-processing, eg. transformation into numerical values, before being fed to a machine learning algorithm.  While simple approaches like ordinal encoding
 
 > [giraffe, opossum, chipmunk]  -> [1, 2, 3])
 
@@ -35,10 +34,10 @@ Embedding layers can be used as part of Neural Network trainings to mitigate the
 
 > [giraffe, opossum, chipmunk]  -> [[ 0.12, 0.22,...],[ 0.87, 0.78, ... ],[ 0.11, 0.094, ... ]]
 
-This mapping (eg weights & biases of the embedding layer) are usually learned together with the rest of the model in a supervised fashion. An advantage is, that the embedding is learned as part of the whole model on the complete feature set. The embedding hence reflects the best way of translating data for the task at hand.
+This mapping (eg. weights & biases of embedding layers) are usually learned together with the rest of the model in a supervised fashion. This has the advantage that the embedding is learned as part of the whole model on the complete feature set. The resulting embedding hence reflects the optimal way of translating data for a given oiptimisation target.
 
 
-The [Autoembedder Model](https://medium.com/kirey-group/autoembedder-training-embedding-layers-on-unsupervised-tasks-fc364c0f6eec) provides a way of training an embedding layer in an unsupervised fashion by using an Autoencoder as backend.
+The [Autoembedder Model](https://medium.com/kirey-group/autoembedder-training-embedding-layers-on-unsupervised-tasks-fc364c0f6eec) provides a way of training an embedding layer in an **unsupervised manner** by using an Autoencoder as backend.
 
 ### The Model
 
