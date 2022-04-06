@@ -45,9 +45,9 @@ The [Autoembedder Model](https://medium.com/kirey-group/autoembedder-training-em
 
 The data is split into categorical (e.g. non-numerical) and  continuous (eg.
 numerical, non-discrete) feature sets. The categorical features are encoded
-using an ordinal encoding. These encoded features are  used as input to the
-embedding layers. The output of these layers are concatenated with the
-continuous features and used as input to the AutoEncoder.
+using an alphabetically ordered, ordinal encoding. These encoded features form
+the input to the embedding layers. The outputs of these layers are concatenated
+with the continuous features and used as input to the AutoEncoder.
 
 This encoder is trained by calculating the loss between its input and output;
 the Autoencoder learns how to reconstruct its input. Together with the
@@ -55,8 +55,9 @@ parameters of the Autoencoder layers, the embedding layer parameters are
 adjusted using backpropagation. This allows for the unsupervised training of
 these layers.
 
-Once the training is completed, the Autoencoder is discarded an
-the embedding layers can be used for the Anomaly detection tasks.
+Once the training is completed, the Autoencoder is discarded and the embedding
+layers can be used to embedd categorical features in unsupervised machine
+learning tasks.
 
 ### Implementation
 The model is implemented using `tensorflow 2.8.0` and `sklearn 1.0`. The files can be found in the directory `./autoembedder/`:
