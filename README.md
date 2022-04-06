@@ -64,13 +64,15 @@ The model is implemented using `tensorflow 2.8.0` and `sklearn 1.0`. The files c
 
 | File  | Description |
 | ------------- | ------------- |
-| `embedding/embedder.py`  | Class defining and wrapping all Embedding layers  |
-| `embedding/auto_embedder.py`  | The AutoEmbedding model; defines Autoencoder architecture and methods used in training and testing |
-| `concat_reports.py`  | Script for training input preparation  |
-| `train_autoembedder.py`  | Script to steer building, training and saving the model  |
-| `test_auto_embedder.py`  | Testing the trained model, loading it from disk |
-| `dvc.yaml`  | Definition of pipeline stages  |
-| `params.yaml`  | Parameters used in scripts  |
+| `auto_embedder/`  | Contains the autoembedder model and its parent class the embedder.  |
+| `data/`  | Input and output files. Tracked using DVC. |
+| `feature_handling/`  | Configuration files to register features and their required processing.  |
+| `models/`  | Simple classification models to test the autoembedding layers usefulness.  |
+| `scripts/`  | Scripts to run the preprocessing, training and testing. |
+| `utils/`  | Various tools used module-wide. |
+| `dvc.yaml`  | Definition of pipeline stages.  |
+| `params.yaml`  | Parameters used in scripts.  |
+| `.github/workflows/cml.yaml`  | Definition of github continuous integration workflow (github actions).  |
 
 ### Usage
 The autoembedding `dvc` pipeline defined in `autoembedding/dvc.yaml` includes all relevant steps to use the Autoembedding model:
