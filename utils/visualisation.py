@@ -20,18 +20,20 @@ def find_metric_pairs(history: tf.keras.callbacks.History) -> dict:
     return metric_dict
 
 
-def plot_metrics_history(history: tf.keras.callbacks.History, outdir: str) -> None:
+def plot_metrics_history(
+    history: tf.keras.callbacks.History, outdir: str, tag: str
+) -> None:
     metric_plot_dict = find_metric_pairs(history)
     for metric_name, train_test_metrics in metric_plot_dict.items():
         plt.plot(train_test_metrics[0])
         plt.plot(train_test_metrics[1])
-        plt.title(f"Model {metric_name}")
+        plt.title(f"{tag} {metric_name}")
         plt.ylabel(f"{metric_name}")
         plt.xlabel("epoch")
         plt.legend(["train", "test"], loc="upper left")
         target_dir = os.path.join(".", outdir, "")
         os.makedirs(target_dir, exist_ok=True)
-        plt.savefig(f"{outdir}/{metric_name}.pdf")
+        plt.savefig(f"{outdir}/{tag}_{metric_name}.pdf")
         plt.clf()
 
 

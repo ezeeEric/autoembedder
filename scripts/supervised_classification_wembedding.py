@@ -108,7 +108,7 @@ def main(params: dict):
         model=model,
         config=params,
     )
-    plot_metrics_history(history=history, outdir="./data/plots/")
+    plot_metrics_history(history=history, outdir="./data/plots/", tag="autoembedder")
     loss, accuracy = test_model(
         test_data_num=test_df_num,
         test_data_cat=test_df_cat,
