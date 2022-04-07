@@ -21,40 +21,43 @@ from utils.data import (
     encode_categorical_input_ordinal,
     normalise_numerical_input_columns,
 )
+from utils.visualisation import plot_metrics_history, write_metrics
+
 from sklearn.model_selection import train_test_split
 
 from autoembedder.autoembedder import AutoEmbedder, AutoembedderCallbacks
 
 
 def train_model(
-    df: pd.DataFrame,
-    validation_df: pd.DataFrame,
-    model: AutoEmbedder,
-    batch_size: int,
-    epochs: int,
-) -> None:
+    df: pd.DataFrame, validation_df: pd.DataFrame, model: AutoEmbedder, config: dict
+) -> tf.keras.callbacks.History:
     autoembedder_callback = AutoembedderCallbacks(
         validation_data=tf.convert_to_tensor(validation_df)
     )
     model.match_feature_to_input_column_idx(columns=df.columns)
-    model.fit(
+    history = model.fit(
         tf.convert_to_tensor(df),
-        batch_size=batch_size,
-        epochs=epochs,
+        batch_size=config["batch_size"],
+        validation_split=config["val_data_fraction"],
+        epochs=config["n_epochs"],
         verbose=1,
         callbacks=[autoembedder_callback],
     )
+    history.history = history.history | autoembedder_callback.metric_history
+    return history
 
 
 def test_model(df: pd.DataFrame, model: AutoEmbedder, batch_size: int) -> None:
     autoembedder_callback = AutoembedderCallbacks(
         validation_data=tf.convert_to_tensor(df)
     )
-    model.evaluate(
+    metrics = model.evaluate(
         tf.convert_to_tensor(df),
         batch_size=batch_size,
         callbacks=[autoembedder_callback],
     )
+    print(metrics)
+    exit()
 
 
 def train_autoembedder(df: pd.DataFrame, params: dict) -> pd.DataFrame:
@@ -78,18 +81,18 @@ def train_autoembedder(df: pd.DataFrame, params: dict) -> pd.DataFrame:
         config=params,
     )
     engine.compile_model(model=auto_embedder, config=params)
-    train_model(
-        df=train_df,
-        validation_df=test_df,
-        model=auto_embedder,
-        batch_size=params["batch_size"],
-        epochs=params["n_epochs"],
+    history = train_model(
+        df=train_df, validation_df=test_df, model=auto_embedder, config=params
     )
+    plot_metrics_history(history=history, outdir="./data/plots/")
+
     test_model(
         test_df,
         auto_embedder,
         batch_size=params["batch_size"],
     )
+    write_metrics(loss, accuracy, outdir="./data/metrics/")
+
     return auto_embedder
 
 

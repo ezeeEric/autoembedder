@@ -45,19 +45,19 @@ stages:
     - python scripts/train_autoembedder.py ./data/training_input/
     deps:
     - path: ./autoembedder/
-      md5: 384a41ffdcd1b354e2e8cf381fa94b99.dir
-      size: 47053
+      md5: 3171a27e3a65b7e64ac0561857295d73.dir
+      size: 47709
       nfiles: 7
     - path: ./data/training_input/
-      md5: bc39173eab8717e9546f8c4a7a804cf0.dir
-      size: 2072370
+      md5: 76518463305c60240aba1a1514d686a0.dir
+      size: 12754
       nfiles: 1
     - path: ./feature_handling/feature_handler.json
-      md5: 5d1a75980d75e9eee4c18b42e586f13b
-      size: 4273
+      md5: dfb240b251b8a11fa558492ebc47fe47
+      size: 2456
     - path: ./scripts/train_autoembedder.py
-      md5: 3eb2d057a5f4443338dec588714064cb
-      size: 3306
+      md5: 67f4209a8bbd25e973934ee77974544a
+      size: 3443
     - path: ./utils/data.py
       md5: f0e7f3b7d68ac244ddac7b452e1d5a14
       size: 5191
@@ -69,26 +69,24 @@ stages:
         train_autoembedder:
           output_directory: ./data/model
           feature_handler_file: ./feature_handling/feature_handler.json
-          manual_encoder_architecture:
-          - 108
-          - 90
-          - 70
+          manual_encoder_architecture: []
           manual_decoder_architecture: []
           hidden_layer_activation_function: ReLU
           output_layer_activation_function: tanh
-          test_data_fraction: 0.2
+          test_data_fraction: 0.1
+          val_data_fraction: 0.2
           embeddings_initializer: uniform
           normalisation_method: manual
           optimizer: adam
           loss: mse
           metrics: []
           learning_rate: 0.005
-          batch_size: 1024
-          n_epochs: 20
+          batch_size: 32
+          n_epochs: 10
     outs:
     - path: ./data/model/
-      md5: 7908678405a68aa4a35f1d4e91bc7ff9.dir
-      size: 1309535
+      md5: cb845c4147c80af649bc97d5b9ba74e0.dir
+      size: 271117
       nfiles: 4
   train_supervised_classification_embedding:
     cmd:
