@@ -84,6 +84,8 @@ The [Palmer Penguin dataset](https://allisonhorst.github.io/palmerpenguins/) (an
 The [adult income dataset](http://www.cs.toronto.edu/~delve/data/adult/) contains census data related to the yearly income of US adults. Six continuous and 8 categoricals features are present. 
 
 #### Classification
+In order to judge the usefulness of the auto-embedded layers, supervised classification tasks can be run on both datasets. The classification model is a fully connected network. Two options are explored: either the embedding layers are part of the model and adjusted during training of the classification model. That is the traditional way of using embedding layers. The second option uses pre-trained embedding layers, which do not get adjusted during training. A comparison between classification metrics for both approaches can give insights to the usefulness of the autoembedding.
+
 
 ### Usage
 The autoembedding `dvc` pipeline defined in `autoembedding/dvc.yaml` includes all relevant steps to use the Autoembedding model:
