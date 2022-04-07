@@ -47,15 +47,16 @@ def test_model(
     model: tf.keras.Model,
     config: dict,
 ) -> None:
-    loss, accuracy = model.evaluate(
+    test_metric_dict = model.evaluate(
         [test_data_cat, test_data_num],
         test_data_target,
         batch_size=config["batch_size"],
         verbose=config["verbosity_level"],
+        return_dict=True,
     )
-    print(f" Model loss on the test set: {loss:.2E}")
-    print(f" Model accuracy on the test set: {100*accuracy:.1f}%")
-    return loss, accuracy
+    print(f" Model loss on the test set: {test_metric_dict['loss']:.2E}")
+    print(f" Model accuracy on the test set: {100*test_metric_dict['accuracy']:.1f}%")
+    return test_metric_dict
 
 
 @with_params("params.yaml", "train_classification_models")
@@ -109,14 +110,14 @@ def main(params: dict):
         config=params,
     )
     plot_metrics_history(history=history, outdir="./data/plots/", tag="autoembedder")
-    loss, accuracy = test_model(
+    test_metric_dict = test_model(
         test_data_num=test_df_num,
         test_data_cat=test_df_cat,
         test_data_target=test_df_target,
         model=model,
         config=params,
     )
-    write_metrics(loss, accuracy, outdir="./data/metrics/")
+    write_metrics(test_metric_dict, outdir="./data/metrics/", tag="classification")
 
 
 if __name__ == "__main__":
