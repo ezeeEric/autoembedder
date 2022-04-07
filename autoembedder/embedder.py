@@ -1,6 +1,5 @@
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras.models import Model
 import pandas as pd
 
 
@@ -8,7 +7,7 @@ def get_encoded_column(input: np.ndarray, slice_idx: int) -> list[np.ndarray]:
     return input[:, slice_idx]
 
 
-class Embedder(Model):
+class Embedder(tf.keras.models.Model):
     def __init__(
         self,
         encoding_reference_values: dict[str, list],
@@ -38,6 +37,7 @@ class Embedder(Model):
             f"Embedding layer {layer_idx}: Shape "
             + f"({self.n_categories_per_feature[layer_idx]},"
             + f"{self.embedding_layers_output_dimensions[layer_idx]}) (In,Out)"
+            + f"{self.embedding_layers[layer_idx].weights}) (weights)"
             for layer_idx in range(len(self.embedding_layers))
         ]
         output.append(super(Embedder, self).__str__())
@@ -54,19 +54,29 @@ class Embedder(Model):
         # output_dim=int(input_size ** 0.25)
         # https://developers.googleblog.com/2017/11/introducing-tensorflow-feature-columns.html
         # embedding_output_dimension = int(input_dim ** 0.25)
-        # TODO
         embedding_output_dimension = n_categories
 
         # this assumes we use one layer per input feature. Sentence embeddings
         # would use multiple inputs here; however there's no intrinsic
         # positional relation between our words.
         input_length = 1
+
+        # the initialisation of the embedding layer weights is important for performance
+        if self.config["embeddings_initializer"] == "uniform":
+            embeddings_initializer = tf.keras.initializers.RandomUniform(
+                minval=-1, maxval=1, seed=None
+            )
+        else:
+            raise NotImplementedError(
+                f"embeddings_initializer {self.config['embeddings_initializer']} not implemented."
+            )
+
         embedding_layer = tf.keras.layers.Embedding(
             input_dim=input_dim,
             output_dim=embedding_output_dimension,
             input_length=input_length,
             dtype=np.float64,
-            embeddings_initializer=self.config["embeddings_initializer"].lower(),
+            embeddings_initializer=embeddings_initializer,
             name=f"embedding_{feature_name}",
         )
         return embedding_layer, embedding_output_dimension
@@ -76,7 +86,7 @@ class Embedder(Model):
     ) -> pd.DataFrame:
         return self.embedding_layers[layer_idx](input_data)
 
-    def _forward_call_embedder(self, inputs: list[pd.DataFrame]) -> tf.Tensor:
+    def _forward_call_embedder(self, inputs: list[tf.Tensor]) -> tf.Tensor:
         """Forward call of this model. Data is passed through the following
         sequence in training and evaluation"""
         embedded_inputs = []

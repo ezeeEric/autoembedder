@@ -8,10 +8,8 @@ Usage (for testing): >> python feature_handler.py ../data/feathered
 
 import os
 import json
-from dataclasses import dataclass, field
-
-from typing import Dict
 import pandas as pd
+from dataclasses import dataclass, field
 
 from utils.utils import create_output_dir, get_dtype_dict
 

@@ -1,8 +1,39 @@
-import glob
 import os
-
-from typing import Dict
+import glob
+import numpy as np
 import pandas as pd
+import tensorflow as tf
+from typing import Dict, Tuple
+
+from sklearn.preprocessing import OrdinalEncoder, MinMaxScaler, StandardScaler
+from sklearn.model_selection import train_test_split
+
+from autoembedder.autoembedder import AutoEmbedder
+
+
+def create_output_dir(out_dir: str) -> str:
+    """Create a given output directory if it does not exist."""
+    target_dir = os.path.join(".", out_dir, "")
+    os.makedirs(target_dir, exist_ok=True)
+    return target_dir
+
+
+def save_model(
+    auto_embedder: AutoEmbedder, output_directory: str, model_name: str = "autoembedder"
+) -> None:
+    create_output_dir(output_directory)
+    output_file = os.path.join(output_directory, model_name)
+    auto_embedder.save(output_file)
+
+
+def load_model(model_dir: str) -> AutoEmbedder:
+    try:
+        return tf.keras.models.load_model(
+            model_dir, custom_objects={"AutoEmbedder": AutoEmbedder}
+        )
+    except OSError:
+        print(f"Warning: No model found in {model_dir}")
+    return None
 
 
 def get_sorted_input_files(
@@ -18,13 +49,6 @@ def get_sorted_input_files(
             )
             input_files.extend(these_input_files)
         return input_files
-
-
-def create_output_dir(out_dir: str) -> str:
-    """Create a given output directory if it does not exist."""
-    target_dir = os.path.join(".", out_dir, "")
-    os.makedirs(target_dir, exist_ok=True)
-    return target_dir
 
 
 def get_dtype_dict(df: pd.DataFrame) -> Dict[str, list[str]]:

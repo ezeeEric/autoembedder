@@ -1,16 +1,45 @@
 data_preprocessing:
     feature_handler_dir: ./feature_handling/
-train_model:
+    # feature_action_file: ./feature_handling/feature_actions_adult_income.json
+    feature_action_file: ./feature_handling/feature_actions_penguins.json
+    #TODO implement clever switch?
+    # dataset_tag: adults #penguins
+    dataset_tag: penguins
+    dataset_path: ./data/adult_income_dataset/adult.data #ignored with penguin setting
+train_autoembedder:
+    output_directory: ./data/model
     feature_handler_file: ./feature_handling/feature_handler.json
+    # manual_encoder_architecture: [108,90,70] #empty list [] for automatic autencoder shape
     manual_encoder_architecture: [] #empty list [] for automatic autencoder shape
     manual_decoder_architecture: [] #empty list [] for default symmetric autoencoder shape
-    activation_function: ReLU
+    hidden_layer_activation_function: ReLU
+    output_layer_activation_function: tanh
     test_data_fraction: 0.2
     embeddings_initializer: uniform
-    optimizer: sgd
+    normalisation_method: manual
+    optimizer: adam
     loss: mse
-    batch_size: 9
-    epochs: 20
-    learning_rate: 0.05
-test_model:
+    metrics: []
+    learning_rate: 0.005
+    # batch_size: 1024
+    batch_size: 32
+    n_epochs: 100
+train_classification_models:
+    dataset_tag: adults #penguins
     feature_handler_file: ./feature_handling/feature_handler.json
+    hidden_layer_activation_function: relu
+    output_layer_activation_function: softmax
+    # n_nodes_per_layer: [4,4,3]
+    n_nodes_per_layer: [108,74,50]
+    normalisation_method: manual
+    test_data_fraction: 0.2
+    embeddings_initializer: uniform
+    optimizer: adam
+    loss: cce
+    learning_rate: 0.001
+    metrics:
+    - accuracy
+    # - precision
+    batch_size: 2048
+    n_epochs: 10
+    verbosity_level: 1

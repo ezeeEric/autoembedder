@@ -4,11 +4,42 @@ Embedding categorial data by training an embedding layer in an unsupervised way
 """
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras import layers
 import pandas as pd
+from typing import Tuple
 
 from autoembedder.embedder import Embedder
+from autoembedder.embedding_confusion_metric import EmbeddingConfusionMetric
+
 from sklearn.preprocessing import OrdinalEncoder
+
+
+class AutoembedderCallbacks(tf.keras.callbacks.Callback):
+    def __init__(self, validation_data: Tuple[tf.Tensor, tf.Tensor]) -> None:
+        super().__init__()
+        self.validation_data = validation_data
+
+    # https://www.tensorflow.org/guide/keras/custom_callback
+    def on_epoch_end(self, epoch, logs=None):
+        print()
+        metrics = self.model.test_step(input_batch=self.validation_data)
+        for metric_name, metric_val in metrics.items():
+            print(f"{metric_name}: {metric_val.numpy().item():.2f}")
+
+    def on_train_end(self, logs=None):
+        # print(f"\ninput_batch\n {self.model.last_input_output[0]}")
+        # print(f"\numerical_input\n {self.model.last_input_output[1]}")
+        # print(f"\nembedding_layer_input\n {self.model.last_input_output[2]}")
+        # print(f"\nembedding_layer_output\n {self.model.last_input_output[3]}")
+        # print(f"\nauto_encoder_input\n {self.model.last_input_output[4]}")
+        # print(f"\nauto_encoder_output\n {self.model.last_input_output[5]}")
+        # print(f"\nnumerical_input_reco\n {self.model.last_input_output[6]}")
+        # print(f"\nembedding_layer_outputs_reco\n {self.model.last_input_output[7]}")
+        # print(f"\nembeddings_reference_values\n {self.model.last_input_output[8]}")
+        pass
+
+    def on_test_begin(self, logs=None):
+        self.model._embedding_confusion_metric.reset_state()
+        self.model.create_embedding_reference()
 
 
 def determine_autoencoder_shape(
@@ -35,9 +66,9 @@ def determine_autoencoder_shape(
 
 def create_dense_layers(
     shape: list[int], name: str, activation_fct: str
-) -> list[layers.Dense]:
+) -> list[tf.keras.layers.Dense]:
     return [
-        layers.Dense(
+        tf.keras.layers.Dense(
             n_nodes, activation=activation_fct.lower(), name=f"{name}_{layer_idx}"
         )
         for layer_idx, n_nodes in enumerate(shape)
@@ -73,8 +104,7 @@ def load_ordinal_encoder_for_feature(
 ) -> OrdinalEncoder:
     encoder = OrdinalEncoder()
     encoder.categories_ = [np.array(encoding_dict[feature_name], dtype=object)]
-    # TODO The following is a hack. The loading and saving of the OrdinalEncoder by only
-    # using the dictionary above requires this _missing_indices to be set.
+    # Loading the OrdinalEncoder like this requires the variable below to be set.
     encoder._missing_indices = {}
     return encoder
 
@@ -113,6 +143,12 @@ class AutoEmbedder(Embedder):
 
         self.feature_idx_map = feature_idx_map
 
+        # TODO should this be a member (issues when loading from disk?)
+        # this requires to set the @metric property and overwrite it in all child classes
+        self._loss_tracker_epoch = tf.keras.metrics.Mean(name="epoch_loss")
+        self._embedding_confusion_metric = EmbeddingConfusionMetric()
+        self.embeddings_reference_values = {}
+
         self.encoder_shape, self.decoder_shape = determine_autoencoder_shape(
             self.embedding_layers_output_dimensions,
             len(self.numerical_features),
@@ -121,6 +157,13 @@ class AutoEmbedder(Embedder):
 
         self.encoder = self.setup_encoder(self.encoder_shape)
         self.decoder = self.setup_decoder(self.decoder_shape)
+
+        self.last_input_output = []
+
+    def __str__(self) -> str:
+        out_string = "Autoembedder\n"
+        out_string += "\n".join([f"{key}:{val}" for key, val in self.__dict__.items()])
+        return f"{out_string}\n{super().__str__()}"
 
     def get_config(self):
         config_dict = {
@@ -141,7 +184,7 @@ class AutoEmbedder(Embedder):
         encoder_layers = create_dense_layers(
             shape=encoder_shape,
             name="encoder",
-            activation_fct=self.config["activation_function"],
+            activation_fct=self.config["hidden_layer_activation_function"],
         )
         return tf.keras.Sequential(encoder_layers, name="encoder")
 
@@ -149,14 +192,14 @@ class AutoEmbedder(Embedder):
         dec_layers = create_dense_layers(
             shape=decoder_shape[:-1],
             name="decoder",
-            activation_fct=self.config["activation_function"],
+            activation_fct=self.config["hidden_layer_activation_function"],
         )
 
-        # the last layer is a sigmoid activation
+        # the last layer is a tanh activation
         dec_layers.append(
-            layers.Dense(
+            tf.keras.layers.Dense(
                 decoder_shape[-1],
-                activation="sigmoid",
+                activation=self.config["hidden_layer_activation_function"],
                 name=f"decoder_{len(decoder_shape)}",
             )
         )
@@ -179,7 +222,6 @@ class AutoEmbedder(Embedder):
     def create_embedding_reference(
         self,
     ) -> None:
-        self.embeddings_reference_values = {}
         for idx, (feature_name, feature_vocabulary) in enumerate(
             self.encoding_reference_values.items()
         ):
@@ -196,6 +238,7 @@ class AutoEmbedder(Embedder):
             self.embeddings_reference_values[feature_name] = list(
                 map(tuple, embedded_vocabulary.numpy())
             )
+        return self.embeddings_reference_values
 
     def train_step(self, input_batch: tf.Tensor) -> dict:
         """A single training step on a batch of the data. This gets called within model.fit() and is repeated for every batch in every epoch.
@@ -213,16 +256,33 @@ class AutoEmbedder(Embedder):
         )
         with tf.GradientTape() as tape:
             embedding_layer_output = self._forward_call_embedder(embedding_layer_input)
-
             auto_encoder_input = prepare_data_for_encoder(
                 numerical_input, embedding_layer_output
             )
 
             auto_encoder_output = self(auto_encoder_input, training=True)
-
             loss = self.compiled_loss(
                 y_true=auto_encoder_input, y_pred=auto_encoder_output
             )
+
+        # split autoencoder output to get reconstructed embedding values for confusion metric
+        numerical_input_reco, embedding_layer_outputs_reco = split_autoencoder_output(
+            auto_encoder_output,
+            numerical_input.shape[1],
+            self.embedding_layers_output_dimensions,
+        )
+        embeddings_reference_values = self.create_embedding_reference()
+        self.last_input_output = [
+            input_batch,
+            numerical_input,
+            embedding_layer_input,
+            embedding_layer_output,
+            auto_encoder_input,
+            auto_encoder_output,
+            numerical_input_reco,
+            embedding_layer_outputs_reco,
+            embeddings_reference_values,
+        ]
 
         # Compute gradients
         trainable_vars = self.trainable_variables
@@ -230,7 +290,27 @@ class AutoEmbedder(Embedder):
 
         # Update weights
         self.optimizer.apply_gradients(zip(gradients, trainable_vars))
-        return {"loss": loss}
+
+        # Compute our own metrics
+        self._loss_tracker_epoch.update_state(loss)
+        # self._embedding_confusion_metric.update_state(
+        #     embedding_layer_input,
+        #     embedding_layer_outputs_reco,
+        #     embeddings_reference_values,
+        # )
+        return {
+            "loss": self._loss_tracker_epoch.result(),
+            **self._embedding_confusion_metric.result(),
+        }
+
+    @property
+    def metrics(self):
+        # We list our `Metric` objects here so that `reset_states()` can be
+        # called automatically at the start of each epoch
+        # or at the start of `evaluate()`.
+        # If you don't implement this property, you have to call
+        # `reset_states()` yourself at the time of your choosing.
+        return [self._loss_tracker_epoch, self._embedding_confusion_metric]
 
     def test_step(self, input_batch: tf.Tensor) -> dict:
         numerical_input, embedding_layer_input = prepare_data_for_embedder(
@@ -249,37 +329,18 @@ class AutoEmbedder(Embedder):
         auto_encoder_output = self(auto_encoder_input, training=True)
 
         # split autoencoder output to get reconstructed embedding values
-        numerical_input_reco, embedding_layer_outputs_reco = split_autoencoder_output(
+        _, embedding_layer_outputs_reco = split_autoencoder_output(
             auto_encoder_output,
             numerical_input.shape[1],
             self.embedding_layers_output_dimensions,
         )
-        cosine_loss = tf.keras.losses.CosineSimilarity(
-            axis=-1, reduction=tf.keras.losses.Reduction.NONE
+        self._embedding_confusion_metric.update_state(
+            embedding_layer_input,
+            embedding_layer_outputs_reco,
+            self.embeddings_reference_values,
         )
-        # TODO can these loops be replace with tensor operations?
-        # matched_category_idx = []
-        accuracy = tf.keras.metrics.Accuracy()
-        metric_dict = {}
-        for idx, embedded_feature_batch in enumerate(embedding_layer_outputs_reco):
-            this_feature_name = list(self.embeddings_reference_values.keys())[idx]
-            reference_embeddings = tf.convert_to_tensor(
-                list(self.embeddings_reference_values.values())[idx], dtype=tf.float64
-            )
-            cos_sims = []
-            for ref_emb in reference_embeddings:
-                cos_dist = cosine_loss(
-                    ref_emb, tf.cast(embedded_feature_batch, tf.float64)
-                )
-                cos_sims.append(1 - cos_dist)
-            cosine_similarities = tf.transpose(tf.convert_to_tensor(cos_sims))
-            matched_category_idx = tf.math.argmax(cosine_similarities, axis=1)
-            metric_dict[f"{this_feature_name}_accuracy"] = accuracy(
-                embedding_layer_input[:, idx],
-                tf.convert_to_tensor(matched_category_idx),
-            )
 
-        return metric_dict
+        return self._embedding_confusion_metric.result()
 
     def predict(self, input_column: pd.Series) -> pd.DataFrame:
         """Takes a categorical column of an input dataframe and returns a
