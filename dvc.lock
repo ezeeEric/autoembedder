@@ -26,20 +26,20 @@ stages:
       params.yaml:
         data_preprocessing:
           feature_handler_dir: ./feature_handling/
-          feature_action_file: ./feature_handling/feature_actions_adult_income.json
-          dataset_tag: adults
+          feature_action_file: ./feature_handling/feature_actions_penguins.json
+          dataset_tag: penguins
           dataset_path: ./data/adult_income_dataset/adult.data
     outs:
     - path: ./data/training_input/
-      md5: bc39173eab8717e9546f8c4a7a804cf0.dir
-      size: 2072370
+      md5: 76518463305c60240aba1a1514d686a0.dir
+      size: 12754
       nfiles: 1
     - path: ./feature_handling/feature_handler.json
-      md5: 5d1a75980d75e9eee4c18b42e586f13b
-      size: 4273
+      md5: dfb240b251b8a11fa558492ebc47fe47
+      size: 2456
     - path: feature_handling/feature_handler_pretty_summary.json
-      md5: 333f2b13ae4dd72f5dfa18f93d35b647
-      size: 922
+      md5: 85530058600ceb2075fc5fa4246b76da
+      size: 594
   train_autoembedder:
     cmd:
     - python scripts/train_autoembedder.py ./data/training_input/
@@ -95,12 +95,12 @@ stages:
     - python scripts/supervised_classification_wembedding.py ./data/training_input/
     deps:
     - path: ./data/training_input/
-      md5: bc39173eab8717e9546f8c4a7a804cf0.dir
-      size: 2072370
+      md5: 76518463305c60240aba1a1514d686a0.dir
+      size: 12754
       nfiles: 1
     - path: ./scripts/supervised_classification_wembedding.py
-      md5: 8ba9ab725dca3bb19297dafadc94a2f0
-      size: 3278
+      md5: 6741c9b65fb9230104b96aa2b4c62df3
+      size: 3578
     - path: ./utils/data.py
       md5: f0e7f3b7d68ac244ddac7b452e1d5a14
       size: 5191
@@ -129,9 +129,14 @@ stages:
           learning_rate: 0.001
           metrics:
           - accuracy
-          batch_size: 2048
-          n_epochs: 10
+          batch_size: 128
+          n_epochs: 100
           verbosity_level: 1
+    outs:
+    - path: ./data/plots/
+      md5: e79a0e4c9ae646fc193b8168f88f33a8.dir
+      size: 11589
+      nfiles: 1
   train_supervised_classification_autoembedding:
     cmd:
     - python scripts/supervised_classification_wembedding.py ./data/training_input/
