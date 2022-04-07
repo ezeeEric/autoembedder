@@ -39,6 +39,9 @@ This mapping (eg. weights & biases of embedding layers) are usually learned toge
 
 The [Autoembedder Model](https://medium.com/kirey-group/autoembedder-training-embedding-layers-on-unsupervised-tasks-fc364c0f6eec) provides a way of training an embedding layer in an **unsupervised manner** by using an Autoencoder as backend.
 
+
+This package provides a [generic implementation](#the-model) of the Autoembedder model. Using the steps described in [the cookbook](#autoembedding-cookbook-a-step-by-step-guide), it can be used on any relevant dataset. In order to demonstrate the usage of the model, the package comes with two [datasets](#datasets). The usefulness of the pre-trained embedding layers is demonstrated in a [simple classification task](#classification) on these datasets.
+
 ### The Model
 
 ![model sketch](./autoembedder_model_sketch.png?raw=True "The AutoEmbedding Model")
@@ -73,6 +76,14 @@ The model is implemented using `tensorflow 2.8.0` and `sklearn 1.0`. The files c
 | `dvc.yaml`  | Definition of pipeline stages.  |
 | `params.yaml`  | Parameters used in scripts.  |
 | `.github/workflows/cml.yaml`  | Definition of github continuous integration workflow (github actions).  |
+
+#### Datasets
+
+Two datasets are available out of the box; both include categorical and continuous numerical data.
+The [Palmer Penguin dataset](https://allisonhorst.github.io/palmerpenguins/) (and it's [python interface](https://github.com/mcnakhaee/palmerpenguins)) describes features of penguin species in the Antarctic. The dataset contains 4 continuous, 1 discrete numerical and 3 categorical features.
+The [adult income dataset](http://www.cs.toronto.edu/~delve/data/adult/) contains census data related to the yearly income of US adults. Six continuous and 8 categoricals features are present. 
+
+#### Classification
 
 ### Usage
 The autoembedding `dvc` pipeline defined in `autoembedding/dvc.yaml` includes all relevant steps to use the Autoembedding model:
