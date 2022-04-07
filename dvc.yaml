@@ -32,6 +32,7 @@ stages:
     - ./feature_handling/feature_handler.json
     - ./utils/feature_handler.py
     - ./utils/data.py
+    - ./utils/visualisation.py
     - ./data/training_input/
     - ./autoembedder/
     outs:

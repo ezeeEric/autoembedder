@@ -64,6 +64,9 @@ stages:
     - path: ./utils/feature_handler.py
       md5: c37ecc5c73593a41e10789c8846aced0
       size: 12139
+    - path: ./utils/visualisation.py
+      md5: e59ef0ad86cd7238d59ede94f50df6a3
+      size: 1641
     params:
       params.yaml:
         train_autoembedder:
@@ -85,8 +88,8 @@ stages:
           n_epochs: 10
     outs:
     - path: ./data/model/
-      md5: 308f4ba5404496d39ea671c4c3bd761a.dir
-      size: 271091
+      md5: d802fc53ff2cd45981f279be8fb82536.dir
+      size: 271107
       nfiles: 4
   train_supervised_classification_embedding:
     cmd:
