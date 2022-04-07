@@ -12,7 +12,7 @@ from utils.params import with_params
 from utils.utils import get_sorted_input_files, load_model
 from utils.engine import compile_model
 from utils.data import prepare_data
-from utils.visualisation import plot_loss_history, write_metrics
+from utils.visualisation import plot_metrics_history, write_metrics
 
 from models.base_classification_network import BaseClassificationNetwork
 from models.autoembedder_classification_model import AutoEmbedderClassificationModel
@@ -32,6 +32,7 @@ def train_model(
     history = model.fit(
         [train_data_cat, train_data_num],
         train_data_target,
+        validation_split=config["val_data_fraction"],
         batch_size=config["batch_size"],
         epochs=config["n_epochs"],
         verbose=config["verbosity_level"],
@@ -46,15 +47,16 @@ def test_model(
     model: tf.keras.Model,
     config: dict,
 ) -> None:
-    loss, accuracy = model.evaluate(
+    test_metric_dict = model.evaluate(
         [test_data_cat, test_data_num],
         test_data_target,
         batch_size=config["batch_size"],
         verbose=config["verbosity_level"],
+        return_dict=True,
     )
-    print(f" Model loss on the test set: {loss:.2E}")
-    print(f" Model accuracy on the test set: {100*accuracy:.1f}%")
-    return loss, accuracy
+    print(f" Model loss on the test set: {test_metric_dict['loss']:.2E}")
+    print(f" Model accuracy on the test set: {100*test_metric_dict['accuracy']:.1f}%")
+    return test_metric_dict
 
 
 @with_params("params.yaml", "train_classification_models")
@@ -107,15 +109,15 @@ def main(params: dict):
         model=model,
         config=params,
     )
-    plot_loss_history(history=history, outdir="./data/plots/")
-    loss, accuracy = test_model(
+    plot_metrics_history(history=history, outdir="./data/plots/", tag="autoembedder")
+    test_metric_dict = test_model(
         test_data_num=test_df_num,
         test_data_cat=test_df_cat,
         test_data_target=test_df_target,
         model=model,
         config=params,
     )
-    write_metrics(loss, accuracy, outdir="./data/metrics/")
+    write_metrics(test_metric_dict, outdir="./data/metrics/", tag="classification")
 
 
 if __name__ == "__main__":

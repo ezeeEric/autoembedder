@@ -17,12 +17,18 @@ class AutoembedderCallbacks(tf.keras.callbacks.Callback):
     def __init__(self, validation_data: Tuple[tf.Tensor, tf.Tensor]) -> None:
         super().__init__()
         self.validation_data = validation_data
+        self.metric_history = {}
 
     # https://www.tensorflow.org/guide/keras/custom_callback
     def on_epoch_end(self, epoch, logs=None):
         print()
         metrics = self.model.test_step(input_batch=self.validation_data)
         for metric_name, metric_val in metrics.items():
+            if not metric_name in self.metric_history.keys():
+                print(metric_val)
+                self.metric_history[metric_name] = [metric_val.numpy().item()]
+            else:
+                self.metric_history[metric_name].append(metric_val.numpy().item())
             print(f"{metric_name}: {metric_val.numpy().item():.2f}")
 
     def on_train_end(self, logs=None):
@@ -327,6 +333,7 @@ class AutoEmbedder(Embedder):
             numerical_input, embedding_layer_output
         )
         auto_encoder_output = self(auto_encoder_input, training=True)
+        loss = self.compiled_loss(y_true=auto_encoder_input, y_pred=auto_encoder_output)
 
         # split autoencoder output to get reconstructed embedding values
         _, embedding_layer_outputs_reco = split_autoencoder_output(
@@ -339,8 +346,10 @@ class AutoEmbedder(Embedder):
             embedding_layer_outputs_reco,
             self.embeddings_reference_values,
         )
-
-        return self._embedding_confusion_metric.result()
+        return {
+            "loss": tf.reduce_mean(loss),
+            **self._embedding_confusion_metric.result(),
+        }
 
     def predict(self, input_column: pd.Series) -> pd.DataFrame:
         """Takes a categorical column of an input dataframe and returns a
