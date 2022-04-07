@@ -45,6 +45,7 @@ stages:
     - ./data/training_input/
     - ./utils/data.py
     - ./utils/engine.py
+    - ./utils/visualisation.py
     - ./utils/utils.py
     - ./scripts/supervised_classification_wembedding.py
     outs:
@@ -56,6 +57,7 @@ stages:
     - train_classification_models
     deps:
     - ./utils/data.py
+    - ./utils/visualisation.py
     - ./utils/engine.py
     - ./utils/utils.py
     - ./data/training_input/

@@ -32,7 +32,8 @@ train_classification_models:
     # n_nodes_per_layer: [4,4,3]
     n_nodes_per_layer: [108,74,50]
     normalisation_method: manual
-    test_data_fraction: 0.2
+    test_data_fraction: 0.1
+    val_data_fraction: 0.2
     embeddings_initializer: uniform
     optimizer: adam
     loss: cce

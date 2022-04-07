@@ -12,7 +12,7 @@ from utils.params import with_params
 from utils.utils import get_sorted_input_files, load_model
 from utils.engine import compile_model
 from utils.data import prepare_data
-from utils.visualisation import plot_loss_history, write_metrics
+from utils.visualisation import plot_metrics_history, write_metrics
 
 from models.base_classification_network import BaseClassificationNetwork
 from models.autoembedder_classification_model import AutoEmbedderClassificationModel
@@ -32,6 +32,7 @@ def train_model(
     history = model.fit(
         [train_data_cat, train_data_num],
         train_data_target,
+        validation_split=config["val_data_fraction"],
         batch_size=config["batch_size"],
         epochs=config["n_epochs"],
         verbose=config["verbosity_level"],
@@ -107,7 +108,7 @@ def main(params: dict):
         model=model,
         config=params,
     )
-    plot_loss_history(history=history, outdir="./data/plots/")
+    plot_metrics_history(history=history, outdir="./data/plots/")
     loss, accuracy = test_model(
         test_data_num=test_df_num,
         test_data_cat=test_df_cat,
