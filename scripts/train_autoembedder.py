@@ -6,16 +6,14 @@ trained model.
 python scripts/train_autoembedder.py ./data/training_input <input_pattern>
 """
 
+from cgi import test
 import sys
 import pandas as pd
 import tensorflow as tf
 
 import utils.engine as engine
 from utils.params import with_params
-from utils.utils import (
-    get_sorted_input_files,
-    save_model,
-)
+from utils.utils import get_sorted_input_files, save_model
 from utils.data import (
     load_features,
     encode_categorical_input_ordinal,
@@ -55,9 +53,9 @@ def test_model(df: pd.DataFrame, model: AutoEmbedder, batch_size: int) -> None:
         tf.convert_to_tensor(df),
         batch_size=batch_size,
         callbacks=[autoembedder_callback],
+        return_dict=True,
     )
-    print(metrics)
-    exit()
+    return metrics
 
 
 def train_autoembedder(df: pd.DataFrame, params: dict) -> pd.DataFrame:
@@ -86,13 +84,12 @@ def train_autoembedder(df: pd.DataFrame, params: dict) -> pd.DataFrame:
     )
     plot_metrics_history(history=history, outdir="./data/plots/", tag="autoembedder")
 
-    test_model(
+    test_metric_dict = test_model(
         test_df,
         auto_embedder,
         batch_size=params["batch_size"],
     )
-    # write_metrics(loss, accuracy, outdir="./data/metrics/")
-
+    write_metrics(test_metric_dict, outdir="./data/metrics/", tag="autoembedder")
     return auto_embedder
 
 

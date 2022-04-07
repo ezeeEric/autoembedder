@@ -45,7 +45,7 @@ stages:
     - python scripts/train_autoembedder.py ./data/training_input/
     deps:
     - path: ./autoembedder/
-      md5: 3171a27e3a65b7e64ac0561857295d73.dir
+      md5: 300e56a1c6d4a9868e3964479491a79a.dir
       size: 47709
       nfiles: 7
     - path: ./data/training_input/
@@ -56,8 +56,8 @@ stages:
       md5: dfb240b251b8a11fa558492ebc47fe47
       size: 2456
     - path: ./scripts/train_autoembedder.py
-      md5: 67f4209a8bbd25e973934ee77974544a
-      size: 3443
+      md5: f89147b450e5e06e3c9bbbaf50c3fbf1
+      size: 3729
     - path: ./utils/data.py
       md5: f0e7f3b7d68ac244ddac7b452e1d5a14
       size: 5191
@@ -85,8 +85,8 @@ stages:
           n_epochs: 10
     outs:
     - path: ./data/model/
-      md5: cb845c4147c80af649bc97d5b9ba74e0.dir
-      size: 271117
+      md5: 308f4ba5404496d39ea671c4c3bd761a.dir
+      size: 271091
       nfiles: 4
   train_supervised_classification_embedding:
     cmd:

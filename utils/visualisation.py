@@ -37,9 +37,9 @@ def plot_metrics_history(
         plt.clf()
 
 
-def write_metrics(loss: float, accuracy: float, outdir: str) -> None:
+def write_metrics(metrics: dict, outdir: str, tag: str) -> None:
     target_dir = os.path.join(".", outdir, "")
     os.makedirs(target_dir, exist_ok=True)
-    with open(f"{target_dir}/metrics.txt", "w") as outfile:
-        outfile.write(f"Loss on the test set: {loss:.2E}\n")
-        outfile.write(f"Accuracy on the test set: {100*accuracy:.1f}%")
+    with open(f"{target_dir}/{tag}_metrics.txt", "w") as outfile:
+        for metric_name, metric_val in metrics.items():
+            outfile.write(f"{metric_name}: {metric_val:.2E}\n")
