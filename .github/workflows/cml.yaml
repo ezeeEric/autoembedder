@@ -16,12 +16,20 @@ jobs:
       #     python-version: '3.x'
       #TODO maybe not necessary with container?
       # - uses: iterative/setup-cml@v1
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v0.4.0'
+        with:
+          workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
+          service_account: 'my-service-account@my-project.iam.gserviceaccount.com'
       - name: Train model
         env:
           REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
         run: |
-          dvc status
+          echo ${{GOOGLE_APPLICATION_CREDENTIALS}}
+          dvc pull
+          # dvc status
           # echo "Test the github action"  >> report.md
           # cml-send-comment report.md
 
@@ -29,9 +37,8 @@ jobs:
           # pip install -r requirements.txt
 
           # # Pull data & run-cache from S3 and reproduce pipeline
-          dvc status
+          # dvc status
 
-          dvc pull
 
           # dvc repro train_autoembedder
 
