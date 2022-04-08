@@ -26,7 +26,7 @@ train_autoembedder:
     batch_size: 32
     n_epochs: 10
 train_classification_models:
-    dataset_tag: adults #penguins
+    dataset_tag: penguins #penguins
     feature_handler_file: ./feature_handling/feature_handler.json
     hidden_layer_activation_function: relu
     output_layer_activation_function: softmax

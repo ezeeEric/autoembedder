@@ -93,6 +93,7 @@ def main(params: dict):
             encoding_reference_values=encoding_reference_values,
             config=params,
         )
+        outtag = f"autoembedded_{params['dataset_tag']}"
     else:
         print(f"No pretrained model defined, using basic model.")
         model = BaseClassificationNetwork(
@@ -101,6 +102,7 @@ def main(params: dict):
             encoding_reference_values=encoding_reference_values,
             config=params,
         )
+        outtag = f"embedded_{params['dataset_tag']}"
     compile_model(model=model, config=params)
     history = train_model(
         train_data_num=train_df_num,
@@ -109,7 +111,9 @@ def main(params: dict):
         model=model,
         config=params,
     )
-    plot_metrics_history(history=history, outdir="./data/plots/", tag="autoembedder")
+    plot_metrics_history(
+        history=history, outdir="./data/plots/", tag=f"{outtag}_classification"
+    )
     test_metric_dict = test_model(
         test_data_num=test_df_num,
         test_data_cat=test_df_cat,
@@ -117,9 +121,10 @@ def main(params: dict):
         model=model,
         config=params,
     )
-    write_metrics(test_metric_dict, outdir="./data/metrics/", tag="classification")
+    write_metrics(
+        test_metric_dict, outdir="./data/metrics/", tag=f"{outtag}_classification"
+    )
 
 
 if __name__ == "__main__":
     main()
-    print()

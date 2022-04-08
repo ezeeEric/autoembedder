@@ -45,7 +45,7 @@ stages:
     - python scripts/train_autoembedder.py ./data/training_input/
     deps:
     - path: ./autoembedder/
-      md5: 300e56a1c6d4a9868e3964479491a79a.dir
+      md5: 0d15e99b82580473ce08c4d8b2fb2517.dir
       size: 47709
       nfiles: 7
     - path: ./data/training_input/
@@ -65,8 +65,8 @@ stages:
       md5: c37ecc5c73593a41e10789c8846aced0
       size: 12139
     - path: ./utils/visualisation.py
-      md5: e59ef0ad86cd7238d59ede94f50df6a3
-      size: 1641
+      md5: 045be0b958d10c9e8da8583c009a1aee
+      size: 1579
     params:
       params.yaml:
         train_autoembedder:
@@ -88,8 +88,8 @@ stages:
           n_epochs: 10
     outs:
     - path: ./data/model/
-      md5: d802fc53ff2cd45981f279be8fb82536.dir
-      size: 271107
+      md5: 40d06cccc0737f92949a2c65b0128304.dir
+      size: 271103
       nfiles: 4
   train_supervised_classification_embedding:
     cmd:
@@ -100,8 +100,8 @@ stages:
       size: 12754
       nfiles: 1
     - path: ./scripts/supervised_classification_wembedding.py
-      md5: efe7a96fe3fee7817487866a72a24195
-      size: 3754
+      md5: 62bb3d0c77cd993b96146fc8c93861aa
+      size: 3913
     - path: ./utils/data.py
       md5: f0e7f3b7d68ac244ddac7b452e1d5a14
       size: 5191
@@ -117,7 +117,7 @@ stages:
     params:
       params.yaml:
         train_classification_models:
-          dataset_tag: adults
+          dataset_tag: penguins
           feature_handler_file: ./feature_handling/feature_handler.json
           hidden_layer_activation_function: relu
           output_layer_activation_function: softmax
@@ -139,8 +139,8 @@ stages:
           verbosity_level: 1
     outs:
     - path: ./data/plots/
-      md5: bdc0a3ee6a08dcb7242d27f052a7b5cd.dir
-      size: 26934
+      md5: dc551f1d0e87090730c37aeb38b3c5e0.dir
+      size: 28432
       nfiles: 2
   train_supervised_classification_autoembedding:
     cmd:
@@ -148,16 +148,16 @@ stages:
       ./data/model/autoembedder
     deps:
     - path: ./data/model/
-      md5: 89f492072a88cb1b2e992d7524eebb29.dir
-      size: 1198369
+      md5: 40d06cccc0737f92949a2c65b0128304.dir
+      size: 271103
       nfiles: 4
     - path: ./data/training_input/
-      md5: bc39173eab8717e9546f8c4a7a804cf0.dir
-      size: 2072370
+      md5: 76518463305c60240aba1a1514d686a0.dir
+      size: 12754
       nfiles: 1
     - path: ./scripts/supervised_classification_wembedding.py
-      md5: 8ba9ab725dca3bb19297dafadc94a2f0
-      size: 3278
+      md5: 62bb3d0c77cd993b96146fc8c93861aa
+      size: 3913
     - path: ./utils/data.py
       md5: f0e7f3b7d68ac244ddac7b452e1d5a14
       size: 5191
@@ -165,12 +165,15 @@ stages:
       md5: 947de9a00d4aec5544307aca89598d75
       size: 1604
     - path: ./utils/utils.py
-      md5: 68e095e276449b7c52f4c7449e33515a
-      size: 2216
+      md5: 60227dd636673cbb4aca6c83779eefd8
+      size: 2217
+    - path: ./utils/visualisation.py
+      md5: 045be0b958d10c9e8da8583c009a1aee
+      size: 1579
     params:
       params.yaml:
         train_classification_models:
-          dataset_tag: adults
+          dataset_tag: penguins
           feature_handler_file: ./feature_handling/feature_handler.json
           hidden_layer_activation_function: relu
           output_layer_activation_function: softmax
@@ -179,13 +182,14 @@ stages:
           - 74
           - 50
           normalisation_method: manual
-          test_data_fraction: 0.2
+          test_data_fraction: 0.1
+          val_data_fraction: 0.2
           embeddings_initializer: uniform
           optimizer: adam
           loss: cce
           learning_rate: 0.001
           metrics:
           - accuracy
-          batch_size: 2048
-          n_epochs: 10
+          batch_size: 128
+          n_epochs: 100
           verbosity_level: 1
