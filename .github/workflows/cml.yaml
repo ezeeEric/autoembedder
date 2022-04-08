@@ -13,6 +13,7 @@ jobs:
         run: |
           # Install requirements
           pip install -r requirements.txt
+          pip install -e .
 
           #run pipeline
           dvc repro
