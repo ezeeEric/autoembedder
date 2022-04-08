@@ -34,7 +34,7 @@ def plot_metrics_history(
         plt.ylabel(f"{metric_name}")
         plt.xlabel("epoch")
         plt.legend(["train", "test"], loc="upper left")
-        plt.savefig(f"{outdir}/{tag}_{metric_name}.png")
+        plt.savefig(f"{outdir}/{tag}_{metric_name}.pdf")
         plt.clf()
 
 
