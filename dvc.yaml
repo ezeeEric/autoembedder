@@ -37,6 +37,8 @@ stages:
     - ./autoembedder/
     outs:
     - ./data/model/
+    - ./data/plots_autoembedder/
+    - ./data/metrics_autoembedder/
   train_supervised_classification_embedding:
     cmd:
     - python scripts/supervised_classification_wembedding.py ./data/training_input/
@@ -54,5 +56,5 @@ stages:
     - ./models/autoembedder_classification_model.py
     - ./models/base_classification_network.py
     outs:
-    - ./data/plots/
-    - ./data/metrics/
+    - ./data/plots_classification/
+    - ./data/metrics_classification/

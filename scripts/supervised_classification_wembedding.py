@@ -112,7 +112,9 @@ def main(params: dict):
         config=params,
     )
     plot_metrics_history(
-        history=history, outdir="./data/plots/", tag=f"{outtag}_classification"
+        history=history,
+        outdir="./data/plots_classification/",
+        tag=f"{outtag}_classification",
     )
     test_metric_dict = test_model(
         test_data_num=test_df_num,
@@ -122,7 +124,9 @@ def main(params: dict):
         config=params,
     )
     write_metrics(
-        test_metric_dict, outdir="./data/metrics/", tag=f"{outtag}_classification"
+        test_metric_dict,
+        outdir="./data/metrics_classification/",
+        tag=f"{outtag}_classification",
     )
 
 

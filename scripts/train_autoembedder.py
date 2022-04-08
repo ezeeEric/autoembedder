@@ -82,14 +82,22 @@ def train_autoembedder(df: pd.DataFrame, params: dict) -> pd.DataFrame:
     history = train_model(
         df=train_df, validation_df=test_df, model=auto_embedder, config=params
     )
-    plot_metrics_history(history=history, outdir="./data/plots/", tag="autoembedder")
+    plot_metrics_history(
+        history=history,
+        outdir="./data/plots_autoembedder/",
+        tag=f"train_autoembedder_{params['dataset_tag']}",
+    )
 
     test_metric_dict = test_model(
         test_df,
         auto_embedder,
         batch_size=params["batch_size"],
     )
-    write_metrics(test_metric_dict, outdir="./data/metrics/", tag="autoembedder")
+    write_metrics(
+        test_metric_dict,
+        outdir="./data/metrics_autoembedder/",
+        tag=f"train_autoembedder_{params['dataset_tag']}",
+    )
     return auto_embedder
 
 

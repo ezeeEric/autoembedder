@@ -7,6 +7,7 @@ data_preprocessing:
     dataset_tag: penguins
     dataset_path: ./data/adult_income_dataset/adult.data #ignored with penguin setting
 train_autoembedder:
+    dataset_tag: penguins #penguins
     output_directory: ./data/model
     feature_handler_file: ./feature_handling/feature_handler.json
     # manual_encoder_architecture: [108,90,70] #empty list [] for automatic autencoder shape

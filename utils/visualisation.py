@@ -24,6 +24,9 @@ def plot_metrics_history(
     history: tf.keras.callbacks.History, outdir: str, tag: str
 ) -> None:
     metric_plot_dict = find_metric_pairs(history)
+    target_dir = os.path.join(".", outdir, "")
+    os.makedirs(target_dir, exist_ok=True)
+    print(target_dir)
     for metric_name, train_test_metrics in metric_plot_dict.items():
         plt.plot(train_test_metrics[0])
         plt.plot(train_test_metrics[1])
@@ -31,8 +34,6 @@ def plot_metrics_history(
         plt.ylabel(f"{metric_name}")
         plt.xlabel("epoch")
         plt.legend(["train", "test"], loc="upper left")
-        target_dir = os.path.join(".", outdir, "")
-        os.makedirs(target_dir, exist_ok=True)
         plt.savefig(f"{outdir}/{tag}_{metric_name}.pdf")
         plt.clf()
 

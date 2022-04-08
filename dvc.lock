@@ -56,8 +56,8 @@ stages:
       md5: dfb240b251b8a11fa558492ebc47fe47
       size: 2456
     - path: ./scripts/train_autoembedder.py
-      md5: f89147b450e5e06e3c9bbbaf50c3fbf1
-      size: 3729
+      md5: 7b5163b34f74b51e6d5cdfb88b959ac5
+      size: 3879
     - path: ./utils/data.py
       md5: f0e7f3b7d68ac244ddac7b452e1d5a14
       size: 5191
@@ -65,11 +65,12 @@ stages:
       md5: c37ecc5c73593a41e10789c8846aced0
       size: 12139
     - path: ./utils/visualisation.py
-      md5: 045be0b958d10c9e8da8583c009a1aee
-      size: 1579
+      md5: f539d0c78542cc9ee06d332905c4f4eb
+      size: 1593
     params:
       params.yaml:
         train_autoembedder:
+          dataset_tag: penguins
           output_directory: ./data/model
           feature_handler_file: ./feature_handling/feature_handler.json
           manual_encoder_architecture: []
@@ -87,21 +88,41 @@ stages:
           batch_size: 32
           n_epochs: 10
     outs:
+    - path: ./data/metrics_autoembedder/
+      md5: 2d83655f98bcbc339bbdbdc9406a6bfb.dir
+      size: 64
+      nfiles: 1
     - path: ./data/model/
-      md5: 40d06cccc0737f92949a2c65b0128304.dir
-      size: 271103
+      md5: 60ad9198c5a4f2c17c541ce3ccb89aad.dir
+      size: 271149
       nfiles: 4
+    - path: ./data/plots_autoembedder/
+      md5: 5e7fc6e8b4fe021f1a603976b636c33d.dir
+      size: 37794
+      nfiles: 3
   train_supervised_classification_embedding:
     cmd:
     - python scripts/supervised_classification_wembedding.py ./data/training_input/
+    - python scripts/supervised_classification_wembedding.py ./data/training_input/
+      ./data/model/autoembedder
     deps:
+    - path: ./data/model/
+      md5: 60ad9198c5a4f2c17c541ce3ccb89aad.dir
+      size: 271149
+      nfiles: 4
     - path: ./data/training_input/
       md5: 76518463305c60240aba1a1514d686a0.dir
       size: 12754
       nfiles: 1
+    - path: ./models/autoembedder_classification_model.py
+      md5: 18f3e761fb9a8f6219d51836a7ad50cf
+      size: 2653
+    - path: ./models/base_classification_network.py
+      md5: d8e084dc2ebc04063a932be99a00f65b
+      size: 1672
     - path: ./scripts/supervised_classification_wembedding.py
-      md5: 62bb3d0c77cd993b96146fc8c93861aa
-      size: 3913
+      md5: cba49f9e0d906de85c0a5074f718f8ff
+      size: 3977
     - path: ./utils/data.py
       md5: f0e7f3b7d68ac244ddac7b452e1d5a14
       size: 5191
@@ -112,8 +133,8 @@ stages:
       md5: 60227dd636673cbb4aca6c83779eefd8
       size: 2217
     - path: ./utils/visualisation.py
-      md5: 045be0b958d10c9e8da8583c009a1aee
-      size: 1579
+      md5: f539d0c78542cc9ee06d332905c4f4eb
+      size: 1593
     params:
       params.yaml:
         train_classification_models:
@@ -138,10 +159,14 @@ stages:
           n_epochs: 100
           verbosity_level: 1
     outs:
-    - path: ./data/plots/
-      md5: dc551f1d0e87090730c37aeb38b3c5e0.dir
-      size: 28432
+    - path: ./data/metrics_classification/
+      md5: 29e7347b65c3c7e7c96f16750e34a9d4.dir
+      size: 68
       nfiles: 2
+    - path: ./data/plots_classification/
+      md5: aa2959b80ae40c054ed7caa831bc9533.dir
+      size: 57326
+      nfiles: 4
   train_supervised_classification_autoembedding:
     cmd:
     - python scripts/supervised_classification_wembedding.py ./data/training_input/

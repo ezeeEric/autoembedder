@@ -18,13 +18,13 @@ jobs:
           dvc repro
 
           # Report metrics
-          # echo "## Metrics" >> report.md
+          echo "## Metrics and Visualisation" >> report.md
+          echo "### Autoembedding Training" >> report.md
+          cat ./data/metrics_autoembedder/*.txt >> report.md
+          cml publish ./data/plots_autoembedder/* >> report.md
 
-          # # Publish confusion matrix diff
-          # echo "## Plots" >> report.md
-          # echo "### Class confusions" >> report.md
+          echo "### Classification" >> report.md
+          cat ./data/metrics_classification/*.txt >> report.md
+          cml publish ./data/plots_classification/* >> report.md
 
-          # # Publish regularization function diff
-          # echo "### Effects of regularization" >> report.md
-
-          # cml-send-comment report.md
+          cml-send-comment report.md
