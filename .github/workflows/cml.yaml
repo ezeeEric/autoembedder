@@ -26,10 +26,11 @@ jobs:
           echo "## Metrics and Visualisation" >> report.md
           echo "### Autoembedding Training" >> report.md
           cat ./data/metrics_autoembedder/*.txt >> report.md
-          cml publish ./data/plots_autoembedder/* >> report.md
+          cml publish ./data/plots_autoembedder/train_autoembedder_penguins_loss.pdf >> report.md
 
           echo "### Classification" >> report.md
           cat ./data/metrics_classification/*.txt >> report.md
-          cml publish ./data/plots_classification/* >> report.md
+          cml publish ./data/plots_classification/embedded_penguins_classification_loss.pdf >> report.md
+          cml publish ./data/plots_classification/autoembedded_penguins_classification_loss.pdf >> report.md
 
           cml-send-comment report.md
