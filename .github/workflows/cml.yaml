@@ -6,6 +6,9 @@ jobs:
     container: docker://ghcr.io/iterative/cml:0-dvc2-base1
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.9.4'
       - name: Run DVC Pipeline
         env:
           REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
